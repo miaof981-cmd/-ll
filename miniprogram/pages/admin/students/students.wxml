@@ -1,0 +1,31 @@
+<view class="container">
+  <view class="toolbar">
+    <input class="search" placeholder="搜索学号或姓名" value="{{keyword}}" bindinput="onKeyword" />
+    <button bindtap="search">搜索</button>
+    <button type="primary" bindtap="create">新建学生</button>
+  </view>
+
+  <view class="table">
+    <view class="thead">
+      <text class="th id">学号</text>
+      <text class="th name">家长名称</text>
+      <text class="th ops">操作</text>
+    </view>
+    <view class="tr" wx:for="{{pageList}}" wx:key="studentId">
+      <text class="td id">{{item.studentId}}</text>
+      <text class="td name">{{item.name}}</text>
+      <view class="td ops">
+        <button size="mini" bindtap="viewDetail" data-id="{{item.studentId}}">查看档案</button>
+        <button size="mini" bindtap="edit" data-id="{{item.studentId}}">编辑</button>
+        <button size="mini" type="warn" bindtap="remove" data-id="{{item.studentId}}">删除</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="pager">
+    <button size="mini" bindtap="prev" disabled="{{pageIndex===1}}">上一页</button>
+    <text>第 {{pageIndex}} / {{totalPages}} 页（共 {{filteredTotal}} 人）</text>
+    <button size="mini" bindtap="next" disabled="{{pageIndex===totalPages}}">下一页</button>
+  </view>
+</view>
+

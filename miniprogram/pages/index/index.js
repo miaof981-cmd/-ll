@@ -88,10 +88,7 @@ Page({
           createdAt: '2024-10-09'
         }
       ],
-      banners: [
-        'https://via.placeholder.com/750x300/1f6feb/ffffff?text=学校官网',
-        'https://via.placeholder.com/750x300/28a745/ffffff?text=欢迎访问'
-      ],
+      banners: [],
       loading: false
     });
   },

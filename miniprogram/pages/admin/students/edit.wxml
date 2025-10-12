@@ -1,0 +1,43 @@
+<view class="container">
+  <view class="form">
+    <view class="group">
+      <view class="label">系统分配学号</view>
+      <input class="input" value="{{studentId}}" bindinput="onStudentId" />
+    </view>
+    <view class="group">
+      <view class="label">初始密码</view>
+      <input class="input" value="{{password}}" bindinput="onPassword" />
+    </view>
+    <view class="group">
+      <view class="label">家长名称</view>
+      <input class="input" value="{{name}}" bindinput="onName" />
+    </view>
+
+    <view class="section-title">录取通知书（必填）</view>
+    <input class="input" placeholder="标题" value="{{admitTitle}}" bindinput="onAdmitTitle" />
+    <view class="row">
+      <input class="input" placeholder="文件URL（或上传图片）" value="{{admitUrl}}" bindinput="onAdmitUrl" />
+      <button size="mini" bindtap="chooseAdmitImage">上传图片</button>
+    </view>
+
+    <view class="section-title">初始化档案</view>
+    <button class="add-btn" bindtap="addRecord">+ 添加档案</button>
+    <block wx:for="{{initRecords}}" wx:key="index">
+      <view class="record">
+        <picker mode="selector" range="{{['图片','处分','成绩']}}" value="{{item.type==='image'?0:(item.type==='punishment'?1:2)}}" bindchange="setRecordType" data-idx="{{index}}">
+          <view class="picker">档案类型：{{item.type==='image'?'图片':(item.type==='punishment'?'处分':'成绩')}}</view>
+        </picker>
+        <input class="input" placeholder="标题" value="{{item.title}}" bindinput="setRecordField" data-idx="{{index}}" data-field="title" />
+        <input class="input" placeholder="描述" value="{{item.description}}" bindinput="setRecordField" data-idx="{{index}}" data-field="description" />
+        <view class="row">
+          <input class="input" placeholder="图片URL（图片档案可选）" value="{{item.url}}" bindinput="setRecordField" data-idx="{{index}}" data-field="url" />
+          <button size="mini" bindtap="chooseRecordImage" data-idx="{{index}}">上传图片</button>
+        </view>
+        <button size="mini" bindtap="removeRecord" data-idx="{{index}}">移除</button>
+      </view>
+    </block>
+
+    <button type="primary" bindtap="save">保存</button>
+  </view>
+</view>
+

@@ -110,15 +110,7 @@ Page({
             reason: '上课讲话影响他人学习'
           }
         ],
-        images: [
-          {
-            id: '1',
-            title: '获奖证书',
-            description: '数学竞赛二等奖',
-            url: 'https://via.placeholder.com/300x200/28a745/ffffff?text=获奖证书',
-            uploadedAt: '2024-10-01'
-          }
-        ]
+        images: []
       },
       loading: false
     });

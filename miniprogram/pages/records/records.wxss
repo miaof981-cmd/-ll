@@ -1,200 +1,260 @@
-/* pages/records/records.wxss */
+/* pages/records/records.wxss - 精致瀑布流档案页 */
 
-/* 用户信息 */
-.user-info {
-  background: white;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  display: flex;
-  align-items: center;
+.records-container {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  padding-bottom: 40rpx;
 }
 
-.user-avatar {
-  width: 100rpx;
-  height: 100rpx;
-  background: #1f6feb;
+/* ==================== 用户信息卡片 ==================== */
+.user-profile-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  padding: var(--spacing-xl);
+  margin: var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.profile-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(10rpx);
+}
+
+.avatar-icon {
   font-size: 48rpx;
-  color: white;
-  margin-right: 30rpx;
 }
 
-.user-details {
+.profile-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
 }
 
-.user-name {
+.profile-name {
   font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 8rpx;
+  font-weight: 600;
+  color: var(--text-white);
 }
 
-.user-id {
+.profile-id {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.profile-action {
+  padding: 16rpx 28rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10rpx);
+}
+
+.profile-action:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.action-text {
   font-size: 26rpx;
-  color: #666;
+  color: var(--text-white);
+  font-weight: 500;
 }
 
-.logout-btn {
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 20rpx;
-}
-
-/* 标签页 */
-.tabs {
-  background: white;
+/* ==================== 档案标题栏 ==================== */
+.section-title-bar {
   display: flex;
-  margin-bottom: 20rpx;
-}
-
-.tab-item {
-  flex: 1;
-  text-align: center;
-  padding: 30rpx 20rpx;
-  font-size: 28rpx;
-  color: #666;
-  border-bottom: 4rpx solid transparent;
-  transition: all 0.3s ease;
-}
-
-.tab-item.active {
-  color: #1f6feb;
-  border-bottom-color: #1f6feb;
-  font-weight: bold;
-}
-
-/* 标签页内容 */
-.tab-content {
-  min-height: 400rpx;
-}
-
-/* 成绩卡片 */
-.grade-card {
-  background: white;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.08);
-}
-
-.grade-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 30rpx;
-  padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  gap: 12rpx;
+  padding: 0 var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
-.grade-term {
+.section-icon {
+  font-size: 40rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+/* ==================== 瀑布流容器 ==================== */
+.waterfall-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg);
+}
+
+/* ==================== 档案卡片基础样式 ==================== */
+.archive-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.archive-card:active {
+  transform: translateY(-4rpx) scale(1.01);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--bg-tertiary);
+  border-bottom: 2rpx solid var(--border-light);
+}
+
+.card-icon {
   font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+  background: var(--bg-primary);
+  border-radius: 50%;
 }
 
-.grade-average {
+.card-icon.warning {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.card-type {
   font-size: 26rpx;
-  color: #1f6feb;
-  background: #f0f7ff;
-  padding: 8rpx 16rpx;
-  border-radius: 20rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2rpx;
 }
 
-.grade-subjects {
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+.card-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+}
+
+.card-desc {
+  display: block;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.card-footer {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--bg-secondary);
+  border-top: 2rpx solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-date {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}
+
+/* ==================== 成绩卡片 ==================== */
+.grade-card {
+  border-left: 6rpx solid var(--primary-color);
+}
+
+.grade-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20rpx;
 }
 
-.subject-item {
+.grade-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 20rpx;
-  background: #f8f9fa;
-  border-radius: 12rpx;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
 }
 
-.subject-name {
-  font-size: 28rpx;
-  color: #333;
+.subject {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-.subject-score {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #1f6feb;
+.score {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--primary-color);
 }
 
-/* 处分记录卡片 */
-.punishment-card {
-  background: white;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  border-left: 6rpx solid #ffc107;
-}
-
-.punishment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-
-.punishment-date {
+.average-badge {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  color: var(--text-white);
+  padding: 12rpx 24rpx;
+  border-radius: var(--radius-md);
   font-size: 24rpx;
-  color: #999;
+  font-weight: 600;
+}
+
+/* ==================== 处罚记录卡片 ==================== */
+.punishment-card {
+  border-left: 6rpx solid var(--accent-color);
+}
+
+.punishment-type {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.type-label {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+.type-value {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--accent-color);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 6rpx 16rpx;
+  border-radius: var(--radius-sm);
 }
 
 .punishment-reason {
   font-size: 28rpx;
-  color: #333;
-  line-height: 1.6;
+  color: var(--text-primary);
+  line-height: 1.7;
 }
 
-/* 图片网格 */
-.images-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20rpx;
-}
-
+/* ==================== 图片档案卡片 ==================== */
 .image-card {
-  background: white;
-  border-radius: 16rpx;
-  overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.08);
+  border-left: 6rpx solid #10b981;
 }
 
-.image-thumbnail {
+.card-image {
   width: 100%;
-  height: 200rpx;
-}
-
-.image-info {
-  padding: 20rpx;
-}
-
-.image-title {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 8rpx;
-}
-
-.image-desc {
-  font-size: 24rpx;
-  color: #666;
-  margin-bottom: 12rpx;
-}
-
-.image-date {
-  font-size: 22rpx;
-  color: #999;
+  display: block;
+  background: var(--bg-tertiary);
 }

@@ -1,81 +1,73 @@
 <!--pages/admin/admin.wxml-->
-<view class="container">
-  <!-- 管理员信息 -->
-  <view class="admin-info" wx:if="{{adminInfo}}">
-    <view class="admin-avatar">⚙️</view>
-    <view class="admin-details">
-      <view class="admin-name">{{adminInfo.name}}</view>
-      <view class="admin-role">系统管理员</view>
+<view class="admin-container">
+  <!-- 管理员信息卡片 -->
+  <view class="admin-profile-card">
+    <view class="profile-header">
+      <view class="admin-avatar">
+        <text class="avatar-icon">⚙️</text>
+      </view>
+      <view class="admin-info">
+        <text class="admin-name">{{adminInfo.name}}</text>
+        <text class="admin-role">系统管理员</text>
+      </view>
     </view>
-    <button class="logout-btn" bindtap="logout" size="mini">退出</button>
+    <view class="logout-btn" bindtap="logout">
+      <text>退出登录</text>
+    </view>
   </view>
 
-  <!-- 统计数据 -->
+  <!-- 数据统计卡片 -->
   <view class="stats-section">
-    <view class="stats-title">数据概览</view>
+    <text class="section-title">📊 数据统计</text>
     <view class="stats-grid">
-      <view class="stat-item">
-        <view class="stat-number">{{stats.totalStudents}}</view>
-        <view class="stat-label">学生总数</view>
+      <view class="stat-card">
+        <view class="stat-icon students">👥</view>
+        <view class="stat-info">
+          <text class="stat-value">{{stats.totalStudents}}</text>
+          <text class="stat-label">学生总数</text>
+        </view>
       </view>
-      <view class="stat-item">
-        <view class="stat-number">{{stats.totalAnnouncements}}</view>
-        <view class="stat-label">公告数量</view>
+      <view class="stat-card">
+        <view class="stat-icon announcements">📢</view>
+        <view class="stat-info">
+          <text class="stat-value">{{stats.totalAnnouncements}}</text>
+          <text class="stat-label">公告数量</text>
+        </view>
       </view>
-      <view class="stat-item">
-        <view class="stat-number">{{stats.totalArticles}}</view>
-        <view class="stat-label">文章数量</view>
+      <view class="stat-card">
+        <view class="stat-icon articles">📰</view>
+        <view class="stat-info">
+          <text class="stat-value">{{stats.totalArticles}}</text>
+          <text class="stat-label">新闻数量</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- 管理功能 -->
+  <!-- 管理功能区 -->
   <view class="management-section">
-    <view class="section-title">管理功能</view>
-    
+    <text class="section-title">🛠️ 管理功能</text>
     <view class="function-grid">
-      <view class="function-item" bindtap="manageAnnouncements">
-        <view class="function-icon">📢</view>
-        <view class="function-name">公告管理</view>
-        <view class="function-desc">发布和管理学校公告</view>
+      <view class="function-card" bindtap="manageAnnouncements">
+        <view class="function-icon announcements">📢</view>
+        <text class="function-title">公告管理</text>
+        <text class="function-desc">发布和管理学校公告</text>
+        <view class="function-arrow">→</view>
       </view>
 
-      <view class="function-item" bindtap="manageArticles">
-        <view class="function-icon">📰</view>
-        <view class="function-name">文章管理</view>
-        <view class="function-desc">管理校园新闻文章</view>
+      <view class="function-card" bindtap="manageArticles">
+        <view class="function-icon articles">📰</view>
+        <text class="function-title">新闻管理</text>
+        <text class="function-desc">发布和管理校园新闻</text>
+        <view class="function-arrow">→</view>
       </view>
 
-      <view class="function-item" bindtap="manageStudents">
-        <view class="function-icon">👥</view>
-        <view class="function-name">学生管理</view>
-        <view class="function-desc">管理学生信息和档案</view>
+      <view class="function-card" bindtap="manageStudents">
+        <view class="function-icon students">👥</view>
+        <text class="function-title">学生管理</text>
+        <text class="function-desc">管理学生信息和档案</text>
+        <view class="function-arrow">→</view>
       </view>
-
-      <view class="function-item" bindtap="viewLogs">
-        <view class="function-icon">📋</view>
-        <view class="function-name">操作日志</view>
-        <view class="function-desc">查看系统操作记录</view>
-      </view>
-
-      <view class="function-item" bindtap="systemSettings">
-        <view class="function-icon">⚙️</view>
-        <view class="function-name">系统设置</view>
-        <view class="function-desc">配置系统参数</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 快捷操作 -->
-  <view class="quick-actions">
-    <view class="section-title">快捷操作</view>
-    <view class="action-buttons">
-      <button class="action-btn btn-primary" bindtap="manageAnnouncements">
-        发布公告
-      </button>
-      <button class="action-btn btn-secondary" bindtap="manageStudents">
-        添加学生
-      </button>
     </view>
   </view>
 </view>

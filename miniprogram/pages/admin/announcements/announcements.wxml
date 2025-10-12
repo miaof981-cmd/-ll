@@ -1,0 +1,24 @@
+<view class="container">
+  <view class="form">
+    <input class="input" placeholder="公告标题" value="{{title}}" bindinput="onTitle" />
+    <textarea class="textarea" placeholder="公告内容" value="{{content}}" bindinput="onContent" />
+    <view class="image-row">
+      <input class="input" placeholder="封面图片URL（可选）" value="{{cover}}" bindinput="onCover" />
+      <button bindtap="chooseCover">选择本地图片</button>
+      <text class="hint">建议尺寸 750x300，超出将被裁剪</text>
+    </view>
+    <switch checked="{{pinned}}" bindchange="onPinned">置顶</switch>
+    <button type="primary" bindtap="save">发布公告</button>
+  </view>
+  <view class="list">
+    <view class="item" wx:for="{{list}}" wx:key="_id">
+      <view class="item-title">{{item.title}} <text wx:if="{{item.pinned}}" class="tag">置顶</text></view>
+      <view class="item-content">{{item.content}}</view>
+      <view class="item-actions">
+        <button size="mini" bindtap="edit" data-id="{{item._id}}">编辑</button>
+        <button size="mini" type="warn" bindtap="remove" data-id="{{item._id}}">删除</button>
+      </view>
+    </view>
+  </view>
+</view>
+

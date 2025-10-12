@@ -1,0 +1,9 @@
+<view class="container">
+  <view class="title">{{item.title}}</view>
+  <image wx:if="{{item.cover}}" class="cover" src="{{item.cover}}" mode="widthFix" />
+  <view class="content" wx:if="{{!expanded}}">{{shortContent}}</view>
+  <view class="content" wx:if="{{expanded}}">{{item.content}}</view>
+  <button size="mini" bindtap="toggle">{{expanded ? '收起' : '展开更多'}}</button>
+  <view class="time">{{item.createdAt}}</view>
+</view>
+

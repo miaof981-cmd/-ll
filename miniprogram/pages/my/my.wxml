@@ -1,0 +1,58 @@
+<!--pages/my/my.wxml-->
+<view class="container">
+  <!-- 未登录提示 -->
+  <view wx:if="{{!userInfo}}" class="login-tip">
+    <view class="tip-title">请先登录</view>
+    <view class="tip-desc">登录后可查看个人档案</view>
+    <navigator url="/pages/login/login" class="login-btn">去登录</navigator>
+  </view>
+
+  <!-- 已登录：个人信息 + 管理或档案 -->
+  <view wx:if="{{userInfo}}">
+    <!-- 个人信息 -->
+    <view class="profile">
+      <view class="avatar">👤</view>
+      <view class="info">
+        <view class="name">{{userInfo.name}}</view>
+        <view class="id">学号：{{userInfo.studentId}}</view>
+      </view>
+      <button class="logout" size="mini" bindtap="logout">退出</button>
+    </view>
+
+    <!-- 管理员：直接展示管理后台入口卡片（归属“我的”页，不再单独按钮页） -->
+    <view wx:if="{{isAdmin}}" class="admin-actions">
+      <view class="actions-grid">
+        <button class="action-card primary" bindtap="goAdmin">进入管理后台</button>
+      </view>
+    </view>
+
+    <!-- 非管理员：档案瀑布流 -->
+    <view wx:if="{{!isAdmin}}" class="waterfall">
+      <view class="column">
+        <block wx:for="{{leftColumn}}" wx:key="_id">
+          <view class="card" bindtap="openRecord" data-record="{{item}}">
+            <view class="card-tag success" wx:if="{{item.type === 'grade'}}">成绩</view>
+            <view class="card-tag warn" wx:if="{{item.type === 'punishment'}}">处分</view>
+            <image wx:if="{{item.type === 'image' && item.url}}" class="card-image" src="{{item.url}}" mode="widthFix" />
+            <view class="card-title">{{item.title}}</view>
+            <view class="card-content">{{item.content}}</view>
+            <view class="card-meta">{{item.date}}</view>
+          </view>
+        </block>
+      </view>
+      <view class="column">
+        <block wx:for="{{rightColumn}}" wx:key="_id">
+          <view class="card" bindtap="openRecord" data-record="{{item}}">
+            <view class="card-tag success" wx:if="{{item.type === 'grade'}}">成绩</view>
+            <view class="card-tag warn" wx:if="{{item.type === 'punishment'}}">处分</view>
+            <image wx:if="{{item.type === 'image' && item.url}}" class="card-image" src="{{item.url}}" mode="widthFix" />
+            <view class="card-title">{{item.title}}</view>
+            <view class="card-content">{{item.content}}</view>
+            <view class="card-meta">{{item.date}}</view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>
+

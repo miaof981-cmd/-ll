@@ -1,93 +1,99 @@
 <!--pages/index/index.wxml-->
-<view class="container">
-  <!-- 轮播图 -->
-  <swiper 
-    class="banner-swiper" 
-    wx:if="{{banners.length > 0}}" 
-    autoplay="{{true}}" 
-    interval="3000" 
-    duration="500" 
-    circular="{{true}}"
-    bindchange="onBannerChange"
-  >
-    <swiper-item wx:for="{{banners}}" wx:key="index">
-      <image class="banner-image" src="{{item}}" mode="aspectFill"></image>
-    </swiper-item>
-  </swiper>
-
-  <!-- 功能导航 -->
-  <view class="nav-section">
-    <view class="nav-grid">
-      <navigator url="/pages/login/login" class="nav-item">
-        <view class="nav-icon">👤</view>
-        <text class="nav-text">家长登录</text>
-      </navigator>
-      <navigator url="/pages/records/records" class="nav-item">
-        <view class="nav-icon">📊</view>
-        <text class="nav-text">成绩查询</text>
-      </navigator>
-      <view class="nav-item" bindtap="showContact">
-        <view class="nav-icon">📞</view>
-        <text class="nav-text">联系我们</text>
-      </view>
-      <navigator url="/pages/admin/admin" class="nav-item">
-        <view class="nav-icon">⚙️</view>
-        <text class="nav-text">管理后台</text>
-      </navigator>
-    </view>
-  </view>
-
-  <!-- 公告栏 -->
-  <view class="section">
-    <view class="section-header">
-      <view class="section-title">
-        <text class="title-icon">📢</text>
-        <text class="title-text">学校公告</text>
-      </view>
-      <text class="more-text">更多</text>
-    </view>
-    
-    <view wx:if="{{announcements.length === 0 && !loading}}" class="empty-state">
-      <view class="empty-state-icon">📝</view>
-      <view class="empty-state-text">暂无公告</view>
-    </view>
-    
-    <view wx:if="{{loading}}" class="loading">
-      <text>加载中...</text>
-    </view>
-    
-    <view wx:for="{{announcements}}" wx:key="id" class="announcement-item" bindtap="viewAnnouncement" data-announcement="{{item}}">
-      <view class="announcement-header">
-        <text class="announcement-title">{{item.title}}</text>
-        <view wx:if="{{item.pinned}}" class="tag tag-danger">置顶</view>
-      </view>
-      <view class="announcement-content">{{item.content}}</view>
-      <view class="announcement-footer">
-        <text class="announcement-time">{{item.createdAt}}</text>
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="header">
+    <view class="header-content">
+      <view class="logo-section">
+        <text class="logo-icon">🎓</text>
+        <text class="logo-text">学校官网</text>
       </view>
     </view>
   </view>
 
-  <!-- 校园新闻 -->
-  <view class="section">
-    <view class="section-header">
-      <view class="section-title">
-        <text class="title-icon">📰</text>
-        <text class="title-text">校园新闻</text>
+  <!-- 主内容区 -->
+  <view class="main-content">
+    <!-- 快捷功能卡片 -->
+    <view class="quick-actions">
+      <navigator url="/pages/login/login" class="action-card">
+        <view class="action-icon">👤</view>
+        <text class="action-title">家长登录</text>
+        <text class="action-desc">查看学生档案</text>
+      </navigator>
+      
+      <view class="action-card" bindtap="showContact">
+        <view class="action-icon">📞</view>
+        <text class="action-title">联系我们</text>
+        <text class="action-desc">咨询与帮助</text>
       </view>
-      <text class="more-text">更多</text>
     </view>
-    
-    <view wx:if="{{articles.length === 0 && !loading}}" class="empty-state">
-      <view class="empty-state-icon">📰</view>
-      <view class="empty-state-text">暂无新闻</view>
+
+    <!-- 学校公告区 -->
+    <view class="content-section">
+      <view class="section-header">
+        <view class="section-title-wrapper">
+          <view class="section-icon">📢</view>
+          <text class="section-title">学校公告</text>
+        </view>
+        <text class="section-more">更多</text>
+      </view>
+
+      <view wx:if="{{announcements.length === 0}}" class="empty-state">
+        <view class="empty-icon">📝</view>
+        <text class="empty-text">暂无公告</text>
+      </view>
+
+      <view class="announcement-list">
+        <view 
+          wx:for="{{announcements}}" 
+          wx:key="id" 
+          class="announcement-card fade-in"
+          style="animation-delay: {{index * 0.1}}s"
+          bindtap="viewAnnouncement" 
+          data-announcement="{{item}}"
+        >
+          <view class="announcement-header">
+            <text class="announcement-title">{{item.title}}</text>
+            <view wx:if="{{item.pinned}}" class="tag tag-danger">置顶</view>
+          </view>
+          <view class="announcement-content">{{item.content}}</view>
+          <view class="announcement-footer">
+            <text class="announcement-time">📅 {{item.createdAt}}</text>
+          </view>
+        </view>
+      </view>
     </view>
-    
-    <view wx:for="{{articles}}" wx:key="id" class="article-item" bindtap="viewArticle" data-article="{{item}}">
-      <view class="article-title">{{item.title}}</view>
-      <view class="article-content">{{item.content}}</view>
-      <view class="article-footer">
-        <text class="article-time">{{item.createdAt}}</text>
+
+    <!-- 校园新闻区 -->
+    <view class="content-section">
+      <view class="section-header">
+        <view class="section-title-wrapper">
+          <view class="section-icon">📰</view>
+          <text class="section-title">校园新闻</text>
+        </view>
+        <text class="section-more">更多</text>
+      </view>
+
+      <view wx:if="{{articles.length === 0}}" class="empty-state">
+        <view class="empty-icon">📰</view>
+        <text class="empty-text">暂无新闻</text>
+      </view>
+
+      <view class="news-list">
+        <view 
+          wx:for="{{articles}}" 
+          wx:key="id" 
+          class="news-card fade-in"
+          style="animation-delay: {{index * 0.1}}s"
+          bindtap="viewArticle" 
+          data-article="{{item}}"
+        >
+          <view class="news-title">{{item.title}}</view>
+          <view class="news-content">{{item.content}}</view>
+          <view class="news-footer">
+            <text class="news-time">📅 {{item.createdAt}}</text>
+            <text class="news-action">查看详情 →</text>
+          </view>
+        </view>
       </view>
     </view>
   </view>

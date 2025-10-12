@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="form">
+    <input class="input" placeholder="图片URL（或留空选择本地）" value="{{url}}" bindinput="onUrl" />
+    <button bindtap="choose">选择本地图片</button>
+    <view class="hint">显示时将按原图比例缩放（不裁剪）</view>
+    <button type="primary" bindtap="add">添加到轮播图</button>
+  </view>
+  <view class="list">
+    <view class="item" wx:for="{{list}}" wx:key="_id">
+      <image class="banner" src="{{item.url}}" mode="aspectFit" background="white"></image>
+      <view class="item-actions">
+        <button size="mini" type="warn" bindtap="remove" data-id="{{item._id}}">删除</button>
+      </view>
+    </view>
+  </view>
+</view>
+
