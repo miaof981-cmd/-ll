@@ -67,7 +67,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-lg);
+  /* 优化：减少标题栏的下边距，让区块更紧凑 */
+  margin-bottom: 20rpx;
+  /* 优化：减少标题栏自身高度 */
+  padding: 8rpx 0;
 }
 
 .section-title-wrapper {
@@ -77,11 +80,13 @@
 }
 
 .section-icon {
-  font-size: 40rpx;
+  /* 优化：图标略微缩小，整体更协调 */
+  font-size: 36rpx;
 }
 
 .section-title {
-  font-size: 36rpx;
+  /* 优化：标题字号略微缩小，高度更合理 */
+  font-size: 32rpx;
   font-weight: 700;
   color: var(--primary-dark);
 }
