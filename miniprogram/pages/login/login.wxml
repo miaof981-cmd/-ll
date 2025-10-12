@@ -1,0 +1,86 @@
+<!--pages/login/login.wxml-->
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="logo">
+      <text class="logo-text">🏫</text>
+    </view>
+    <view class="title">学校官网</view>
+    <view class="subtitle">欢迎登录</view>
+  </view>
+
+  <!-- 登录类型切换 -->
+  <view class="login-type-tabs">
+    <view 
+      class="tab-item {{loginType === 'parent' ? 'active' : ''}}"
+      bindtap="switchLoginType"
+      data-type="parent"
+    >
+      家长登录
+    </view>
+    <view 
+      class="tab-item {{loginType === 'admin' ? 'active' : ''}}"
+      bindtap="switchLoginType"
+      data-type="admin"
+    >
+      管理员登录
+    </view>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="login-form">
+    <view class="form-group">
+      <view class="input-group">
+        <text class="input-icon">👤</text>
+        <input 
+          class="form-input"
+          type="text"
+          placeholder="{{loginType === 'parent' ? '请输入学号' : '请输入用户名'}}"
+          value="{{studentId}}"
+          bindinput="onStudentIdInput"
+        />
+      </view>
+    </view>
+
+    <view class="form-group">
+      <view class="input-group">
+        <text class="input-icon">🔒</text>
+        <input 
+          class="form-input"
+          type="password"
+          placeholder="请输入密码"
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+    </view>
+
+    <view class="form-actions">
+      <button 
+        class="btn btn-primary login-btn"
+        bindtap="handleLogin"
+        loading="{{loading}}"
+        disabled="{{loading}}"
+      >
+        {{loading ? '登录中...' : '登录'}}
+      </button>
+    </view>
+
+    <view class="form-footer">
+      <text class="forgot-link" bindtap="forgotPassword">忘记密码？</text>
+    </view>
+  </view>
+
+  <!-- 演示账号 -->
+  <view class="demo-accounts">
+    <view class="demo-title">演示账号</view>
+    <view class="demo-item">
+      <text class="demo-label">家长账号：</text>
+      <text class="demo-value">20230001 / 123456</text>
+    </view>
+    <view class="demo-item">
+      <text class="demo-label">管理员：</text>
+      <text class="demo-value">admin / admin123</text>
+    </view>
+  </view>
+</view>

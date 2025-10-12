@@ -1,0 +1,109 @@
+<!--pages/records/records.wxml-->
+<view class="container">
+  <!-- 用户信息 -->
+  <view class="user-info" wx:if="{{userInfo}}">
+    <view class="user-avatar">👤</view>
+    <view class="user-details">
+      <view class="user-name">{{userInfo.name}}</view>
+      <view class="user-id">学号：{{userInfo.studentId}}</view>
+    </view>
+    <button class="logout-btn" bindtap="logout" size="mini">退出</button>
+  </view>
+
+  <!-- 标签页 -->
+  <view class="tabs">
+    <view 
+      class="tab-item {{activeTab === 'grades' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="grades"
+    >
+      📊 成绩单
+    </view>
+    <view 
+      class="tab-item {{activeTab === 'punishments' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="punishments"
+    >
+      ⚠️ 处分记录
+    </view>
+    <view 
+      class="tab-item {{activeTab === 'images' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="images"
+    >
+      🖼️ 图片档案
+    </view>
+  </view>
+
+  <!-- 成绩单 -->
+  <view class="tab-content" wx:if="{{activeTab === 'grades'}}">
+    <view wx:if="{{records.reportCards.length === 0}}" class="empty-state">
+      <view class="empty-state-icon">📊</view>
+      <view class="empty-state-text">暂无成绩记录</view>
+    </view>
+
+    <view wx:for="{{records.reportCards}}" wx:key="term" class="grade-card">
+      <view class="grade-header">
+        <text class="grade-term">{{item.term}}</text>
+        <text class="grade-average">平均分：{{item.average || '计算中'}}</text>
+      </view>
+      <view class="grade-subjects">
+        <view class="subject-item">
+          <text class="subject-name">语文</text>
+          <text class="subject-score">{{item.chinese}}</text>
+        </view>
+        <view class="subject-item">
+          <text class="subject-name">数学</text>
+          <text class="subject-score">{{item.math}}</text>
+        </view>
+        <view class="subject-item">
+          <text class="subject-name">英语</text>
+          <text class="subject-score">{{item.english}}</text>
+        </view>
+        <view class="subject-item">
+          <text class="subject-name">物理</text>
+          <text class="subject-score">{{item.physics}}</text>
+        </view>
+        <view class="subject-item">
+          <text class="subject-name">化学</text>
+          <text class="subject-score">{{item.chemistry}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 处分记录 -->
+  <view class="tab-content" wx:if="{{activeTab === 'punishments'}}">
+    <view wx:if="{{records.punishments.length === 0}}" class="empty-state">
+      <view class="empty-state-icon">✅</view>
+      <view class="empty-state-text">无处分记录，表现良好！</view>
+    </view>
+
+    <view wx:for="{{records.punishments}}" wx:key="index" class="punishment-card">
+      <view class="punishment-header">
+        <text class="punishment-type tag tag-warning">{{item.type}}</text>
+        <text class="punishment-date">{{item.date}}</text>
+      </view>
+      <view class="punishment-reason">{{item.reason}}</view>
+    </view>
+  </view>
+
+  <!-- 图片档案 -->
+  <view class="tab-content" wx:if="{{activeTab === 'images'}}">
+    <view wx:if="{{records.images.length === 0}}" class="empty-state">
+      <view class="empty-state-icon">🖼️</view>
+      <view class="empty-state-text">暂无图片档案</view>
+    </view>
+
+    <view class="images-grid">
+      <view wx:for="{{records.images}}" wx:key="id" class="image-card" bindtap="previewImage" data-url="{{item.url}}">
+        <image class="image-thumbnail" src="{{item.url}}" mode="aspectFill"></image>
+        <view class="image-info">
+          <view class="image-title">{{item.title}}</view>
+          <view class="image-desc">{{item.description}}</view>
+          <view class="image-date">{{item.uploadedAt}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

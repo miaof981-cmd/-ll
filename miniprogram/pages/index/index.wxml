@@ -1,0 +1,94 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 轮播图 -->
+  <swiper 
+    class="banner-swiper" 
+    wx:if="{{banners.length > 0}}" 
+    autoplay="{{true}}" 
+    interval="3000" 
+    duration="500" 
+    circular="{{true}}"
+    bindchange="onBannerChange"
+  >
+    <swiper-item wx:for="{{banners}}" wx:key="index">
+      <image class="banner-image" src="{{item}}" mode="aspectFill"></image>
+    </swiper-item>
+  </swiper>
+
+  <!-- 功能导航 -->
+  <view class="nav-section">
+    <view class="nav-grid">
+      <navigator url="/pages/login/login" class="nav-item">
+        <view class="nav-icon">👤</view>
+        <text class="nav-text">家长登录</text>
+      </navigator>
+      <navigator url="/pages/records/records" class="nav-item">
+        <view class="nav-icon">📊</view>
+        <text class="nav-text">成绩查询</text>
+      </navigator>
+      <view class="nav-item" bindtap="showContact">
+        <view class="nav-icon">📞</view>
+        <text class="nav-text">联系我们</text>
+      </view>
+      <navigator url="/pages/admin/admin" class="nav-item">
+        <view class="nav-icon">⚙️</view>
+        <text class="nav-text">管理后台</text>
+      </navigator>
+    </view>
+  </view>
+
+  <!-- 公告栏 -->
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title">
+        <text class="title-icon">📢</text>
+        <text class="title-text">学校公告</text>
+      </view>
+      <text class="more-text">更多</text>
+    </view>
+    
+    <view wx:if="{{announcements.length === 0 && !loading}}" class="empty-state">
+      <view class="empty-state-icon">📝</view>
+      <view class="empty-state-text">暂无公告</view>
+    </view>
+    
+    <view wx:if="{{loading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+    
+    <view wx:for="{{announcements}}" wx:key="id" class="announcement-item" bindtap="viewAnnouncement" data-announcement="{{item}}">
+      <view class="announcement-header">
+        <text class="announcement-title">{{item.title}}</text>
+        <view wx:if="{{item.pinned}}" class="tag tag-danger">置顶</view>
+      </view>
+      <view class="announcement-content">{{item.content}}</view>
+      <view class="announcement-footer">
+        <text class="announcement-time">{{item.createdAt}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 校园新闻 -->
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title">
+        <text class="title-icon">📰</text>
+        <text class="title-text">校园新闻</text>
+      </view>
+      <text class="more-text">更多</text>
+    </view>
+    
+    <view wx:if="{{articles.length === 0 && !loading}}" class="empty-state">
+      <view class="empty-state-icon">📰</view>
+      <view class="empty-state-text">暂无新闻</view>
+    </view>
+    
+    <view wx:for="{{articles}}" wx:key="id" class="article-item" bindtap="viewArticle" data-article="{{item}}">
+      <view class="article-title">{{item.title}}</view>
+      <view class="article-content">{{item.content}}</view>
+      <view class="article-footer">
+        <text class="article-time">{{item.createdAt}}</text>
+      </view>
+    </view>
+  </view>
+</view>
