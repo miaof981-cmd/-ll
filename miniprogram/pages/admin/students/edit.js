@@ -1,87 +1,219 @@
-const storage = require('../../../utils/storage');
+// pages/admin/students/edit.js
+const storage = require('../../../utils/storage.js');
 
 Page({
   data: {
-    id: '', studentId: '', name: '', password: '',
-    // 可配置：学号前缀与起始序号、默认初始密码
-    prefix: '2025',
-    nextSeq: 1,
-    defaultPassword: '123456',
-    // 初始化档案编辑
-    initRecords: [],
-    admitTitle: '',
-    admitUrl: ''
-  },
-  onLoad(query) {
-    if (query && query.id) {
-      const item = storage.getArray('students').find(s => s.studentId === query.id);
-      if (item) this.setData({ id: item.studentId, studentId: item.studentId, name: item.name, password: item.password });
-      wx.setNavigationBarTitle({ title: '编辑学生' });
-    } else {
-      wx.setNavigationBarTitle({ title: '新建学生' });
-      // 系统自动分配学号与默认密码
-      const studentId = `${this.data.prefix}${String(this.data.nextSeq).padStart(4,'0')}`;
-      this.setData({ studentId, password: this.data.defaultPassword });
-    }
-  },
-  onStudentId(e) { this.setData({ studentId: e.detail.value }); },
-  onName(e) { this.setData({ name: e.detail.value }); },
-  onPassword(e) { this.setData({ password: e.detail.value }); },
-  // 初始化档案操作
-  setRecordType(e) {
-    const idx = e.currentTarget.dataset.idx;
-    const map = ['image','punishment','grade'];
-    const val = map[Number(e.detail.value)] || 'image';
-    const key = `initRecords[${idx}].type`;
-    const obj = {};
-    obj[key] = val;
-    this.setData(obj);
-  },
-  setRecordField(e) { const { idx, field } = e.currentTarget.dataset; const key = `initRecords[${idx}][${field}]`; const obj = {}; obj[key] = e.detail.value; this.setData(obj); },
-  addRecord() { this.setData({ initRecords: [...this.data.initRecords, { type: 'image', title: '', description: '', url: '' }] }); },
-  removeRecord(e) { const idx = e.currentTarget.dataset.idx; const arr = this.data.initRecords.slice(); arr.splice(idx,1); this.setData({ initRecords: arr }); },
-  chooseRecordImage(e) {
-    const idx = e.currentTarget.dataset.idx;
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (res) => {
-      const path = res.tempFiles[0] && res.tempFiles[0].tempFilePath;
-      if (path) { const key = `initRecords[${idx}].url`; const obj = {}; obj[key] = path; this.setData(obj); }
-    }});
+    studentId: '', // 编辑时的学号
+    isEdit: false,
+    formData: {
+      name: '',
+      parentName: '',
+      admissionLetter: ''
+    },
+    initRecords: [] // 初始档案记录
   },
 
-  onAdmitTitle(e) { this.setData({ admitTitle: e.detail.value }); },
-  onAdmitUrl(e) { this.setData({ admitUrl: e.detail.value }); },
-  chooseAdmitImage() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (res) => {
-      const path = res.tempFiles[0] && res.tempFiles[0].tempFilePath;
-      if (path) this.setData({ admitUrl: path });
-    }});
+  onLoad(options) {
+    if (options.studentId) {
+      // 编辑模式
+      this.setData({
+        studentId: options.studentId,
+        isEdit: true
+      });
+      this.loadStudent(options.studentId);
+    }
   },
 
-  save() {
-    const { id, studentId, name, password, initRecords, admitTitle, admitUrl } = this.data;
-    if (!studentId.trim() || !name.trim() || !password.trim()) { wx.showToast({ title: '请填写完整', icon: 'error' }); return; }
-    const item = { studentId: studentId.trim(), name: name.trim(), password: password.trim() };
-    storage.upsertById('students', item, 'studentId');
-    // 初始化档案与录取通知书（存入 records:studentId）
-    const recordsKey = `records:${studentId}`;
-    const existing = storage.getArray(recordsKey);
-    const normalized = (initRecords || []).filter(r => r.title || r.url || r.description).map((r, i) => ({
-      _id: `${Date.now()}-${i}`,
-      type: r.type,
-      title: r.title,
-      content: r.description,
-      url: r.url,
-      date: new Date().toISOString().slice(0,10)
-    }));
-    let admission = [];
-    if (admitTitle || admitUrl) {
-      admission = [{ _id: `${Date.now()}-admit`, type: 'image', title: admitTitle || '录取通知书', content: '', url: admitUrl, date: new Date().toISOString().slice(0,10), admission: true }];
+  // 加载学生信息
+  loadStudent(studentId) {
+    const student = storage.getStudentById(studentId);
+    if (student) {
+      this.setData({
+        formData: {
+          name: student.name,
+          parentName: student.parentName,
+          admissionLetter: student.admissionLetter || ''
+        }
+      });
     }
-    // 只写入录取通知书 + 初始化档案，不注入任何其它预设
-    storage.setArray(recordsKey, [...admission, ...normalized, ...existing]);
-    wx.showToast({ title: '已保存', icon: 'success' });
-    setTimeout(() => { wx.navigateBack(); }, 500);
+  },
+
+  // 输入学生姓名
+  onNameInput(e) {
+    this.setData({
+      'formData.name': e.detail.value
+    });
+  },
+
+  // 输入家长姓名
+  onParentNameInput(e) {
+    this.setData({
+      'formData.parentName': e.detail.value
+    });
+  },
+
+  // 上传录取通知书
+  uploadAdmissionLetter() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        this.setData({
+          'formData.admissionLetter': res.tempFiles[0].tempFilePath
+        });
+      }
+    });
+  },
+
+  // 添加档案记录
+  addRecord() {
+    wx.showActionSheet({
+      itemList: ['成绩单', '图片档案', '处分单'],
+      success: (res) => {
+        const types = ['grade', 'image', 'punishment'];
+        const type = types[res.tapIndex];
+        
+        const record = {
+          tempId: Date.now().toString(),
+          type: type,
+          data: {}
+        };
+        
+        const initRecords = this.data.initRecords;
+        initRecords.push(record);
+        this.setData({ initRecords });
+      }
+    });
+  },
+
+  // 删除档案记录
+  deleteRecord(e) {
+    const { index } = e.currentTarget.dataset;
+    const initRecords = this.data.initRecords;
+    initRecords.splice(index, 1);
+    this.setData({ initRecords });
+  },
+
+  // 设置档案字段值
+  setRecordField(e) {
+    const { index, field } = e.currentTarget.dataset;
+    const value = e.detail.value;
+    
+    const updateKey = `initRecords[${index}].data.${field}`;
+    const updateData = {};
+    updateData[updateKey] = value;
+    
+    this.setData(updateData);
+  },
+
+  // 上传档案图片
+  uploadRecordImage(e) {
+    const { index } = e.currentTarget.dataset;
+    
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const updateKey = `initRecords[${index}].data.imageUrl`;
+        const updateData = {};
+        updateData[updateKey] = res.tempFiles[0].tempFilePath;
+        
+        this.setData(updateData);
+      }
+    });
+  },
+
+  // 保存学生
+  saveStudent() {
+    const { name, parentName, admissionLetter } = this.data.formData;
+
+    // 验证必填字段
+    if (!name.trim()) {
+      wx.showToast({
+        title: '请输入学生姓名',
+        icon: 'error'
+      });
+      return;
+    }
+
+    if (!parentName.trim()) {
+      wx.showToast({
+        title: '请输入家长姓名',
+        icon: 'error'
+      });
+      return;
+    }
+
+    if (!this.data.isEdit && !admissionLetter) {
+      wx.showToast({
+        title: '请上传录取通知书',
+        icon: 'error'
+      });
+      return;
+    }
+
+    wx.showLoading({ title: '保存中...' });
+
+    try {
+      if (this.data.isEdit) {
+        // 更新学生信息
+        const success = storage.updateStudent(this.data.studentId, this.data.formData);
+        
+        if (!success) {
+          throw new Error('更新失败');
+        }
+      } else {
+        // 添加新学生
+        const newStudent = storage.addStudent(this.data.formData);
+        
+        if (!newStudent) {
+          throw new Error('添加失败');
+        }
+
+        // 添加初始档案记录
+        this.data.initRecords.forEach(record => {
+          const recordData = {
+            type: record.type,
+            ...record.data
+          };
+
+          // 根据类型补充必要字段
+          if (record.type === 'grade') {
+            recordData.term = record.data.term || '';
+            recordData.chinese = parseFloat(record.data.chinese) || 0;
+            recordData.math = parseFloat(record.data.math) || 0;
+            recordData.english = parseFloat(record.data.english) || 0;
+          } else if (record.type === 'image') {
+            recordData.title = record.data.title || '';
+            recordData.imageUrl = record.data.imageUrl || '';
+            recordData.description = record.data.description || '';
+          } else if (record.type === 'punishment') {
+            recordData.type = record.data.type || '';
+            recordData.reason = record.data.reason || '';
+          }
+
+          storage.addRecord(newStudent.studentId, recordData);
+        });
+      }
+
+      wx.hideLoading();
+      wx.showToast({
+        title: '保存成功',
+        icon: 'success'
+      });
+
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
+
+    } catch (error) {
+      wx.hideLoading();
+      wx.showToast({
+        title: error.message || '保存失败',
+        icon: 'error'
+      });
+    }
   }
 });
-
-

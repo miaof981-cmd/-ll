@@ -1,17 +1,35 @@
+<!--pages/admin/banners/banners.wxml-->
 <view class="container">
-  <view class="form">
-    <input class="input" placeholder="图片URL（或留空选择本地）" value="{{url}}" bindinput="onUrl" />
-    <button bindtap="choose">选择本地图片</button>
-    <view class="hint">显示时将按原图比例缩放（不裁剪）</view>
-    <button type="primary" bindtap="add">添加到轮播图</button>
+  <!-- 添加轮播图按钮 - 紧凑版 -->
+  <view class="add-section-compact">
+    <button class="btn-add-compact" bindtap="addBanner">
+      <text class="add-icon-small">📷</text>
+      <text>上传轮播图</text>
+    </button>
   </view>
-  <view class="list">
-    <view class="item" wx:for="{{list}}" wx:key="_id">
-      <image class="banner" src="{{item.url}}" mode="aspectFit" background="white"></image>
-      <view class="item-actions">
-        <button size="mini" type="warn" bindtap="remove" data-id="{{item._id}}">删除</button>
+
+  <!-- 轮播图列表 -->
+  <view class="banner-list">
+    <view wx:if="{{banners.length === 0}}" class="empty-state">
+      <view class="empty-icon">🖼️</view>
+      <text class="empty-text">暂无轮播图</text>
+      <text class="empty-hint">点击上方按钮添加轮播图</text>
+    </view>
+
+    <view 
+      wx:for="{{banners}}" 
+      wx:key="id" 
+      class="banner-item"
+    >
+      <image class="banner-preview" src="{{item.imageUrl}}" mode="widthFix" />
+      <view class="banner-info">
+        <text class="banner-date">上传时间：{{item.createdAt}}</text>
+      </view>
+      <view class="banner-actions">
+        <button class="btn-delete" bindtap="deleteBanner" data-id="{{item.id}}">
+          删除
+        </button>
       </view>
     </view>
   </view>
 </view>
-

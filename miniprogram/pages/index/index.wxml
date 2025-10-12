@@ -12,19 +12,27 @@
 
   <!-- 主内容区 -->
   <view class="main-content">
-    <!-- 快捷功能卡片 -->
-    <view class="quick-actions">
-      <navigator url="/pages/login/login" class="action-card">
-        <view class="action-icon">👤</view>
-        <text class="action-title">家长登录</text>
-        <text class="action-desc">查看学生档案</text>
-      </navigator>
-      
-      <view class="action-card" bindtap="showContact">
-        <view class="action-icon">📞</view>
-        <text class="action-title">联系我们</text>
-        <text class="action-desc">咨询与帮助</text>
-      </view>
+    <!-- 轮播图区域 - 自适应高度 -->
+    <view wx:if="{{banners.length > 0}}" class="banner-section">
+      <swiper 
+        class="banner-swiper" 
+        style="height: {{bannerHeight}}px"
+        autoplay="{{true}}" 
+        interval="3000" 
+        duration="500" 
+        circular="{{true}}"
+        bindchange="onBannerChange"
+      >
+        <swiper-item wx:for="{{banners}}" wx:key="id">
+          <image 
+            class="banner-image" 
+            src="{{item.imageUrl}}" 
+            mode="widthFix"
+            bindload="onBannerImageLoad"
+            data-index="{{index}}"
+          />
+        </swiper-item>
+      </swiper>
     </view>
 
     <!-- 学校公告区 -->
@@ -34,7 +42,6 @@
           <view class="section-icon">📢</view>
           <text class="section-title">学校公告</text>
         </view>
-        <text class="section-more">更多</text>
       </view>
 
       <view wx:if="{{announcements.length === 0}}" class="empty-state">
@@ -51,13 +58,23 @@
           bindtap="viewAnnouncement" 
           data-announcement="{{item}}"
         >
-          <view class="announcement-header">
-            <text class="announcement-title">{{item.title}}</text>
-            <view wx:if="{{item.pinned}}" class="tag tag-danger">置顶</view>
-          </view>
-          <view class="announcement-content">{{item.content}}</view>
-          <view class="announcement-footer">
-            <text class="announcement-time">📅 {{item.createdAt}}</text>
+          <!-- 公告封面图 -->
+          <image 
+            wx:if="{{item.coverImage}}" 
+            class="announcement-cover" 
+            src="{{item.coverImage}}" 
+            mode="widthFix"
+          />
+          
+          <view class="announcement-body">
+            <view class="announcement-header">
+              <text class="announcement-title">{{item.title}}</text>
+              <view wx:if="{{item.pinned}}" class="tag tag-danger">置顶</view>
+            </view>
+            <view class="announcement-content">{{item.content}}</view>
+            <view class="announcement-footer">
+              <text class="announcement-time">📅 {{item.createdAt}}</text>
+            </view>
           </view>
         </view>
       </view>
@@ -70,7 +87,6 @@
           <view class="section-icon">📰</view>
           <text class="section-title">校园新闻</text>
         </view>
-        <text class="section-more">更多</text>
       </view>
 
       <view wx:if="{{articles.length === 0}}" class="empty-state">

@@ -1,15 +1,32 @@
+// pages/announcement/detail.js
 Page({
-  data: { item: {}, expanded: false, shortContent: '' },
-  onLoad() {
+  data: {
+    announcement: {}
+  },
+
+  onLoad(options) {
+    // 从本地存储获取公告详情
     try {
-      const item = wx.getStorageSync('announcement:detail') || {};
-      const shortContent = (item.content || '').length > 100 ? (item.content || '').slice(0, 100) + '…' : (item.content || '');
-      this.setData({ item, shortContent });
+      const announcementStr = wx.getStorageSync('currentAnnouncement');
+      if (announcementStr) {
+        const announcement = JSON.parse(announcementStr);
+        this.setData({ announcement });
+      }
     } catch (e) {
-      console.error('load announcement failed', e);
+      console.error('获取公告详情失败:', e);
+      wx.showToast({
+        title: '加载失败',
+        icon: 'error'
+      });
     }
   },
-  toggle() { this.setData({ expanded: !this.data.expanded }); }
+
+  // 预览图片
+  previewImage(e) {
+    const { url } = e.currentTarget.dataset;
+    wx.previewImage({
+      current: url,
+      urls: [url]
+    });
+  }
 });
-
-

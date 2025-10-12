@@ -1,10 +1,197 @@
-.form { background: #fff; padding: 20rpx; margin: 20rpx; border-radius: 12rpx; }
-.input { border: 1rpx solid #e5e7eb; padding: 16rpx; border-radius: 8rpx; margin-bottom: 12rpx; }
-.group { margin-bottom: 12rpx; }
-.label { font-size: 24rpx; color: #6b7280; margin-bottom: 8rpx; }
-.section-title { font-weight: 600; margin: 16rpx 0; }
-.record { background: #f9fafb; padding: 12rpx; border-radius: 8rpx; margin-bottom: 12rpx; }
-.picker { padding: 12rpx; background: #fff; border: 1rpx solid #e5e7eb; border-radius: 8rpx; margin-bottom: 8rpx; }
-.add-btn { margin: 8rpx 0 16rpx; }
-.row { display: flex; gap: 12rpx; }
+/* pages/admin/students/edit.wxss */
 
+.container {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  padding: var(--spacing-lg);
+  padding-bottom: 120rpx;
+}
+
+.form-section {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 12rpx;
+}
+
+.form-input {
+  width: 100%;
+  padding: 24rpx;
+  background: var(--bg-secondary);
+  border: 2rpx solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 28rpx;
+}
+
+.upload-box {
+  width: 100%;
+  min-height: 300rpx;
+  background: var(--bg-secondary);
+  border: 2rpx dashed var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.upload-preview {
+  width: 100%;
+  display: block;
+}
+
+.upload-placeholder {
+  min-height: 300rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+}
+
+.upload-icon {
+  font-size: 64rpx;
+  opacity: 0.5;
+}
+
+.upload-text {
+  font-size: 26rpx;
+  color: var(--text-tertiary);
+}
+
+/* 档案区域 */
+.records-section {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 2rpx solid var(--border-light);
+}
+
+.btn-add-record {
+  padding: 12rpx 24rpx;
+  background: var(--primary-color);
+  color: var(--text-white);
+  border-radius: var(--radius-sm);
+  font-size: 24rpx;
+  border: none;
+}
+
+.btn-add-record::after {
+  border: none;
+}
+
+.empty-hint {
+  padding: 60rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--text-tertiary);
+}
+
+.record-item {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.record-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.record-type {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.btn-delete-record {
+  padding: 8rpx 20rpx;
+  background: #ef4444;
+  color: var(--text-white);
+  border-radius: var(--radius-sm);
+  font-size: 22rpx;
+}
+
+.record-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.mini-input, .mini-textarea {
+  width: 100%;
+  padding: 16rpx;
+  background: var(--bg-primary);
+  border: 1rpx solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 26rpx;
+}
+
+.mini-textarea {
+  min-height: 120rpx;
+}
+
+.mini-upload {
+  min-height: 200rpx;
+  background: var(--bg-primary);
+  border: 1rpx dashed var(--border-color);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}
+
+.mini-preview {
+  width: 100%;
+  display: block;
+}
+
+/* 底部按钮 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: var(--spacing-lg);
+  background: var(--bg-primary);
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.btn-save {
+  width: 100%;
+  padding: 32rpx;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  color: var(--text-white);
+  border-radius: var(--radius-lg);
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-save::after {
+  border: none;
+}

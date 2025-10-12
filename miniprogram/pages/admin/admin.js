@@ -1,11 +1,13 @@
 // pages/admin/admin.js
+const storage = require('../../utils/storage.js');
+
 Page({
   data: {
     adminInfo: null,
     stats: {
       totalStudents: 0,
       totalAnnouncements: 0,
-      totalArticles: 0
+      totalBanners: 0
     }
   },
 
@@ -15,6 +17,7 @@ Page({
 
   onShow() {
     this.checkAdminLogin();
+    this.loadStats();
   },
 
   // 检查管理员登录状态
@@ -37,68 +40,32 @@ Page({
     this.setData({
       adminInfo: app.globalData.userInfo
     });
-    this.loadStats();
   },
 
-  // 加载统计数据
-  async loadStats() {
-    try {
-      // 这里可以调用云函数获取统计数据
-      // 暂时使用模拟数据
-      this.setData({
-        stats: {
-          totalStudents: 156,
-          totalAnnouncements: 12,
-          totalArticles: 28
-        }
-      });
-    } catch (error) {
-      console.error('加载统计数据失败:', error);
-    }
+  // 加载统计数据 - 使用真实数据
+  loadStats() {
+    const stats = storage.getStats();
+    this.setData({ stats });
+  },
+
+  // 管理轮播图
+  manageBanners() {
+    wx.navigateTo({
+      url: '/pages/admin/banners/banners'
+    });
   },
 
   // 管理公告
   manageAnnouncements() {
-    wx.showModal({
-      title: '功能开发中',
-      content: '公告管理功能正在开发中，敬请期待！',
-      showCancel: false
-    });
-  },
-
-  // 管理文章
-  manageArticles() {
-    wx.showModal({
-      title: '功能开发中',
-      content: '文章管理功能正在开发中，敬请期待！',
-      showCancel: false
+    wx.navigateTo({
+      url: '/pages/admin/announcements/announcements'
     });
   },
 
   // 管理学生
   manageStudents() {
-    wx.showModal({
-      title: '功能开发中',
-      content: '学生管理功能正在开发中，敬请期待！',
-      showCancel: false
-    });
-  },
-
-  // 查看日志
-  viewLogs() {
-    wx.showModal({
-      title: '功能开发中',
-      content: '操作日志功能正在开发中，敬请期待！',
-      showCancel: false
-    });
-  },
-
-  // 系统设置
-  systemSettings() {
-    wx.showModal({
-      title: '功能开发中',
-      content: '系统设置功能正在开发中，敬请期待！',
-      showCancel: false
+    wx.navigateTo({
+      url: '/pages/admin/students/students'
     });
   },
 
@@ -112,7 +79,7 @@ Page({
           const app = getApp();
           app.globalData.userInfo = null;
           app.globalData.isAdmin = false;
-          
+
           wx.showToast({
             title: '已退出登录',
             icon: 'success'

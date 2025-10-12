@@ -40,46 +40,19 @@
   padding-bottom: 40rpx;
 }
 
-/* ==================== 快捷功能卡片 ==================== */
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+/* ==================== 轮播图区域 ==================== */
+.banner-section {
+  background: var(--bg-primary);
 }
 
-.action-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--spacing-xl) var(--spacing-lg);
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.banner-swiper {
+  width: 100%;
+  transition: height 0.3s ease;
 }
 
-.action-card:active {
-  transform: translateY(-8rpx) scale(1.02);
-  box-shadow: var(--shadow-xl);
-}
-
-.action-icon {
-  font-size: 64rpx;
-  margin-bottom: 16rpx;
-  filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.15));
-}
-
-.action-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: var(--text-white);
-  margin-bottom: 8rpx;
-}
-
-.action-desc {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.9);
+.banner-image {
+  width: 100%;
+  display: block;
 }
 
 /* ==================== 内容区块 ==================== */
@@ -111,18 +84,6 @@
   color: var(--primary-dark);
 }
 
-.section-more {
-  font-size: 26rpx;
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-}
-
-.section-more::after {
-  content: ' →';
-  margin-left: 4rpx;
-}
-
 /* ==================== 公告卡片 ==================== */
 .announcement-list {
   display: flex;
@@ -133,15 +94,24 @@
 .announcement-card {
   background: var(--bg-primary);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
   box-shadow: var(--shadow-md);
-  border-left: 6rpx solid var(--primary-color);
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .announcement-card:active {
-  transform: translateX(8rpx);
+  transform: translateY(-4rpx);
   box-shadow: var(--shadow-lg);
+}
+
+.announcement-cover {
+  width: 100%;
+  display: block;
+}
+
+.announcement-body {
+  padding: var(--spacing-lg);
+  border-left: 6rpx solid var(--primary-color);
 }
 
 .announcement-header {

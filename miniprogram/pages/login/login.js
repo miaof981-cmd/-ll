@@ -1,19 +1,16 @@
 // pages/login/login.js
+const storage = require('../../utils/storage.js');
+
 Page({
   data: {
     studentId: '',
     password: '',
-    loginType: 'parent', // parent 或 admin
+    loginType: 'parent',
     loading: false
   },
 
-  onLoad(options) {
-    // 如果从其他页面传来登录类型
-    if (options.type) {
-      this.setData({
-        loginType: options.type
-      });
-    }
+  onLoad() {
+    console.log("登录页加载");
   },
 
   // 输入学号
@@ -41,7 +38,7 @@ Page({
   },
 
   // 登录
-  async handleLogin() {
+  handleLogin() {
     const { studentId, password, loginType } = this.data;
 
     if (!studentId.trim()) {
@@ -62,78 +59,44 @@ Page({
 
     this.setData({ loading: true });
 
-    try {
-      const app = getApp();
-      if (app.globalData.useCloud) {
-        // 调用云函数进行登录
-        const res = await wx.cloud.callFunction({
-          name: 'userLogin',
-          data: {
-            studentId: studentId.trim(),
-            password: password.trim(),
-            type: loginType
-          }
-        });
-
-        if (res.result && res.result.success) {
-          // 登录成功
-          const app = getApp();
-          app.globalData.userInfo = res.result.userInfo;
-          app.globalData.isAdmin = loginType === 'admin';
-
-          wx.showToast({
-            title: '登录成功',
-            icon: 'success'
-          });
-
-          // 跳转到相应页面
-          setTimeout(() => {
-            if (loginType === 'admin') {
-              wx.navigateTo({
-                url: '/pages/admin/admin'
-              });
-            } else {
-              wx.navigateTo({
-                url: '/pages/records/records'
-              });
-            }
-          }, 1500);
-
-        } else {
-          // 登录失败 - 使用模拟登录
-          this.mockLogin();
-        }
-      } else {
-        // 登录成功
-        this.mockLogin();
-      }
-    } catch (error) {
-      console.error('登录失败:', error);
-      // 使用模拟登录
-      this.mockLogin();
-    } finally {
-      this.setData({ loading: false });
-    }
-  },
-
-  // 模拟登录（用于演示）
-  mockLogin() {
-    const { studentId, password, loginType } = this.data;
-
-    // 模拟验证
+    // 验证登录
     let isValid = false;
+    let userInfo = null;
+    
     if (loginType === 'admin') {
+      // 管理员登录
       isValid = studentId === 'admin' && password === 'admin123';
+      if (isValid) {
+        userInfo = {
+          studentId: 'admin',
+          name: '管理员'
+        };
+      }
     } else {
-      isValid = studentId === '20230001' && password === '123456';
+      // 学生/家长登录 - 从本地存储验证
+      const students = storage.getStudents();
+      const student = students.find(s => s.studentId === studentId.trim());
+      
+      if (student) {
+        // 验证密码（默认密码是123456，或用户修改后的密码）
+        const correctPassword = student.password || '123456';
+        isValid = password === correctPassword;
+        
+        if (isValid) {
+          userInfo = {
+            studentId: student.studentId,
+            name: student.name,
+            parentName: student.parentName
+          };
+        }
+      }
     }
 
-    if (isValid) {
+    this.setData({ loading: false });
+
+    if (isValid && userInfo) {
       const app = getApp();
-      app.globalData.userInfo = {
-        studentId: studentId,
-        name: loginType === 'admin' ? '管理员' : '张三家长'
-      };
+      app.globalData.userInfo = userInfo;
       app.globalData.isAdmin = loginType === 'admin';
 
       wx.showToast({
@@ -143,10 +106,12 @@ Page({
 
       setTimeout(() => {
         if (loginType === 'admin') {
+          // 管理员跳转到管理后台
           wx.navigateTo({
             url: '/pages/admin/admin'
           });
         } else {
+          // 学生/家长跳转到档案页面
           wx.navigateTo({
             url: '/pages/records/records'
           });
@@ -154,7 +119,7 @@ Page({
       }, 1500);
     } else {
       wx.showToast({
-        title: '用户名或密码错误',
+        title: '学号或密码错误',
         icon: 'error'
       });
     }
@@ -164,7 +129,7 @@ Page({
   forgotPassword() {
     wx.showModal({
       title: '忘记密码',
-      content: '请联系学校管理员重置密码\n电话：0755-12345678',
+      content: '学生默认密码为：123456\n\n如需修改密码，请联系学校管理员\n电话：0755-12345678',
       showCancel: false,
       confirmText: '知道了'
     });

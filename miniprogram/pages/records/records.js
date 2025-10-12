@@ -11,12 +11,17 @@ Page({
     loading: true
   },
 
-  onLoad() {
-    this.checkLogin();
+  onLoad(options) {
+    // 支持从URL参数传入studentId（管理员查看档案）
+    if (options.studentId) {
+      this.loadStudentRecords(options.studentId);
+    } else {
+      this.checkLogin();
+    }
   },
 
   onShow() {
-    this.checkLogin();
+    // 不自动刷新，避免覆盖管理员查看的档案
   },
 
   // 检查登录状态
@@ -28,93 +33,52 @@ Page({
         content: '请先登录',
         showCancel: false,
         success: () => {
-          wx.navigateTo({
-            url: '/pages/login/login?type=parent'
+          wx.switchTab({
+            url: '/pages/login/login'
           });
         }
       });
       return;
     }
 
-    this.setData({
-      userInfo: app.globalData.userInfo
-    });
-    this.loadRecords();
+    const userInfo = app.globalData.userInfo;
+    this.setData({ userInfo });
+    this.loadStudentRecords(userInfo.studentId);
   },
 
-  // 加载学生记录
-  async loadRecords() {
-    wx.showLoading({
-      title: '加载中...'
-    });
-
-    try {
-      const app = getApp();
-      if (app.globalData.useCloud) {
-        const res = await wx.cloud.callFunction({
-          name: 'getRecords',
-          data: {
-            studentId: this.data.userInfo.studentId
-          }
-        });
-
-        if (res.result && res.result.success) {
-          this.setData({
-            records: res.result.data,
-            loading: false
-          });
-        } else {
-          this.loadMockRecords();
-        }
-      } else {
-        // 未启用云开发，直接使用本地模拟
-        this.loadMockRecords();
-      }
-    } catch (error) {
-      console.error('加载记录失败:', error);
-      // 使用模拟数据
-      this.loadMockRecords();
-    } finally {
-      wx.hideLoading();
+  // 加载指定学生的档案
+  loadStudentRecords(studentId) {
+    const storage = require('../../utils/storage.js');
+    const student = storage.getStudentById(studentId);
+    
+    if (!student) {
+      wx.showToast({
+        title: '学生不存在',
+        icon: 'error'
+      });
+      return;
     }
-  },
 
-  // 加载模拟数据
-  loadMockRecords() {
+    // 获取档案记录
+    const allRecords = storage.getRecords(studentId);
+    
+    // 分类档案
+    const records = {
+      reportCards: allRecords.filter(r => r.type === 'grade'),
+      punishments: allRecords.filter(r => r.type === 'punishment'),
+      images: allRecords.filter(r => r.type === 'image')
+    };
+
     this.setData({
-      records: {
-        reportCards: [
-          {
-            term: '2024-2025 上学期',
-            chinese: 92,
-            math: 95,
-            english: 90,
-            physics: 88,
-            chemistry: 90,
-            average: 91
-          },
-          {
-            term: '2023-2024 下学期',
-            chinese: 88,
-            math: 92,
-            english: 85,
-            physics: 90,
-            chemistry: 87,
-            average: 88.4
-          }
-        ],
-        punishments: [
-          {
-            date: '2024-03-10',
-            type: '警告',
-            reason: '上课讲话影响他人学习'
-          }
-        ],
-        images: []
+      userInfo: {
+        studentId: student.studentId,
+        name: student.name
       },
+      records,
       loading: false
     });
   },
+
 
   // 切换标签页
   switchTab(e) {

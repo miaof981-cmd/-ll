@@ -1,75 +1,175 @@
-const storage = require('../../../utils/storage');
+// pages/admin/announcements/announcements.js
+const storage = require('../../../utils/storage.js');
 
 Page({
   data: {
-    list: [],
-    title: '',
-    content: '',
-    cover: '',
-    pinned: false,
-    editingId: ''
-  },
-
-  onShow() {
-    this.load();
-  },
-
-  load() {
-    const list = storage.getArray('announcements');
-    this.setData({ list });
-  },
-
-  onTitle(e) { this.setData({ title: e.detail.value }); },
-  onContent(e) { this.setData({ content: e.detail.value }); },
-  onPinned(e) { this.setData({ pinned: e.detail.value }); },
-  onCover(e) { this.setData({ cover: e.detail.value }); },
-  chooseCover() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (res) => {
-      const path = res.tempFiles[0] && res.tempFiles[0].tempFilePath;
-      if (path) { this.setData({ cover: path }); }
-    }});
-  },
-
-  save() {
-    const { title, content, cover, pinned, editingId } = this.data;
-    if (!title.trim()) { wx.showToast({ title: '请输入标题', icon: 'error' }); return; }
-    // 规范封面尺寸：750x300，超出按中心裁剪显示（前端通过样式限制展示区域）
-    const item = {
-      _id: editingId || `${Date.now()}`,
-      title: title.trim(),
-      content: content.trim(),
-      cover: cover || '',
-      pinned: !!pinned,
-      createdAt: new Date().toISOString().slice(0, 10)
-    };
-    storage.upsertById('announcements', item);
-    this.setData({ title: '', content: '', pinned: false, editingId: '' });
-    this.load();
-    wx.showToast({ title: '已保存', icon: 'success' });
-  },
-
-  edit(e) {
-    const id = e.currentTarget.dataset.id;
-    const item = storage.getArray('announcements').find(i => i._id === id);
-    if (item) {
-      this.setData({ title: item.title, content: item.content, pinned: item.pinned, editingId: id });
+    announcements: [],
+    showDialog: false,
+    editingId: null,
+    formData: {
+      title: '',
+      content: '',
+      coverImage: '',
+      pinned: false
     }
   },
 
-  remove(e) {
-    const id = e.currentTarget.dataset.id;
+  onLoad() {
+    this.loadAnnouncements();
+  },
+
+  onShow() {
+    this.loadAnnouncements();
+  },
+
+  // 加载公告列表
+  loadAnnouncements() {
+    const announcements = storage.getAnnouncements();
+    this.setData({ announcements });
+  },
+
+  // 显示添加对话框
+  showAddDialog() {
+    this.setData({
+      showDialog: true,
+      editingId: null,
+      formData: {
+        title: '',
+        content: '',
+        coverImage: '',
+        pinned: false
+      }
+    });
+  },
+
+  // 隐藏对话框
+  hideDialog() {
+    this.setData({ showDialog: false });
+  },
+
+  // 阻止冒泡
+  stopPropagation() {},
+
+  // 输入标题
+  onTitleInput(e) {
+    this.setData({
+      'formData.title': e.detail.value
+    });
+  },
+
+  // 输入内容
+  onContentInput(e) {
+    this.setData({
+      'formData.content': e.detail.value
+    });
+  },
+
+  // 切换置顶
+  togglePinned() {
+    this.setData({
+      'formData.pinned': !this.data.formData.pinned
+    });
+  },
+
+  // 上传封面图
+  uploadCover() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        this.setData({
+          'formData.coverImage': res.tempFiles[0].tempFilePath
+        });
+      }
+    });
+  },
+
+  // 保存公告
+  saveAnnouncement() {
+    const { title, content } = this.data.formData;
+
+    if (!title.trim()) {
+      wx.showToast({
+        title: '请输入标题',
+        icon: 'error'
+      });
+      return;
+    }
+
+    if (!content.trim()) {
+      wx.showToast({
+        title: '请输入内容',
+        icon: 'error'
+      });
+      return;
+    }
+
+    let success = false;
+    
+    if (this.data.editingId) {
+      // 更新公告
+      success = storage.updateAnnouncement(this.data.editingId, this.data.formData);
+    } else {
+      // 添加公告
+      success = storage.addAnnouncement(this.data.formData);
+    }
+
+    if (success) {
+      wx.showToast({
+        title: '保存成功',
+        icon: 'success'
+      });
+      this.hideDialog();
+      this.loadAnnouncements();
+    } else {
+      wx.showToast({
+        title: '保存失败',
+        icon: 'error'
+      });
+    }
+  },
+
+  // 编辑公告
+  editAnnouncement(e) {
+    const item = e.currentTarget.dataset.item;
+    this.setData({
+      showDialog: true,
+      editingId: item.id,
+      formData: {
+        title: item.title,
+        content: item.content,
+        coverImage: item.coverImage || '',
+        pinned: item.pinned || false
+      }
+    });
+  },
+
+  // 删除公告
+  deleteAnnouncement(e) {
+    const { id } = e.currentTarget.dataset;
+
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这条公告吗？',
       success: (res) => {
         if (res.confirm) {
-          storage.removeById('announcements', id);
-          this.load();
-          wx.showToast({ title: '已删除' });
+          const success = storage.deleteAnnouncement(id);
+
+          if (success) {
+            wx.showToast({
+              title: '删除成功',
+              icon: 'success'
+            });
+            this.loadAnnouncements();
+          } else {
+            wx.showToast({
+              title: '删除失败',
+              icon: 'error'
+            });
+          }
         }
       }
-    })
+    });
   }
 });
-
-

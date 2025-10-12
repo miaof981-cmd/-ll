@@ -1,24 +1,95 @@
+<!--pages/admin/announcements/announcements.wxml-->
 <view class="container">
-  <view class="form">
-    <input class="input" placeholder="公告标题" value="{{title}}" bindinput="onTitle" />
-    <textarea class="textarea" placeholder="公告内容" value="{{content}}" bindinput="onContent" />
-    <view class="image-row">
-      <input class="input" placeholder="封面图片URL（可选）" value="{{cover}}" bindinput="onCover" />
-      <button bindtap="chooseCover">选择本地图片</button>
-      <text class="hint">建议尺寸 750x300，超出将被裁剪</text>
-    </view>
-    <switch checked="{{pinned}}" bindchange="onPinned">置顶</switch>
-    <button type="primary" bindtap="save">发布公告</button>
+  <!-- 添加公告按钮 - 紧凑版 -->
+  <view class="add-section-compact">
+    <button class="btn-add-compact" bindtap="showAddDialog">
+      <text class="add-icon-small">📝</text>
+      <text>发布新公告</text>
+    </button>
   </view>
-  <view class="list">
-    <view class="item" wx:for="{{list}}" wx:key="_id">
-      <view class="item-title">{{item.title}} <text wx:if="{{item.pinned}}" class="tag">置顶</text></view>
-      <view class="item-content">{{item.content}}</view>
+
+  <!-- 公告列表 -->
+  <view class="announcement-list">
+    <view wx:if="{{announcements.length === 0}}" class="empty-state">
+      <view class="empty-icon">📢</view>
+      <text class="empty-text">暂无公告</text>
+      <text class="empty-hint">点击上方按钮发布公告</text>
+    </view>
+
+    <view 
+      wx:for="{{announcements}}" 
+      wx:key="id" 
+      class="announcement-item"
+    >
+      <image wx:if="{{item.coverImage}}" class="cover-image" src="{{item.coverImage}}" mode="widthFix" />
+      
+      <view class="item-body">
+        <view class="item-header">
+          <text class="item-title">{{item.title}}</text>
+          <view wx:if="{{item.pinned}}" class="tag tag-danger">置顶</view>
+        </view>
+        <text class="item-content">{{item.content}}</text>
+        <text class="item-date">📅 {{item.createdAt}}</text>
+      </view>
+
       <view class="item-actions">
-        <button size="mini" bindtap="edit" data-id="{{item._id}}">编辑</button>
-        <button size="mini" type="warn" bindtap="remove" data-id="{{item._id}}">删除</button>
+        <button class="btn-action btn-edit" bindtap="editAnnouncement" data-item="{{item}}">
+          编辑
+        </button>
+        <button class="btn-action btn-delete" bindtap="deleteAnnouncement" data-id="{{item.id}}">
+          删除
+        </button>
       </view>
     </view>
   </view>
 </view>
 
+<!-- 添加/编辑公告弹窗 -->
+<view wx:if="{{showDialog}}" class="dialog-mask" bindtap="hideDialog">
+  <view class="dialog-content" catchtap="stopPropagation">
+    <view class="dialog-header">
+      <text class="dialog-title">{{editingId ? '编辑公告' : '发布新公告'}}</text>
+    </view>
+
+    <view class="dialog-body">
+      <view class="form-group">
+        <text class="form-label">公告标题</text>
+        <input class="form-input" placeholder="请输入公告标题" value="{{formData.title}}" bindinput="onTitleInput" />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">公告内容</text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入公告内容" 
+          value="{{formData.content}}" 
+          bindinput="onContentInput"
+          maxlength="-1"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">封面图片（可选）</text>
+        <view class="upload-box" bindtap="uploadCover">
+          <image wx:if="{{formData.coverImage}}" class="upload-preview" src="{{formData.coverImage}}" mode="widthFix" />
+          <view wx:else class="upload-placeholder">
+            <text class="upload-icon">📷</text>
+            <text class="upload-text">点击上传封面图</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-group">
+        <label class="checkbox-label">
+          <checkbox checked="{{formData.pinned}}" bindtap="togglePinned" />
+          <text>置顶公告</text>
+        </label>
+      </view>
+    </view>
+
+    <view class="dialog-footer">
+      <button class="btn-cancel" bindtap="hideDialog">取消</button>
+      <button class="btn-confirm" bindtap="saveAnnouncement">保存</button>
+    </view>
+  </view>
+</view>

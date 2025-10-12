@@ -16,30 +16,35 @@
     </view>
   </view>
 
-  <!-- 数据统计卡片 -->
+  <!-- 数据统计卡片 - 可点击跳转 -->
   <view class="stats-section">
     <text class="section-title">📊 数据统计</text>
     <view class="stats-grid">
-      <view class="stat-card">
+      <view class="stat-card clickable" bindtap="manageStudents">
         <view class="stat-icon students">👥</view>
         <view class="stat-info">
           <text class="stat-value">{{stats.totalStudents}}</text>
           <text class="stat-label">学生总数</text>
         </view>
+        <view class="stat-arrow">→</view>
       </view>
-      <view class="stat-card">
+      
+      <view class="stat-card clickable" bindtap="manageAnnouncements">
         <view class="stat-icon announcements">📢</view>
         <view class="stat-info">
           <text class="stat-value">{{stats.totalAnnouncements}}</text>
           <text class="stat-label">公告数量</text>
         </view>
+        <view class="stat-arrow">→</view>
       </view>
-      <view class="stat-card">
-        <view class="stat-icon articles">📰</view>
+      
+      <view class="stat-card clickable" bindtap="manageBanners">
+        <view class="stat-icon banners">🖼️</view>
         <view class="stat-info">
-          <text class="stat-value">{{stats.totalArticles}}</text>
-          <text class="stat-label">新闻数量</text>
+          <text class="stat-value">{{stats.totalBanners}}</text>
+          <text class="stat-label">轮播图</text>
         </view>
+        <view class="stat-arrow">→</view>
       </view>
     </view>
   </view>
@@ -48,17 +53,17 @@
   <view class="management-section">
     <text class="section-title">🛠️ 管理功能</text>
     <view class="function-grid">
+      <view class="function-card" bindtap="manageBanners">
+        <view class="function-icon banners">🖼️</view>
+        <text class="function-title">轮播图管理</text>
+        <text class="function-desc">上传和管理首页轮播图</text>
+        <view class="function-arrow">→</view>
+      </view>
+
       <view class="function-card" bindtap="manageAnnouncements">
         <view class="function-icon announcements">📢</view>
         <text class="function-title">公告管理</text>
         <text class="function-desc">发布和管理学校公告</text>
-        <view class="function-arrow">→</view>
-      </view>
-
-      <view class="function-card" bindtap="manageArticles">
-        <view class="function-icon articles">📰</view>
-        <text class="function-title">新闻管理</text>
-        <text class="function-desc">发布和管理校园新闻</text>
         <view class="function-arrow">→</view>
       </view>
 

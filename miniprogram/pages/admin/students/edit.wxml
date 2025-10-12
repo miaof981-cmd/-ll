@@ -1,43 +1,161 @@
+<!--pages/admin/students/edit.wxml-->
 <view class="container">
-  <view class="form">
-    <view class="group">
-      <view class="label">系统分配学号</view>
-      <input class="input" value="{{studentId}}" bindinput="onStudentId" />
-    </view>
-    <view class="group">
-      <view class="label">初始密码</view>
-      <input class="input" value="{{password}}" bindinput="onPassword" />
-    </view>
-    <view class="group">
-      <view class="label">家长名称</view>
-      <input class="input" value="{{name}}" bindinput="onName" />
-    </view>
-
-    <view class="section-title">录取通知书（必填）</view>
-    <input class="input" placeholder="标题" value="{{admitTitle}}" bindinput="onAdmitTitle" />
-    <view class="row">
-      <input class="input" placeholder="文件URL（或上传图片）" value="{{admitUrl}}" bindinput="onAdmitUrl" />
-      <button size="mini" bindtap="chooseAdmitImage">上传图片</button>
+  <view class="form-section">
+    <!-- 基本信息 -->
+    <view class="section-title">基本信息</view>
+    
+    <view class="form-group">
+      <text class="form-label">学生姓名 *</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入学生姓名" 
+        value="{{formData.name}}"
+        bindinput="onNameInput"
+      />
     </view>
 
-    <view class="section-title">初始化档案</view>
-    <button class="add-btn" bindtap="addRecord">+ 添加档案</button>
-    <block wx:for="{{initRecords}}" wx:key="index">
-      <view class="record">
-        <picker mode="selector" range="{{['图片','处分','成绩']}}" value="{{item.type==='image'?0:(item.type==='punishment'?1:2)}}" bindchange="setRecordType" data-idx="{{index}}">
-          <view class="picker">档案类型：{{item.type==='image'?'图片':(item.type==='punishment'?'处分':'成绩')}}</view>
-        </picker>
-        <input class="input" placeholder="标题" value="{{item.title}}" bindinput="setRecordField" data-idx="{{index}}" data-field="title" />
-        <input class="input" placeholder="描述" value="{{item.description}}" bindinput="setRecordField" data-idx="{{index}}" data-field="description" />
-        <view class="row">
-          <input class="input" placeholder="图片URL（图片档案可选）" value="{{item.url}}" bindinput="setRecordField" data-idx="{{index}}" data-field="url" />
-          <button size="mini" bindtap="chooseRecordImage" data-idx="{{index}}">上传图片</button>
+    <view class="form-group">
+      <text class="form-label">家长姓名 *</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入家长姓名" 
+        value="{{formData.parentName}}"
+        bindinput="onParentNameInput"
+      />
+    </view>
+
+    <!-- 录取通知书 -->
+    <view class="form-group">
+      <text class="form-label">录取通知书 {{isEdit ? '' : '*'}}</text>
+      <view class="upload-box" bindtap="uploadAdmissionLetter">
+        <image 
+          wx:if="{{formData.admissionLetter}}" 
+          class="upload-preview" 
+          src="{{formData.admissionLetter}}" 
+          mode="widthFix"
+        />
+        <view wx:else class="upload-placeholder">
+          <text class="upload-icon">📄</text>
+          <text class="upload-text">点击上传录取通知书</text>
         </view>
-        <button size="mini" bindtap="removeRecord" data-idx="{{index}}">移除</button>
       </view>
-    </block>
+    </view>
 
-    <button type="primary" bindtap="save">保存</button>
+    <!-- 初始档案（仅新建时） -->
+    <view wx:if="{{!isEdit}}" class="records-section">
+      <view class="section-title">
+        <text>初始档案（可选）</text>
+        <button class="btn-add-record" bindtap="addRecord">
+          + 添加档案
+        </button>
+      </view>
+
+      <view wx:if="{{initRecords.length === 0}}" class="empty-hint">
+        <text>暂无档案，可点击上方按钮添加</text>
+      </view>
+
+      <!-- 档案列表 -->
+      <view 
+        wx:for="{{initRecords}}" 
+        wx:key="tempId" 
+        class="record-item"
+      >
+        <view class="record-header">
+          <text class="record-type">
+            {{item.type === 'grade' ? '📊 成绩单' : item.type === 'image' ? '🖼️ 图片档案' : '⚠️ 处分单'}}
+          </text>
+          <view class="btn-delete-record" bindtap="deleteRecord" data-index="{{index}}">
+            删除
+          </view>
+        </view>
+
+        <!-- 成绩单表单 -->
+        <view wx:if="{{item.type === 'grade'}}" class="record-form">
+          <input 
+            class="mini-input" 
+            placeholder="学期" 
+            data-index="{{index}}" 
+            data-field="term"
+            bindinput="setRecordField"
+          />
+          <input 
+            class="mini-input" 
+            type="number" 
+            placeholder="语文" 
+            data-index="{{index}}" 
+            data-field="chinese"
+            bindinput="setRecordField"
+          />
+          <input 
+            class="mini-input" 
+            type="number" 
+            placeholder="数学" 
+            data-index="{{index}}" 
+            data-field="math"
+            bindinput="setRecordField"
+          />
+          <input 
+            class="mini-input" 
+            type="number" 
+            placeholder="英语" 
+            data-index="{{index}}" 
+            data-field="english"
+            bindinput="setRecordField"
+          />
+        </view>
+
+        <!-- 图片档案表单 -->
+        <view wx:if="{{item.type === 'image'}}" class="record-form">
+          <input 
+            class="mini-input" 
+            placeholder="标题" 
+            data-index="{{index}}" 
+            data-field="title"
+            bindinput="setRecordField"
+          />
+          <textarea 
+            class="mini-textarea" 
+            placeholder="描述" 
+            data-index="{{index}}" 
+            data-field="description"
+            bindinput="setRecordField"
+          />
+          <view class="mini-upload" bindtap="uploadRecordImage" data-index="{{index}}">
+            <image 
+              wx:if="{{item.data.imageUrl}}" 
+              class="mini-preview" 
+              src="{{item.data.imageUrl}}" 
+              mode="widthFix"
+            />
+            <text wx:else>点击上传图片</text>
+          </view>
+        </view>
+
+        <!-- 处分单表单 -->
+        <view wx:if="{{item.type === 'punishment'}}" class="record-form">
+          <input 
+            class="mini-input" 
+            placeholder="处分类型" 
+            data-index="{{index}}" 
+            data-field="type"
+            bindinput="setRecordField"
+          />
+          <textarea 
+            class="mini-textarea" 
+            placeholder="处分原因" 
+            data-index="{{index}}" 
+            data-field="reason"
+            bindinput="setRecordField"
+          />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="footer">
+    <button class="btn-save" bindtap="saveStudent">
+      {{isEdit ? '保存修改' : '创建学生'}}
+    </button>
   </view>
 </view>
-

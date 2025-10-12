@@ -3,7 +3,12 @@
     "pages/index/index",
     "pages/login/login",
     "pages/records/records",
-    "pages/admin/admin"
+    "pages/admin/admin",
+    "pages/admin/banners/banners",
+    "pages/admin/announcements/announcements",
+    "pages/admin/students/students",
+    "pages/admin/students/edit",
+    "pages/announcement/detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

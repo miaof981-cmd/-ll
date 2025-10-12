@@ -1,9 +1,224 @@
-.toolbar { display: flex; gap: 12rpx; padding: 20rpx; }
-.search { flex: 1; border: 1rpx solid #e5e7eb; padding: 16rpx; border-radius: 8rpx; }
-.table { margin: 0 20rpx; background: #fff; border-radius: 12rpx; overflow: hidden; }
-.thead, .tr { display: grid; grid-template-columns: 2fr 2fr 3fr; align-items: center; }
-.thead { background: #f3f4f6; padding: 16rpx 20rpx; font-weight: 600; color: #374151; }
-.tr { padding: 16rpx 20rpx; border-top: 1rpx solid #f0f0f0; }
-.td.ops, .th.ops { display: flex; gap: 12rpx; align-items: center; }
-.pager { padding: 16rpx 20rpx; display: flex; justify-content: center; gap: 16rpx; color: #6b7280; }
+/* pages/admin/students/students.wxss - iOS通讯录风格 */
 
+.container {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+}
+
+/* ==================== 搜索区域 ==================== */
+.search-section {
+  background: var(--bg-primary);
+  padding: 24rpx;
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: var(--bg-secondary);
+  border-radius: 20rpx;
+  padding: 16rpx 24rpx;
+}
+
+.search-icon {
+  font-size: 28rpx;
+  opacity: 0.5;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+
+.btn-add-mini {
+  padding: 16rpx 28rpx;
+  background: var(--primary-color);
+  color: var(--text-white);
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-add-mini::after {
+  border: none;
+}
+
+/* ==================== 学生列表 - iOS通讯录风格 ==================== */
+.student-list {
+  background: var(--bg-primary);
+  margin: 16rpx;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.student-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+  border-bottom: 1rpx solid var(--border-light);
+  transition: background 0.2s;
+}
+
+.student-card:last-child {
+  border-bottom: none;
+}
+
+.student-card:active {
+  background: var(--bg-secondary);
+}
+
+/* 左侧：头像和信息 */
+.card-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  min-width: 0; /* 防止文字溢出 */
+}
+
+.avatar-circle {
+  width: 88rpx;
+  height: 88rpx;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(26, 86, 219, 0.2);
+}
+
+.avatar-letter {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.student-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
+}
+
+.student-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-meta {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 右侧：更多按钮 */
+.card-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  background: var(--bg-tertiary);
+  border-radius: 20rpx;
+  transition: all 0.2s;
+}
+
+.card-right:active {
+  background: var(--border-color);
+  transform: scale(0.95);
+}
+
+.more-text {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.more-icon {
+  font-size: 36rpx;
+  color: var(--text-tertiary);
+  line-height: 1;
+}
+
+/* ==================== 空状态 ==================== */
+.empty-state {
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  display: block;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+}
+
+/* ==================== 分页 - 极简风格 ==================== */
+.pagination-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  padding: 32rpx 24rpx;
+}
+
+.btn-page-mini {
+  width: 64rpx;
+  height: 64rpx;
+  background: var(--bg-primary);
+  color: var(--primary-color);
+  border-radius: 50%;
+  font-size: 40rpx;
+  font-weight: 300;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-page-mini[disabled] {
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  box-shadow: none;
+}
+
+.btn-page-mini::after {
+  border: none;
+}
+
+.page-indicator {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 120rpx;
+  text-align: center;
+}

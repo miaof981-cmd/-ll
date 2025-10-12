@@ -23,7 +23,7 @@
         bindtap="switchLoginType" 
         data-type="parent"
       >
-        <text>家长登录</text>
+        <text>学生/家长</text>
       </view>
       <view 
         class="type-tab {{loginType === 'admin' ? 'active' : ''}}" 
@@ -83,12 +83,12 @@
     <view class="hint-box">
       <view class="hint-title">
         <text class="hint-icon">ℹ️</text>
-        <text>测试账号</text>
+        <text>登录说明</text>
       </view>
       <view class="hint-list">
         <view class="hint-item">
-          <text class="hint-label">家长账号：</text>
-          <text class="hint-value">20230001 / 123456</text>
+          <text class="hint-label">学生账号：</text>
+          <text class="hint-value">使用学号登录，默认密码 123456</text>
         </view>
         <view class="hint-item">
           <text class="hint-label">管理员：</text>
@@ -100,6 +100,6 @@
 
   <!-- 底部文字 -->
   <view class="footer-text">
-    <text>© 2024 学校官网 · 安全可靠</text>
+    <text>© 2025 学校官网 · 安全可靠</text>
   </view>
 </view>

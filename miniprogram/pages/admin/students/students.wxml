@@ -1,31 +1,70 @@
+<!--pages/admin/students/students.wxml-->
 <view class="container">
-  <view class="toolbar">
-    <input class="search" placeholder="搜索学号或姓名" value="{{keyword}}" bindinput="onKeyword" />
-    <button bindtap="search">搜索</button>
-    <button type="primary" bindtap="create">新建学生</button>
+  <!-- 顶部搜索栏 -->
+  <view class="search-section">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="search-input" 
+        placeholder="搜索学号、姓名" 
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        bindconfirm="search"
+      />
+    </view>
+    <button class="btn-add-mini" bindtap="addStudent">
+      <text>➕ 添加</text>
+    </button>
   </view>
 
-  <view class="table">
-    <view class="thead">
-      <text class="th id">学号</text>
-      <text class="th name">家长名称</text>
-      <text class="th ops">操作</text>
+  <!-- 学生列表 - iOS通讯录风格 -->
+  <view class="student-list">
+    <view wx:if="{{currentPageStudents.length === 0}}" class="empty-state">
+      <view class="empty-icon">👥</view>
+      <text class="empty-text">暂无学生</text>
     </view>
-    <view class="tr" wx:for="{{pageList}}" wx:key="studentId">
-      <text class="td id">{{item.studentId}}</text>
-      <text class="td name">{{item.name}}</text>
-      <view class="td ops">
-        <button size="mini" bindtap="viewDetail" data-id="{{item.studentId}}">查看档案</button>
-        <button size="mini" bindtap="edit" data-id="{{item.studentId}}">编辑</button>
-        <button size="mini" type="warn" bindtap="remove" data-id="{{item.studentId}}">删除</button>
+
+    <view 
+      wx:for="{{currentPageStudents}}" 
+      wx:key="studentId" 
+      class="student-card"
+    >
+      <!-- 左侧：头像和基本信息 -->
+      <view class="card-left">
+        <view class="avatar-circle">
+          <text class="avatar-letter">{{item.name.substring(0, 1)}}</text>
+        </view>
+        <view class="student-details">
+          <text class="student-name">{{item.name}}</text>
+          <text class="student-meta">学号 {{item.studentId}}</text>
+          <text class="student-meta">家长 {{item.parentName}}</text>
+        </view>
+      </view>
+
+      <!-- 右侧：更多按钮 -->
+      <view class="card-right" bindtap="showActionSheet" data-studentid="{{item.studentId}}">
+        <text class="more-text">更多</text>
+        <text class="more-icon">›</text>
       </view>
     </view>
   </view>
 
-  <view class="pager">
-    <button size="mini" bindtap="prev" disabled="{{pageIndex===1}}">上一页</button>
-    <text>第 {{pageIndex}} / {{totalPages}} 页（共 {{filteredTotal}} 人）</text>
-    <button size="mini" bindtap="next" disabled="{{pageIndex===totalPages}}">下一页</button>
+  <!-- 分页指示器 -->
+  <view wx:if="{{totalPages > 1}}" class="pagination-mini">
+    <button 
+      class="btn-page-mini" 
+      bindtap="prevPage" 
+      disabled="{{pageIndex === 1}}"
+    >
+      ‹
+    </button>
+    <text class="page-indicator">{{pageIndex}} / {{totalPages}}</text>
+    <button 
+      class="btn-page-mini" 
+      bindtap="nextPage" 
+      disabled="{{pageIndex === totalPages}}"
+    >
+      ›
+    </button>
   </view>
 </view>
-

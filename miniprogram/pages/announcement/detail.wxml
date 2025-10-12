@@ -1,9 +1,35 @@
-<view class="container">
-  <view class="title">{{item.title}}</view>
-  <image wx:if="{{item.cover}}" class="cover" src="{{item.cover}}" mode="widthFix" />
-  <view class="content" wx:if="{{!expanded}}">{{shortContent}}</view>
-  <view class="content" wx:if="{{expanded}}">{{item.content}}</view>
-  <button size="mini" bindtap="toggle">{{expanded ? '收起' : '展开更多'}}</button>
-  <view class="time">{{item.createdAt}}</view>
-</view>
+<!--pages/announcement/detail.wxml-->
+<view class="detail-container">
+  <!-- 公告封面图 -->
+  <image 
+    wx:if="{{announcement.coverImage}}" 
+    class="cover-image" 
+    src="{{announcement.coverImage}}" 
+    mode="widthFix"
+    bindtap="previewImage"
+    data-url="{{announcement.coverImage}}"
+  />
 
+  <!-- 公告内容 -->
+  <view class="content-section">
+    <!-- 标题区域 -->
+    <view class="title-area">
+      <text class="title">{{announcement.title}}</text>
+      <view wx:if="{{announcement.pinned}}" class="tag tag-danger">置顶</view>
+    </view>
+
+    <!-- 发布时间 -->
+    <view class="meta-info">
+      <text class="meta-icon">📅</text>
+      <text class="meta-text">{{announcement.createdAt}}</text>
+    </view>
+
+    <!-- 分割线 -->
+    <view class="divider"></view>
+
+    <!-- 正文内容 -->
+    <view class="content-text">
+      <text>{{announcement.content}}</text>
+    </view>
+  </view>
+</view>

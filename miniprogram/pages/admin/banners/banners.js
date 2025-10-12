@@ -1,42 +1,83 @@
-const storage = require('../../../utils/storage');
+// pages/admin/banners/banners.js
+const storage = require('../../../utils/storage.js');
 
 Page({
   data: {
-    list: [],
-    url: ''
+    banners: []
   },
 
-  onShow() { this.load(); },
-
-  load() {
-    const list = storage.getArray('banners');
-    this.setData({ list });
+  onLoad() {
+    this.loadBanners();
   },
 
-  onUrl(e) { this.setData({ url: e.detail.value }); },
-
-  choose() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (res) => {
-      const path = res.tempFiles[0] && res.tempFiles[0].tempFilePath;
-      if (path) { this.setData({ url: path }); }
-    }});
+  onShow() {
+    this.loadBanners();
   },
 
-  add() {
-    const { url } = this.data;
-    if (!url) { wx.showToast({ title: '请先选择或填写图片', icon: 'error' }); return; }
-    const item = { _id: `${Date.now()}`, url };
-    storage.pushToArray('banners', item);
-    this.setData({ url: '' });
-    this.load();
-    wx.showToast({ title: '已添加', icon: 'success' });
+  // 加载轮播图列表
+  loadBanners() {
+    const banners = storage.getBanners();
+    this.setData({ banners });
   },
 
-  remove(e) {
-    const id = e.currentTarget.dataset.id;
-    storage.removeById('banners', id);
-    this.load();
+  // 添加轮播图
+  addBanner() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+        
+        wx.showLoading({ title: '上传中...' });
+        
+        // 这里使用本地路径，实际项目中应该上传到服务器
+        // 为了演示，直接使用临时路径
+        const success = storage.addBanner(tempFilePath);
+        
+        wx.hideLoading();
+        
+        if (success) {
+          wx.showToast({
+            title: '添加成功',
+            icon: 'success'
+          });
+          this.loadBanners();
+        } else {
+          wx.showToast({
+            title: '添加失败',
+            icon: 'error'
+          });
+        }
+      }
+    });
+  },
+
+  // 删除轮播图
+  deleteBanner(e) {
+    const { id } = e.currentTarget.dataset;
+    
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这张轮播图吗？',
+      success: (res) => {
+        if (res.confirm) {
+          const success = storage.deleteBanner(id);
+          
+          if (success) {
+            wx.showToast({
+              title: '删除成功',
+              icon: 'success'
+            });
+            this.loadBanners();
+          } else {
+            wx.showToast({
+              title: '删除失败',
+              icon: 'error'
+            });
+          }
+        }
+      }
+    });
   }
 });
-
-
