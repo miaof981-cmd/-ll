@@ -10,12 +10,14 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--bg-primary);
-  box-shadow: var(--shadow-sm);
+  /* 优化：浅蓝色渐变背景，与主题蓝色自然过渡 */
+  background: linear-gradient(180deg, #e8f0fe 0%, #f0f5ff 100%);
+  /* 优化：移除阴影，视觉更轻盈 */
 }
 
 .header-content {
-  padding: 32rpx var(--spacing-lg);
+  /* 优化：减少 padding，高度减少约 44% */
+  padding: 18rpx var(--spacing-lg);
 }
 
 .logo-section {
