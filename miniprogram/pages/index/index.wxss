@@ -45,32 +45,47 @@
 /* ==================== 轮播图区域 ==================== */
 .banner-section {
   background: var(--bg-primary);
+  /* 优化：移除轮播图底部可能的留白 */
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .banner-swiper {
   width: 100%;
   transition: height 0.3s ease;
+  /* 优化：确保轮播图紧贴底部，无留白 */
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 
 .banner-image {
   width: 100%;
   display: block;
+  /* 优化：移除图片可能的底部间隙 */
+  vertical-align: bottom;
 }
 
 /* ==================== 内容区块 ==================== */
 .content-section {
   margin: var(--spacing-lg);
-  margin-top: var(--spacing-xl);
+  /* 优化：轮播图下方的第一个标题栏，上边距精确控制，确保视觉居中 */
+  margin-top: 28rpx;
+}
+
+/* 优化：第一个内容区块（学校公告）的特殊处理 */
+.content-section:first-of-type {
+  margin-top: 24rpx;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* 优化：减少标题栏的下边距，让区块更紧凑 */
-  margin-bottom: 20rpx;
-  /* 优化：减少标题栏自身高度 */
-  padding: 8rpx 0;
+  /* 优化：上下边距完全相等，确保视觉居中 */
+  margin-bottom: 16rpx;
+  /* 优化：移除 padding，让标题栏更窄 */
+  padding: 0;
 }
 
 .section-title-wrapper {
@@ -89,6 +104,8 @@
   font-size: 32rpx;
   font-weight: 700;
   color: var(--primary-dark);
+  /* 优化：确保标题文字垂直居中 */
+  line-height: 1.2;
 }
 
 /* ==================== 公告卡片 ==================== */
