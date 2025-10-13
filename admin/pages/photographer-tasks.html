@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的任务 - 摄影师工作台</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .task-card {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .child-info {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .life-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: var(--border-radius);
+            object-fit: cover;
+            cursor: pointer;
+        }
+        
+        .info-details {
+            flex: 1;
+        }
+        
+        .info-row {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .info-label {
+            color: var(--text-secondary);
+            margin-right: 8px;
+        }
+        
+        .expectations-box {
+            background: var(--bg-secondary);
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+        }
+        
+        .upload-section {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--border-radius);
+            margin-top: 16px;
+        }
+        
+        .uploaded-work {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .work-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--border-radius);
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>次元学校</h2>
+                <p class="user-info">
+                    <span id="currentUser">摄影师</span>
+                    <span class="user-role" id="currentRole">photographer</span>
+                </p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="../dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>数据概览</span>
+                </a>
+                <a href="photographer-tasks.html" class="nav-item active">
+                    <span class="nav-icon">📋</span>
+                    <span>我的任务</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>我的任务</h1>
+                <div class="header-actions">
+                    <select id="statusFilter" class="form-control" onchange="filterTasks()" style="width: 200px;">
+                        <option value="">全部任务</option>
+                        <option value="waiting_draw">等待绘制</option>
+                        <option value="pending_review">待审核</option>
+                        <option value="pending_confirm">待客户确认</option>
+                        <option value="confirmed">已确认</option>
+                    </select>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <div id="tasksContainer"></div>
+                
+                <div class="empty-message" id="emptyMessage" style="display: none; text-align: center; padding: 60px 20px; color: var(--text-tertiary);">
+                    暂无任务
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 上传作品模态框 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">上传作品</h2>
+                <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>作品文件 *</label>
+                <div class="image-upload">
+                    <div id="workPreview" class="image-preview" style="display: none; width: 200px; height: 200px;">
+                        <img id="workImage" src="" alt="作品">
+                        <button type="button" class="remove-btn" onclick="removeWork()">&times;</button>
+                    </div>
+                    <label class="upload-btn" id="workUploadBtn" style="width: 200px; height: 200px;">
+                        <input type="file" accept="image/*" onchange="uploadWork(event)" style="display: none;">
+                        +
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>备注说明</label>
+                <textarea id="workNote" class="form-control" rows="4" placeholder="请填写风格说明、特殊处理等"></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUploadModal()">取消</button>
+                <button class="btn btn-primary" onclick="submitWork()">提交审核</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/photographer-tasks.js"></script>
+</body>
+</html>
+
