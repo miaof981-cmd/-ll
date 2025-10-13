@@ -25,6 +25,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   loadPhotographers();
+  
+  // 监听localStorage变化，自动刷新列表（跨标签页）
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'photographers') {
+      console.log('🔄 检测到摄影师数据变化（其他标签页），自动刷新列表');
+      loadPhotographers();
+    }
+  });
+  
+  // 监听页面获得焦点，刷新数据
+  window.addEventListener('focus', () => {
+    console.log('🔄 页面获得焦点，刷新摄影师列表');
+    loadPhotographers();
+  });
+  
+  // 监听自定义同步事件
+  window.addEventListener('pageVisible', () => {
+    console.log('🔄 收到同步信号，刷新摄影师列表');
+    loadPhotographers();
+  });
 });
 
 function loadPhotographers() {
