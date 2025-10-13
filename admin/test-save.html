@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试保存功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #1f6feb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 摄影师保存功能测试</h1>
+    
+    <div class="test-section">
+        <h2>测试1：创建测试摄影师</h2>
+        <button onclick="testCreate()">创建测试摄影师</button>
+        <div class="result" id="result1"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试2：验证数据是否保存</h2>
+        <button onclick="testVerify()">验证数据</button>
+        <div class="result" id="result2"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试3：刷新页面后验证</h2>
+        <button onclick="location.reload()">刷新页面</button>
+        <button onclick="testAfterRefresh()">验证刷新后的数据</button>
+        <div class="result" id="result3"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试4：查看localStorage原始数据</h2>
+        <button onclick="showRawData()">查看原始数据</button>
+        <div class="result" id="result4"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试5：清空并重建</h2>
+        <button onclick="clearAndRebuild()">清空并重建</button>
+        <div class="result" id="result5"></div>
+    </div>
+    
+    <script src="js/storage.js"></script>
+    <script>
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = isError ? 'error' : 'success';
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+        }
+        
+        function testCreate() {
+            const result = document.getElementById('result1');
+            result.innerHTML = '';
+            
+            try {
+                log('result1', '开始创建测试摄影师...');
+                
+                const testPhotographer = {
+                    name: 'TEST_' + Date.now(),
+                    username: 'test_' + Date.now(),
+                    password: 'photo123',
+                    price: 99,
+                    specialty: '测试专长',
+                    description: '这是一个测试摄影师',
+                    status: 'available',
+                    orderCount: 0
+                };
+                
+                log('result1', '摄影师数据: ' + JSON.stringify(testPhotographer, null, 2));
+                
+                const saved = Storage.savePhotographer(testPhotographer);
+                
+                if (saved && saved.id) {
+                    log('result1', '✅ 保存成功！ID: ' + saved.id);
+                    log('result1', '完整数据: ' + JSON.stringify(saved, null, 2));
+                    
+                    // 立即验证
+                    const photographers = Storage.getPhotographers();
+                    log('result1', '当前摄影师总数: ' + photographers.length);
+                    
+                    const found = photographers.find(p => p.id === saved.id);
+                    if (found) {
+                        log('result1', '✅ 验证成功：数据已保存到localStorage');
+                    } else {
+                        log('result1', '❌ 验证失败：保存后立即查询找不到数据', true);
+                    }
+                } else {
+                    log('result1', '❌ 保存失败：返回值为空', true);
+                }
+            } catch (e) {
+                log('result1', '❌ 错误: ' + e.message, true);
+                console.error(e);
+            }
+        }
+        
+        function testVerify() {
+            const result = document.getElementById('result2');
+            result.innerHTML = '';
+            
+            try {
+                log('result2', '开始验证数据...');
+                
+                const photographers = Storage.getPhotographers();
+                log('result2', '摄影师总数: ' + photographers.length);
+                
+                if (photographers.length > 0) {
+                    log('result2', '✅ 找到 ' + photographers.length + ' 个摄影师');
+                    photographers.forEach((p, index) => {
+                        log('result2', `摄影师${index + 1}: ${p.name} (${p.username}) - ¥${p.price}`);
+                    });
+                } else {
+                    log('result2', '❌ 没有找到任何摄影师数据', true);
+                }
+                
+                // 检查localStorage
+                const rawData = localStorage.getItem('photographers');
+                if (rawData) {
+                    log('result2', '✅ localStorage中有数据，长度: ' + rawData.length);
+                } else {
+                    log('result2', '❌ localStorage中没有photographers数据', true);
+                }
+            } catch (e) {
+                log('result2', '❌ 错误: ' + e.message, true);
+                console.error(e);
+            }
+        }
+        
+        function testAfterRefresh() {
+            const result = document.getElementById('result3');
+            result.innerHTML = '';
+            
+            try {
+                log('result3', '验证刷新后的数据...');
+                
+                const photographers = Storage.getPhotographers();
+                log('result3', '摄影师总数: ' + photographers.length);
+                
+                if (photographers.length > 0) {
+                    log('result3', '✅ 刷新后数据仍然存在');
+                    photographers.forEach((p, index) => {
+                        log('result3', `摄影师${index + 1}: ${p.name} (${p.username})`);
+                    });
+                } else {
+                    log('result3', '❌ 刷新后数据丢失！', true);
+                    log('result3', '这说明数据没有真正保存到localStorage', true);
+                }
+            } catch (e) {
+                log('result3', '❌ 错误: ' + e.message, true);
+                console.error(e);
+            }
+        }
+        
+        function showRawData() {
+            const result = document.getElementById('result4');
+            result.innerHTML = '';
+            
+            try {
+                log('result4', '查看localStorage原始数据...');
+                
+                const rawData = localStorage.getItem('photographers');
+                if (rawData) {
+                    log('result4', '✅ 找到数据');
+                    log('result4', '数据长度: ' + rawData.length + ' 字符');
+                    log('result4', '原始JSON:\n' + rawData);
+                    
+                    try {
+                        const parsed = JSON.parse(rawData);
+                        log('result4', '✅ JSON解析成功');
+                        log('result4', '数组长度: ' + parsed.length);
+                    } catch (e) {
+                        log('result4', '❌ JSON解析失败: ' + e.message, true);
+                    }
+                } else {
+                    log('result4', '❌ localStorage中没有photographers键', true);
+                    
+                    // 列出所有localStorage键
+                    log('result4', 'localStorage中的所有键:');
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        log('result4', `  ${i + 1}. ${key}`);
+                    }
+                }
+            } catch (e) {
+                log('result4', '❌ 错误: ' + e.message, true);
+                console.error(e);
+            }
+        }
+        
+        function clearAndRebuild() {
+            const result = document.getElementById('result5');
+            result.innerHTML = '';
+            
+            if (!confirm('确定要清空所有摄影师数据并重建吗？')) {
+                return;
+            }
+            
+            try {
+                log('result5', '清空现有数据...');
+                localStorage.removeItem('photographers');
+                log('result5', '✅ 已清空');
+                
+                log('result5', '创建新摄影师...');
+                const newPhotographer = {
+                    name: '测试摄影师',
+                    username: 'test123',
+                    password: 'photo123',
+                    price: 100,
+                    specialty: '测试风格',
+                    description: '测试描述',
+                    status: 'available',
+                    orderCount: 0
+                };
+                
+                const saved = Storage.savePhotographer(newPhotographer);
+                
+                if (saved && saved.id) {
+                    log('result5', '✅ 创建成功！ID: ' + saved.id);
+                    
+                    // 验证
+                    const photographers = Storage.getPhotographers();
+                    log('result5', '验证：当前摄影师数量 = ' + photographers.length);
+                    
+                    if (photographers.length === 1) {
+                        log('result5', '✅ 验证成功！');
+                        log('result5', '请刷新页面验证数据是否持久化');
+                    } else {
+                        log('result5', '❌ 验证失败：数量不对', true);
+                    }
+                } else {
+                    log('result5', '❌ 创建失败', true);
+                }
+            } catch (e) {
+                log('result5', '❌ 错误: ' + e.message, true);
+                console.error(e);
+            }
+        }
+        
+        // 页面加载时自动运行测试
+        window.addEventListener('load', () => {
+            console.log('测试页面已加载');
+            testVerify();
+        });
+    </script>
+</body>
+</html>
+
