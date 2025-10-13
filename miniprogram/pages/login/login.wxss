@@ -287,6 +287,15 @@
   background: rgba(255, 255, 255, 0.5);
   padding: 4rpx 12rpx;
   border-radius: 6rpx;
+  color: #1f6feb;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.hint-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 12rpx 0;
 }
 
 /* ==================== 底部文字 ==================== */
