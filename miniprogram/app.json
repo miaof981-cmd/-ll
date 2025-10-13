@@ -15,7 +15,8 @@
     "pages/apply/payment",
     "pages/apply/status",
     "pages/admin/applications/applications",
-    "pages/admin/photographers/photographers"
+    "pages/admin/photographers/photographers",
+    "pages/admin/photographers/edit"
   ],
   "window": {
     "backgroundTextStyle": "light",

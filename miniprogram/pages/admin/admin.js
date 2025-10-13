@@ -6,6 +6,7 @@ Page({
     adminInfo: null,
     stats: {
       totalStudents: 0,
+      totalPhotographers: 0,
       totalAnnouncements: 0,
       totalBanners: 0
     }
@@ -66,6 +67,13 @@ Page({
   manageStudents() {
     wx.navigateTo({
       url: '/pages/admin/students/students'
+    });
+  },
+
+  // 管理摄影师
+  managePhotographers() {
+    wx.navigateTo({
+      url: '/pages/admin/photographers/photographers'
     });
   },
 

@@ -14,72 +14,69 @@ Page({
   // 加载摄影师列表
   loadPhotographers() {
     // 从本地存储获取摄影师数据
-    const photographers = storage.getPhotographers();
+    let photographers = storage.getPhotographers();
     
-    // 如果没有数据，使用模拟数据
+    // 如果没有数据，初始化默认摄影师数据
     if (photographers.length === 0) {
-      const mockData = [
+      const defaultPhotographers = [
         {
-          id: 'p001',
-          name: '张艺术',
-          title: '资深儿童摄影师',
-          level: '金牌',
-          avatar: '/images/photographer1.png',
-          rating: '4.9',
-          works: 156,
-          orders: 328,
-          description: '10年儿童摄影经验，擅长捕捉孩子最自然的笑容',
-          samples: [
-            '/images/sample1.jpg',
-            '/images/sample2.jpg',
-            '/images/sample3.jpg'
-          ],
-          price: 299
+          id: 'PHO' + Date.now() + '001',
+          name: '星空画师',
+          specialty: '星空风格',
+          description: '擅长星空、梦幻风格的证件照拍摄，10年儿童摄影经验',
+          avatar: '',
+          samples: [],
+          status: 'available',
+          orderCount: 0,
+          createdAt: new Date().toISOString()
         },
         {
-          id: 'p002',
-          name: '李画师',
-          title: '专业证件照摄影师',
-          level: '银牌',
-          avatar: '/images/photographer2.png',
-          rating: '4.8',
-          works: 98,
-          orders: 215,
-          description: '专注证件照拍摄，注重细节和光影效果',
-          samples: [
-            '/images/sample4.jpg',
-            '/images/sample5.jpg',
-            '/images/sample6.jpg'
-          ],
-          price: 199
-        },
-        {
-          id: 'p003',
-          name: '王摄影',
-          title: '创意儿童摄影师',
-          level: '金牌',
-          avatar: '/images/photographer3.png',
-          rating: '5.0',
-          works: 203,
-          orders: 456,
-          description: '创意拍摄，让每一张照片都充满故事',
-          samples: [
-            '/images/sample7.jpg',
-            '/images/sample8.jpg',
-            '/images/sample9.jpg'
-          ],
-          price: 399
+          id: 'PHO' + Date.now() + '002',
+          name: '清新画师',
+          specialty: '清新自然',
+          description: '擅长清新、自然风格的证件照拍摄，注重细节和光影',
+          avatar: '',
+          samples: [],
+          status: 'available',
+          orderCount: 0,
+          createdAt: new Date().toISOString()
         }
       ];
       
-      this.setData({
-        photographers: mockData
+      // 保存默认数据到存储
+      defaultPhotographers.forEach(p => {
+        storage.savePhotographer(p);
       });
-    } else {
-      this.setData({
-        photographers
-      });
+      
+      photographers = defaultPhotographers;
     }
+    
+    // 转换为小程序展示格式
+    const displayPhotographers = photographers.map(p => ({
+      id: p.id,
+      name: p.name,
+      title: p.specialty || '专业摄影师',
+      level: p.orderCount > 50 ? '金牌' : p.orderCount > 20 ? '银牌' : '新星',
+      avatar: p.avatar || this.generateDefaultAvatar(p.name),
+      rating: '5.0',
+      works: p.orderCount || 0,
+      orders: p.orderCount || 0,
+      description: p.description || '专业摄影师，为您提供优质服务',
+      samples: p.samples && p.samples.length > 0 ? p.samples : [],
+      price: 299
+    }));
+    
+    this.setData({
+      photographers: displayPhotographers
+    });
+  },
+  
+  // 生成默认头像
+  generateDefaultAvatar(name) {
+    const colors = ['#1f6feb', '#28a745', '#6f42c1', '#fd7e14', '#dc3545'];
+    const color = colors[name.charCodeAt(0) % colors.length];
+    const initial = name.charAt(0);
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='${encodeURIComponent(color)}' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='40'%3E${initial}%3C/text%3E%3C/svg%3E`;
   },
 
   // 选择摄影师

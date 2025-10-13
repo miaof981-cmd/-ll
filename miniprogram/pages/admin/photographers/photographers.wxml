@@ -1,6 +1,33 @@
-<!--pages/admin/photographers/photographers.wxml-->
 <view class="container">
-  <view class="page-title">摄影师管理（开发中）</view>
-  <view class="empty-hint">此功能正在开发中...</view>
-</view>
+  <view class="header">
+    <text class="title">摄影师管理</text>
+    <button class="btn-add" bindtap="addPhotographer">+ 添加摄影师</button>
+  </view>
 
+  <view class="photographers-list">
+    <view class="photographer-card" wx:for="{{photographers}}" wx:key="id">
+      <view class="card-header">
+        <image class="avatar" src="{{item.avatar}}" mode="aspectFill" wx:if="{{item.avatar}}"></image>
+        <view class="avatar-placeholder" wx:else>{{item.name.substring(0,1)}}</view>
+        <view class="info">
+          <text class="name">{{item.name}}</text>
+          <text class="specialty">{{item.specialty}}</text>
+        </view>
+      </view>
+      <view class="card-body">
+        <text class="description">{{item.description}}</text>
+      </view>
+      <view class="card-footer">
+        <text class="orders">订单数: {{item.orderCount || 0}}</text>
+        <view class="actions">
+          <button class="btn-edit" size="mini" bindtap="editPhotographer" data-id="{{item.id}}">编辑</button>
+          <button class="btn-delete" size="mini" bindtap="deletePhotographer" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{photographers.length === 0}}">
+    <text>暂无摄影师</text>
+  </view>
+</view>

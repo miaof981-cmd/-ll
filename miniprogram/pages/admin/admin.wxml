@@ -29,6 +29,15 @@
         <view class="stat-arrow">→</view>
       </view>
       
+      <view class="stat-card clickable" bindtap="managePhotographers">
+        <view class="stat-icon photographers">📷</view>
+        <view class="stat-info">
+          <text class="stat-value">{{stats.totalPhotographers}}</text>
+          <text class="stat-label">摄影师</text>
+        </view>
+        <view class="stat-arrow">→</view>
+      </view>
+      
       <view class="stat-card clickable" bindtap="manageAnnouncements">
         <view class="stat-icon announcements">📢</view>
         <view class="stat-info">
@@ -71,6 +80,13 @@
         <view class="function-icon students">👥</view>
         <text class="function-title">学生管理</text>
         <text class="function-desc">管理学生信息和档案</text>
+        <view class="function-arrow">→</view>
+      </view>
+
+      <view class="function-card" bindtap="managePhotographers">
+        <view class="function-icon photographers">📷</view>
+        <text class="function-title">摄影师管理</text>
+        <text class="function-desc">管理摄影师和作品</text>
         <view class="function-arrow">→</view>
       </view>
     </view>
