@@ -100,6 +100,28 @@ const Auth = {
     }
     return true;
   },
+  
+  // 检查并重定向到正确的页面
+  redirectToCorrectDashboard() {
+    const user = this.getCurrentUser();
+    if (!user) {
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    // 摄影师只能访问摄影师页面
+    if (user.role === 'photographer') {
+      if (currentPage !== 'photographer-dashboard.html' && currentPage !== 'index.html') {
+        window.location.href = 'photographer-dashboard.html';
+      }
+    } 
+    // 管理员和客服不能访问摄影师页面
+    else if (currentPage === 'photographer-dashboard.html') {
+      window.location.href = 'dashboard.html';
+    }
+  },
 
   // 要求特定权限
   requirePermission(permission) {

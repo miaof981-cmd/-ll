@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摄影师工作台 - 次元学校</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .photographer-container {
+            min-height: 100vh;
+            background: var(--bg-secondary);
+        }
+        
+        .photographer-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 32px;
+            color: white;
+        }
+        
+        .photographer-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .photographer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        .photographer-details h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .photographer-details p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-box .label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .content-area {
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .task-card {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="photographer-container">
+        <!-- 头部信息区 -->
+        <div class="photographer-header">
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+            
+            <div class="photographer-info">
+                <div class="photographer-avatar" id="photographerAvatar">📷</div>
+                <div class="photographer-details">
+                    <h1 id="photographerName">摄影师</h1>
+                    <p id="photographerSpecialty">专业摄影师</p>
+                </div>
+            </div>
+            
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="number" id="waitingCount">0</div>
+                    <div class="label">等待绘制</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="reviewingCount">0</div>
+                    <div class="label">审核中</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="completedCount">0</div>
+                    <div class="label">已完成</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 内容区 -->
+        <div class="content-area">
+            <!-- 筛选器 -->
+            <div class="section-header">
+                <h2 class="section-title">我的任务</h2>
+                <select id="statusFilter" class="form-control" onchange="filterTasks()" style="width: 200px;">
+                    <option value="">全部任务</option>
+                    <option value="waiting_draw">等待绘制</option>
+                    <option value="pending_review">审核中</option>
+                    <option value="pending_confirm">待客户确认</option>
+                    <option value="confirmed">已完成</option>
+                </select>
+            </div>
+            
+            <!-- 任务列表 -->
+            <div id="tasksContainer"></div>
+            
+            <div class="empty-message" id="emptyMessage" style="display: none; text-align: center; padding: 80px 20px; color: var(--text-tertiary);">
+                <div style="font-size: 64px; margin-bottom: 16px;">📋</div>
+                <div style="font-size: 18px;">暂无任务</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 上传作品模态框 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">上传作品</h2>
+                <button class="modal-close" onclick="closeUploadModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>作品文件 *</label>
+                <div class="image-upload">
+                    <div id="workPreview" class="image-preview" style="display: none; width: 200px; height: 200px;">
+                        <img id="workImage" src="" alt="作品">
+                        <button type="button" class="remove-btn" onclick="removeWork()">&times;</button>
+                    </div>
+                    <label class="upload-btn" id="workUploadBtn" style="width: 200px; height: 200px;">
+                        <input type="file" accept="image/*" onchange="uploadWork(event)" style="display: none;">
+                        +
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>备注说明</label>
+                <textarea id="workNote" class="form-control" rows="4" placeholder="请填写风格说明、特殊处理等"></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUploadModal()">取消</button>
+                <button class="btn btn-primary" onclick="submitWork()">提交审核</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/photographer-dashboard.js"></script>
+</body>
+</html>
+

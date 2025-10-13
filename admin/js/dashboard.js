@@ -3,8 +3,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   // 检查登录状态
   if (!Auth.requireLogin()) return;
+  
+  // 检查权限：摄影师不能访问管理后台
+  Auth.redirectToCorrectDashboard();
 
   const currentUser = Auth.getCurrentUser();
+  
+  if (currentUser.role === 'photographer') {
+    alert('摄影师请使用专用工作台');
+    window.location.href = 'photographer-dashboard.html';
+    return;
+  }
   
   // 显示当前用户信息
   document.getElementById('currentUser').textContent = currentUser.name;

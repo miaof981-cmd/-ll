@@ -4,8 +4,14 @@ let bannerImageData = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!Auth.requireLogin()) return;
-
+  
+  // 检查权限：摄影师不能访问
   const currentUser = Auth.getCurrentUser();
+  if (currentUser.role === 'photographer') {
+    alert('您没有权限访问此页面');
+    window.location.href = 'photographer-dashboard.html';
+    return;
+  }
   document.getElementById('currentUser').textContent = currentUser.name;
   document.getElementById('currentRole').textContent = currentUser.role;
 

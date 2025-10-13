@@ -24,7 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const result = Auth.login(username, password, role);
     
     if (result.success) {
-      window.location.href = 'dashboard.html';
+      // 根据角色跳转到不同页面
+      if (result.user.role === 'photographer') {
+        window.location.href = 'photographer-dashboard.html';
+      } else {
+        window.location.href = 'dashboard.html';
+      }
     } else {
       alert(result.message || '登录失败');
     }
