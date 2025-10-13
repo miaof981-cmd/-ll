@@ -6,11 +6,37 @@ Page({
     studentId: '',
     password: '',
     loginType: 'parent',
-    loading: false
+    loading: false,
+    hasApplication: false, // 是否已有申请
+    applicationId: '' // 申请ID
   },
 
   onLoad() {
     console.log("登录页加载");
+    this.checkApplication();
+  },
+
+  onShow() {
+    // 每次显示时检查是否有申请
+    this.checkApplication();
+  },
+
+  // 检查是否有申请记录
+  checkApplication() {
+    const applications = storage.getApplications();
+    if (applications.length > 0) {
+      // 获取最新的申请
+      const latestApp = applications[applications.length - 1];
+      this.setData({
+        hasApplication: true,
+        applicationId: latestApp.id
+      });
+    } else {
+      this.setData({
+        hasApplication: false,
+        applicationId: ''
+      });
+    }
   },
 
   // 输入学号
@@ -133,5 +159,20 @@ Page({
       showCancel: false,
       confirmText: '知道了'
     });
+  },
+
+  // 跳转到申请入学页面或查看进度
+  goToApply() {
+    if (this.data.hasApplication) {
+      // 如果已有申请，跳转到状态查看页面
+      wx.navigateTo({
+        url: '/pages/apply/status?id=' + this.data.applicationId
+      });
+    } else {
+      // 否则跳转到申请页面
+      wx.navigateTo({
+        url: '/pages/apply/apply'
+      });
+    }
   }
 });

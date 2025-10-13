@@ -1,0 +1,331 @@
+/* pages/apply/preview.wxss - 学籍档案预览样式 */
+
+.preview-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
+  padding-bottom: 140rpx;
+}
+
+/* ==================== 步骤进度条（复用） ==================== */
+.steps-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40rpx 32rpx;
+  background: #ffffff;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  flex: 0 0 auto;
+}
+
+.step-number {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background: linear-gradient(135deg, #1a56db 0%, #3b82f6 100%);
+  color: #ffffff;
+  box-shadow: 0 4rpx 12rpx rgba(26, 86, 219, 0.3);
+}
+
+.step.completed .step-number {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.step-label {
+  font-size: 22rpx;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.step.active .step-label {
+  color: #1a56db;
+  font-weight: 600;
+}
+
+.step-line {
+  flex: 1;
+  height: 4rpx;
+  background: #e2e8f0;
+  margin: 0 8rpx;
+  transition: all 0.3s ease;
+}
+
+.step-line.active {
+  background: linear-gradient(90deg, #1a56db 0%, #3b82f6 100%);
+}
+
+/* ==================== 档案卡片 ==================== */
+.archive-card {
+  margin: 32rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 48rpx 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  border: 4rpx solid #1a56db;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 2rpx solid #e2e8f0;
+}
+
+.school-logo {
+  font-size: 72rpx;
+}
+
+.school-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.school-subtitle {
+  font-size: 20rpx;
+  color: #64748b;
+  letter-spacing: 2rpx;
+  margin-top: 4rpx;
+}
+
+.card-title {
+  text-align: center;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 40rpx;
+  letter-spacing: 4rpx;
+}
+
+/* ==================== 证件照区域 ==================== */
+.photo-section {
+  width: 240rpx;
+  height: 320rpx;
+  margin: 0 auto 40rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.photo-section.missing {
+  border: 3rpx dashed #ef4444;
+  background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.photo-section.missing:active {
+  background: #fecaca;
+  transform: scale(0.98);
+}
+
+.photo-placeholder {
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 64rpx;
+  margin-bottom: 16rpx;
+}
+
+.placeholder-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #ef4444;
+  margin-bottom: 8rpx;
+}
+
+.placeholder-hint {
+  font-size: 22rpx;
+  color: #f87171;
+}
+
+/* ==================== 信息区域 ==================== */
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin: 32rpx 0 16rpx;
+  padding-left: 16rpx;
+  border-left: 6rpx solid #1a56db;
+}
+
+.info-section {
+  background: #f8fafc;
+  border-radius: 12rpx;
+  padding: 24rpx;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #e2e8f0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #64748b;
+}
+
+.info-value {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* ==================== 生活照片 ==================== */
+.life-photo {
+  width: 100%;
+  height: 400rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-top: 16rpx;
+}
+
+.life-photo-img {
+  width: 100%;
+  height: 100%;
+}
+
+/* ==================== 期许内容 ==================== */
+.expectations-content {
+  background: #f8fafc;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #475569;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+/* ==================== 档案底部 ==================== */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 48rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx solid #e2e8f0;
+}
+
+.footer-text {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.footer-seal {
+  font-size: 24rpx;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* ==================== 提示框 ==================== */
+.tip-box {
+  margin: 32rpx;
+  padding: 24rpx;
+  background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+  border-radius: 16rpx;
+  border-left: 6rpx solid #f59e0b;
+  display: flex;
+  gap: 16rpx;
+}
+
+.tip-icon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.tip-content {
+  flex: 1;
+}
+
+.tip-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8rpx;
+}
+
+.tip-text {
+  font-size: 24rpx;
+  color: #78350f;
+  line-height: 1.6;
+}
+
+/* ==================== 底部按钮 ==================== */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 32rpx;
+  background: #ffffff;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 16rpx;
+  z-index: 10;
+}
+
+.btn-secondary {
+  flex: 1;
+  height: 88rpx;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 28rpx;
+  font-weight: 600;
+  border-radius: 16rpx;
+  border: 2rpx solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:active {
+  background: #e2e8f0;
+}
+
+.btn-primary {
+  flex: 2;
+  height: 88rpx;
+  background: linear-gradient(135deg, #1a56db 0%, #3b82f6 100%);
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
+  border-radius: 16rpx;
+  border: none;
+  box-shadow: 0 8rpx 20rpx rgba(26, 86, 219, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:active {
+  box-shadow: 0 4rpx 12rpx rgba(26, 86, 219, 0.4);
+  transform: translateY(2rpx);
+}
+

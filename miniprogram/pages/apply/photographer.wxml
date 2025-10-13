@@ -1,0 +1,126 @@
+<!--pages/apply/photographer.wxml - 选择摄影师-->
+<view class="photographer-container">
+  
+  <!-- 步骤进度条 -->
+  <view class="steps-bar">
+    <view class="step completed">
+      <view class="step-number">✓</view>
+      <view class="step-label">填写信息</view>
+    </view>
+    <view class="step-line active"></view>
+    
+    <view class="step completed">
+      <view class="step-number">✓</view>
+      <view class="step-label">档案预览</view>
+    </view>
+    <view class="step-line active"></view>
+    
+    <view class="step active">
+      <view class="step-number">3</view>
+      <view class="step-label">选择摄影师</view>
+    </view>
+    <view class="step-line"></view>
+    
+    <view class="step">
+      <view class="step-number">4</view>
+      <view class="step-label">完成支付</view>
+    </view>
+  </view>
+
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <view class="header-icon">📸</view>
+    <view class="header-title">选择专业摄影师</view>
+    <view class="header-subtitle">为您的孩子拍摄精美证件照</view>
+  </view>
+
+  <!-- 摄影师列表 -->
+  <view class="photographer-list">
+    <view 
+      wx:for="{{photographers}}" 
+      wx:key="id" 
+      class="photographer-card {{selectedId === item.id ? 'selected' : ''}}"
+      bindtap="selectPhotographer"
+      data-id="{{item.id}}"
+    >
+      <!-- 选中标记 -->
+      <view wx:if="{{selectedId === item.id}}" class="selected-badge">
+        <text>✓ 已选择</text>
+      </view>
+
+      <!-- 摄影师头像 -->
+      <view class="photographer-avatar">
+        <image class="avatar-img" src="{{item.avatar}}" mode="aspectFill"/>
+        <view class="avatar-badge">{{item.level}}</view>
+      </view>
+
+      <!-- 摄影师信息 -->
+      <view class="photographer-info">
+        <view class="photographer-name">{{item.name}}</view>
+        <view class="photographer-title">{{item.title}}</view>
+        <view class="photographer-stats">
+          <view class="stat-item">
+            <text class="stat-icon">⭐</text>
+            <text class="stat-text">{{item.rating}}</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-icon">📷</text>
+            <text class="stat-text">{{item.works}}作品</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-icon">👥</text>
+            <text class="stat-text">{{item.orders}}单</text>
+          </view>
+        </view>
+        <view class="photographer-desc">{{item.description}}</view>
+      </view>
+
+      <!-- 作品展示 -->
+      <view class="works-preview">
+        <view class="works-title">作品参考</view>
+        <scroll-view class="works-scroll" scroll-x>
+          <view class="works-list">
+            <image 
+              wx:for="{{item.samples}}" 
+              wx:key="index"
+              wx:for-item="sample"
+              class="work-image" 
+              src="{{sample}}" 
+              mode="aspectFill"
+              bindtap="previewWork"
+              data-urls="{{item.samples}}"
+              data-current="{{sample}}"
+            />
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- 价格 -->
+      <view class="photographer-price">
+        <view class="price-label">拍摄费用</view>
+        <view class="price-value">
+          <text class="price-symbol">¥</text>
+          <text class="price-amount">{{item.price}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{photographers.length === 0}}" class="empty-state">
+    <view class="empty-icon">📷</view>
+    <view class="empty-text">暂无可选摄影师</view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <button class="btn-secondary" bindtap="goBack">
+      ← 返回上一步
+    </button>
+    <button class="btn-primary" bindtap="confirmSelection" disabled="{{!selectedId}}">
+      确认选择并支付 →
+    </button>
+  </view>
+
+</view>
+

@@ -274,6 +274,122 @@ function deleteRecords(studentId) {
   }
 }
 
+// ==================== 入学申请管理 ====================
+
+// 获取所有申请
+function getApplications() {
+  try {
+    return wx.getStorageSync('applications') || [];
+  } catch (e) {
+    console.error('获取申请列表失败:', e);
+    return [];
+  }
+}
+
+// 保存单个申请
+function saveApplication(application) {
+  try {
+    const applications = getApplications();
+    applications.push(application);
+    wx.setStorageSync('applications', applications);
+    return true;
+  } catch (e) {
+    console.error('保存申请失败:', e);
+    return false;
+  }
+}
+
+// 更新申请
+function updateApplication(id, updates) {
+  try {
+    const applications = getApplications();
+    const index = applications.findIndex(app => app.id === id);
+    if (index !== -1) {
+      applications[index] = Object.assign({}, applications[index], updates);
+      wx.setStorageSync('applications', applications);
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('更新申请失败:', e);
+    return false;
+  }
+}
+
+// 删除申请
+function deleteApplication(id) {
+  try {
+    const applications = getApplications();
+    const filtered = applications.filter(function(app) { return app.id !== id; });
+    wx.setStorageSync('applications', filtered);
+    return true;
+  } catch (e) {
+    console.error('删除申请失败:', e);
+    return false;
+  }
+}
+
+// 根据ID获取申请
+function getApplicationById(id) {
+  const applications = getApplications();
+  return applications.find(function(app) { return app.id === id; });
+}
+
+// ==================== 摄影师管理 ====================
+
+// 获取所有摄影师
+function getPhotographers() {
+  try {
+    return wx.getStorageSync('photographers') || [];
+  } catch (e) {
+    console.error('获取摄影师列表失败:', e);
+    return [];
+  }
+}
+
+// 保存摄影师
+function savePhotographer(photographer) {
+  try {
+    const photographers = getPhotographers();
+    photographers.push(photographer);
+    wx.setStorageSync('photographers', photographers);
+    return true;
+  } catch (e) {
+    console.error('保存摄影师失败:', e);
+    return false;
+  }
+}
+
+// 更新摄影师
+function updatePhotographer(id, updates) {
+  try {
+    const photographers = getPhotographers();
+    const index = photographers.findIndex(function(p) { return p.id === id; });
+    if (index !== -1) {
+      photographers[index] = Object.assign({}, photographers[index], updates);
+      wx.setStorageSync('photographers', photographers);
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('更新摄影师失败:', e);
+    return false;
+  }
+}
+
+// 删除摄影师
+function deletePhotographer(id) {
+  try {
+    const photographers = getPhotographers();
+    const filtered = photographers.filter(function(p) { return p.id !== id; });
+    wx.setStorageSync('photographers', filtered);
+    return true;
+  } catch (e) {
+    console.error('删除摄影师失败:', e);
+    return false;
+  }
+}
+
 // ==================== 统计数据 ====================
 
 // 获取统计数据
@@ -281,7 +397,9 @@ function getStats() {
   return {
     totalStudents: getStudents().length,
     totalAnnouncements: getAnnouncements().length,
-    totalBanners: getBanners().length
+    totalBanners: getBanners().length,
+    totalApplications: getApplications().length,
+    totalPhotographers: getPhotographers().length
   };
 }
 
@@ -316,5 +434,18 @@ module.exports = {
   deleteRecords,
   
   // 统计
-  getStats
+  getStats,
+  
+  // 入学申请
+  getApplications,
+  saveApplication,
+  updateApplication,
+  deleteApplication,
+  getApplicationById,
+  
+  // 摄影师
+  getPhotographers,
+  savePhotographer,
+  updatePhotographer,
+  deletePhotographer
 };

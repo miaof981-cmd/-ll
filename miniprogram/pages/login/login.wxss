@@ -217,6 +217,27 @@
   box-shadow: var(--shadow-xl);
 }
 
+/* ==================== 申请入学链接 ==================== */
+.register-link {
+  text-align: center;
+  margin-top: 32rpx;
+  padding: 24rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+.link-text {
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-left: 8rpx;
+  transition: all 0.3s ease;
+}
+
+.register-link:active .link-text {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
 .btn-login::after {
   border: none;
 }

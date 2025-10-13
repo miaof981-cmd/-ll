@@ -1,0 +1,5 @@
+/* pages/admin/applications/applications.wxss */
+.container { padding: 40rpx; }
+.page-title { font-size: 36rpx; font-weight: 700; margin-bottom: 20rpx; }
+.empty-hint { color: #999; }
+

@@ -1,0 +1,91 @@
+<!--pages/apply/status.wxml - 申请状态查看-->
+<view class="status-container">
+  
+  <!-- 状态头部 -->
+  <view class="status-header {{application.status === 'photographing' ? 'status-processing' : 'status-completed'}}">
+    <view class="status-icon">
+      {{application.status === 'photographing' ? '📸' : '✅'}}
+    </view>
+    <view class="status-title">
+      {{application.status === 'photographing' ? '摄影师拍摄中' : '学籍档案已完成'}}
+    </view>
+    <view class="status-subtitle">
+      {{application.status === 'photographing' ? '预计3个工作日内完成' : '您的孩子已成功入学'}}
+    </view>
+  </view>
+
+  <!-- 申请信息 -->
+  <view class="info-section">
+    <view class="section-title">申请信息</view>
+    <view class="info-card">
+      <view class="info-row">
+        <view class="info-label">学生姓名</view>
+        <view class="info-value">{{application.studentName}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">学号</view>
+        <view class="info-value">{{application.studentId}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">家长姓名</view>
+        <view class="info-value">{{application.parentName}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">申请时间</view>
+        <view class="info-value">{{application.paymentTime}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 摄影师信息 -->
+  <view class="info-section">
+    <view class="section-title">摄影师信息</view>
+    <view class="photographer-card">
+      <image class="photographer-avatar" src="{{application.photographerAvatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+      <view class="photographer-info">
+        <view class="photographer-name">{{application.photographerName}}</view>
+        <view class="photographer-status">
+          {{application.status === 'photographing' ? '正在为您拍摄中...' : '已完成拍摄'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 进度时间线 -->
+  <view class="timeline-section">
+    <view class="section-title">处理进度</view>
+    <view class="timeline">
+      <view class="timeline-item completed">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <view class="timeline-title">提交申请</view>
+          <view class="timeline-time">{{application.paymentTime}}</view>
+        </view>
+      </view>
+      <view class="timeline-item {{application.status !== 'photographing' ? 'completed' : 'active'}}">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <view class="timeline-title">摄影师拍摄</view>
+          <view class="timeline-time">{{application.status === 'photographing' ? '进行中...' : '已完成'}}</view>
+        </view>
+      </view>
+      <view class="timeline-item {{application.status !== 'photographing' ? 'completed' : ''}}">
+        <view class="timeline-dot"></view>
+        <view class="timeline-content">
+          <view class="timeline-title">档案完成</view>
+          <view class="timeline-time">{{application.status !== 'photographing' ? '已完成' : '等待中...'}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <button class="btn-secondary" bindtap="goHome">返回首页</button>
+    <button wx:if="{{application.status !== 'photographing'}}" class="btn-primary" bindtap="viewArchive">
+      查看档案
+    </button>
+  </view>
+
+</view>
+

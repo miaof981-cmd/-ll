@@ -1,0 +1,132 @@
+<!--pages/apply/payment.wxml - 支付页面-->
+<view class="payment-container">
+  
+  <!-- 步骤进度条 -->
+  <view class="steps-bar">
+    <view class="step completed">
+      <view class="step-number">✓</view>
+      <view class="step-label">填写信息</view>
+    </view>
+    <view class="step-line active"></view>
+    
+    <view class="step completed">
+      <view class="step-number">✓</view>
+      <view class="step-label">档案预览</view>
+    </view>
+    <view class="step-line active"></view>
+    
+    <view class="step completed">
+      <view class="step-number">✓</view>
+      <view class="step-label">选择摄影师</view>
+    </view>
+    <view class="step-line active"></view>
+    
+    <view class="step active">
+      <view class="step-number">4</view>
+      <view class="step-label">完成支付</view>
+    </view>
+  </view>
+
+  <!-- 订单信息 -->
+  <view class="order-section">
+    <view class="section-title">
+      <text class="title-icon">📋</text>
+      <text>订单信息</text>
+    </view>
+
+    <view class="order-card">
+      <!-- 摄影师信息 -->
+      <view class="order-item">
+        <view class="item-label">摄影师</view>
+        <view class="item-value">
+          <image class="photographer-mini-avatar" src="{{photographer.avatar}}" mode="aspectFill"/>
+          <text>{{photographer.name}}</text>
+        </view>
+      </view>
+
+      <view class="order-item">
+        <view class="item-label">服务内容</view>
+        <view class="item-value">证件照拍摄</view>
+      </view>
+
+      <view class="order-item">
+        <view class="item-label">学生姓名</view>
+        <view class="item-value">{{formData.childName}}</view>
+      </view>
+
+      <view class="order-item">
+        <view class="item-label">学号</view>
+        <view class="item-value">{{studentId}}</view>
+      </view>
+
+      <view class="order-item highlight">
+        <view class="item-label">订单金额</view>
+        <view class="item-value price">
+          <text class="price-symbol">¥</text>
+          <text class="price-amount">{{photographer.price}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支付方式 -->
+  <view class="payment-section">
+    <view class="section-title">
+      <text class="title-icon">💳</text>
+      <text>支付方式</text>
+    </view>
+
+    <view class="payment-methods">
+      <view 
+        class="payment-method {{paymentMethod === 'wechat' ? 'selected' : ''}}"
+        bindtap="selectPaymentMethod"
+        data-method="wechat"
+      >
+        <view class="method-icon">💚</view>
+        <view class="method-info">
+          <view class="method-name">微信支付</view>
+          <view class="method-desc">推荐使用</view>
+        </view>
+        <view class="method-check">{{paymentMethod === 'wechat' ? '✓' : ''}}</view>
+      </view>
+
+      <view 
+        class="payment-method {{paymentMethod === 'alipay' ? 'selected' : ''}}"
+        bindtap="selectPaymentMethod"
+        data-method="alipay"
+      >
+        <view class="method-icon">💙</view>
+        <view class="method-info">
+          <view class="method-name">支付宝</view>
+          <view class="method-desc">安全便捷</view>
+        </view>
+        <view class="method-check">{{paymentMethod === 'alipay' ? '✓' : ''}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="tip-box">
+    <view class="tip-icon">💡</view>
+    <view class="tip-content">
+      <view class="tip-title">温馨提示</view>
+      <view class="tip-text">• 支付成功后，订单将分配给所选摄影师</view>
+      <view class="tip-text">• 摄影师将在3个工作日内完成拍摄</view>
+      <view class="tip-text">• 完成后您将收到小程序通知</view>
+    </view>
+  </view>
+
+  <!-- 底部支付按钮 -->
+  <view class="bottom-actions">
+    <view class="total-price">
+      <text class="total-label">合计：</text>
+      <text class="total-symbol">¥</text>
+      <text class="total-amount">{{photographer.price}}</text>
+    </view>
+    <button class="btn-pay" bindtap="submitPayment">
+      立即支付
+    </button>
+  </view>
+
+</view>
+

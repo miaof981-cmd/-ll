@@ -1,0 +1,127 @@
+<!--pages/apply/preview.wxml - 学籍档案预览-->
+<view class="preview-container">
+  
+  <!-- 步骤进度条 -->
+  <view class="steps-bar">
+    <view class="step completed">
+      <view class="step-number">✓</view>
+      <view class="step-label">填写信息</view>
+    </view>
+    <view class="step-line active"></view>
+    
+    <view class="step active">
+      <view class="step-number">2</view>
+      <view class="step-label">档案预览</view>
+    </view>
+    <view class="step-line"></view>
+    
+    <view class="step">
+      <view class="step-number">3</view>
+      <view class="step-label">选择摄影师</view>
+    </view>
+    <view class="step-line"></view>
+    
+    <view class="step">
+      <view class="step-number">4</view>
+      <view class="step-label">完成支付</view>
+    </view>
+  </view>
+
+  <!-- 档案卡片 -->
+  <view class="archive-card">
+    <view class="card-header">
+      <view class="school-logo">🎓</view>
+      <view class="school-info">
+        <view class="school-name">次元学校</view>
+        <view class="school-subtitle">CIYUAN ACADEMY</view>
+      </view>
+    </view>
+
+    <view class="card-title">学籍档案</view>
+
+    <!-- 证件照区域 - 缺失提示 -->
+    <view class="photo-section missing" bindtap="goToPhotographer">
+      <view class="photo-placeholder">
+        <view class="placeholder-icon">📷</view>
+        <view class="placeholder-text">缺少证件照</view>
+        <view class="placeholder-hint">点击选择摄影师拍摄</view>
+      </view>
+    </view>
+
+    <!-- 学生信息 -->
+    <view class="info-section">
+      <view class="info-row">
+        <view class="info-label">学号</view>
+        <view class="info-value">{{studentId}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">姓名</view>
+        <view class="info-value">{{formData.childName}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">性别</view>
+        <view class="info-value">{{formData.childGender}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">年龄</view>
+        <view class="info-value">{{formData.childAge || '未填写'}}</view>
+      </view>
+    </view>
+
+    <!-- 家长信息 -->
+    <view class="section-title">家长信息</view>
+    <view class="info-section">
+      <view class="info-row">
+        <view class="info-label">家长姓名</view>
+        <view class="info-value">{{formData.parentName}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">联系电话</view>
+        <view class="info-value">{{formData.parentPhone || '未填写'}}</view>
+      </view>
+      <view class="info-row">
+        <view class="info-label">联系微信</view>
+        <view class="info-value">{{formData.parentWechat || '未填写'}}</view>
+      </view>
+    </view>
+
+    <!-- 生活照片 -->
+    <view class="section-title">生活照片</view>
+    <view class="life-photo">
+      <image class="life-photo-img" src="{{formData.childPhoto}}" mode="aspectFill" bindtap="previewLifePhoto"/>
+    </view>
+
+    <!-- 家长期许 -->
+    <view class="section-title">家长期许</view>
+    <view class="expectations-content">
+      {{formData.expectations}}
+    </view>
+
+    <!-- 档案底部信息 -->
+    <view class="card-footer">
+      <view class="footer-text">建档日期：{{createDate}}</view>
+      <view class="footer-seal">🏫 次元学校印</view>
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="tip-box">
+    <view class="tip-icon">💡</view>
+    <view class="tip-content">
+      <view class="tip-title">温馨提示</view>
+      <view class="tip-text">您的学籍档案还缺少证件照，请点击上方证件照区域选择摄影师为孩子拍摄专业证件照。</view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <button class="btn-secondary" bindtap="goBack">
+      ← 返回修改
+    </button>
+    <button class="btn-primary" bindtap="goToPhotographer">
+      选择摄影师 →
+    </button>
+  </view>
+
+</view>
+

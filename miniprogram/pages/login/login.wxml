@@ -77,6 +77,15 @@
       <button class="btn-login" bindtap="handleLogin" loading="{{loading}}">
         {{loading ? '登录中...' : '登录'}}
       </button>
+
+      <!-- 申请入学入口 -->
+      <view class="register-link" bindtap="goToApply">
+        <text wx:if="{{!hasApplication}}">还没有账号？</text>
+        <text wx:if="{{hasApplication}}">已提交申请</text>
+        <text class="link-text">
+          {{hasApplication ? '点击查看进度 →' : '点此申请入学 →'}}
+        </text>
+      </view>
     </view>
 
     <!-- 提示信息 -->

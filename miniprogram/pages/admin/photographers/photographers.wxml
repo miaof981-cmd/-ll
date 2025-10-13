@@ -1,0 +1,6 @@
+<!--pages/admin/photographers/photographers.wxml-->
+<view class="container">
+  <view class="page-title">摄影师管理（开发中）</view>
+  <view class="empty-hint">此功能正在开发中...</view>
+</view>
+

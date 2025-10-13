@@ -1,0 +1,174 @@
+<!--pages/apply/apply.wxml - 入学申请表单-->
+<view class="apply-container">
+  
+  <!-- 步骤进度条 -->
+  <view class="steps-bar">
+    <view class="step {{currentStep >= 1 ? 'active' : ''}} {{currentStep > 1 ? 'completed' : ''}}">
+      <view class="step-number">1</view>
+      <view class="step-label">填写信息</view>
+    </view>
+    <view class="step-line {{currentStep > 1 ? 'active' : ''}}"></view>
+    
+    <view class="step {{currentStep >= 2 ? 'active' : ''}} {{currentStep > 2 ? 'completed' : ''}}">
+      <view class="step-number">2</view>
+      <view class="step-label">档案预览</view>
+    </view>
+    <view class="step-line {{currentStep > 2 ? 'active' : ''}}"></view>
+    
+    <view class="step {{currentStep >= 3 ? 'active' : ''}} {{currentStep > 3 ? 'completed' : ''}}">
+      <view class="step-number">3</view>
+      <view class="step-label">选择摄影师</view>
+    </view>
+    <view class="step-line {{currentStep > 3 ? 'active' : ''}}"></view>
+    
+    <view class="step {{currentStep >= 4 ? 'active' : ''}} {{currentStep > 4 ? 'completed' : ''}}">
+      <view class="step-number">4</view>
+      <view class="step-label">完成支付</view>
+    </view>
+  </view>
+
+  <!-- 欢迎标题 -->
+  <view class="welcome-section">
+    <view class="welcome-icon">🎓</view>
+    <view class="welcome-title">为您的孩子选择次元学校</view>
+    <view class="welcome-subtitle">这是很明智的选择</view>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-section">
+    
+    <!-- 孩子信息 -->
+    <view class="form-group-title">
+      <view class="title-icon">🧒</view>
+      <text>孩子信息</text>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">孩子姓名</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入孩子的姓名" 
+        value="{{formData.childName}}"
+        bindinput="onInputChange"
+        data-field="childName"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">孩子性别</view>
+      <radio-group class="radio-group" bindchange="onGenderChange">
+        <label class="radio-item">
+          <radio value="男" checked="{{formData.childGender === '男'}}"/>
+          <text>男</text>
+        </label>
+        <label class="radio-item">
+          <radio value="女" checked="{{formData.childGender === '女'}}"/>
+          <text>女</text>
+        </label>
+      </radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">孩子年龄</view>
+      <input 
+        class="form-input" 
+        type="number"
+        placeholder="例：10" 
+        value="{{formData.childAge}}"
+        bindinput="onInputChange"
+        data-field="childAge"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">生活照片</view>
+      <view class="upload-tip">上传孩子的生活照，限1张</view>
+      <view class="photo-upload">
+        <view wx:if="{{!formData.childPhoto}}" class="upload-btn" bindtap="uploadChildPhoto">
+          <view class="upload-icon">📷</view>
+          <view class="upload-text">点击上传</view>
+        </view>
+        <view wx:else class="photo-preview">
+          <image class="preview-image" src="{{formData.childPhoto}}" mode="aspectFill"/>
+          <view class="photo-actions">
+            <view class="action-btn" bindtap="previewPhoto" data-url="{{formData.childPhoto}}">
+              <text>👁️ 预览</text>
+            </view>
+            <view class="action-btn delete" bindtap="deleteChildPhoto">
+              <text>🗑️ 删除</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 家长信息 -->
+    <view class="form-group-title">
+      <view class="title-icon">👨‍👩‍👧</view>
+      <text>家长信息</text>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">家长姓名</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入家长姓名" 
+        value="{{formData.parentName}}"
+        bindinput="onInputChange"
+        data-field="parentName"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">联系电话</view>
+      <input 
+        class="form-input" 
+        type="number"
+        placeholder="请输入手机号" 
+        value="{{formData.parentPhone}}"
+        bindinput="onInputChange"
+        data-field="parentPhone"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label required">联系微信</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入微信号" 
+        value="{{formData.parentWechat}}"
+        bindinput="onInputChange"
+        data-field="parentWechat"
+      />
+    </view>
+
+    <!-- 对孩子的期许 -->
+    <view class="form-group-title">
+      <view class="title-icon">❤️</view>
+      <text>对孩子的期许</text>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">期许内容</view>
+      <view class="char-count">{{formData.expectations.length}}/500</view>
+      <textarea 
+        class="form-textarea" 
+        placeholder="请写下您对孩子的期许" 
+        value="{{formData.expectations}}"
+        bindinput="onInputChange"
+        data-field="expectations"
+        maxlength="500"
+      />
+    </view>
+
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <button class="btn-primary" bindtap="submitForm">
+      下一步：预览学籍档案 →
+    </button>
+  </view>
+
+</view>
+

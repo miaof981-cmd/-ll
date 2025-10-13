@@ -8,7 +8,14 @@
     "pages/admin/announcements/announcements",
     "pages/admin/students/students",
     "pages/admin/students/edit",
-    "pages/announcement/detail"
+    "pages/announcement/detail",
+    "pages/apply/apply",
+    "pages/apply/preview",
+    "pages/apply/photographer",
+    "pages/apply/payment",
+    "pages/apply/status",
+    "pages/admin/applications/applications",
+    "pages/admin/photographers/photographers"
   ],
   "window": {
     "backgroundTextStyle": "light",
