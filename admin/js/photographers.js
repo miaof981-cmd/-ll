@@ -124,11 +124,18 @@ function showAddPhotographerModal() {
 }
 
 function editPhotographer(id) {
-  editingPhotographer = Storage.getPhotographers().find(p => p.id === id);
+  const allPhotographers = Storage.getPhotographers();
+  console.log('尝试编辑摄影师 ID:', id);
+  console.log('所有摄影师:', allPhotographers);
+  
+  editingPhotographer = allPhotographers.find(p => p.id === id);
   if (!editingPhotographer) {
+    console.error('未找到摄影师，ID:', id);
     Utils.showToast('摄影师不存在', 'error');
     return;
   }
+  
+  console.log('找到摄影师:', editingPhotographer);
   
   avatarData = editingPhotographer.avatar || null;
   samplesData = editingPhotographer.samples || [];
@@ -253,6 +260,9 @@ function savePhotographer() {
   };
   
   const savedPhotographer = Storage.savePhotographer(photographerData);
+  
+  console.log('保存的摄影师数据:', savedPhotographer);
+  console.log('当前所有摄影师:', Storage.getPhotographers());
   
   if (savedPhotographer) {
     Utils.showToast(

@@ -41,9 +41,15 @@ const Auth = {
     // 检查摄影师账号
     if (role === 'photographer') {
       const photographers = Storage.getPhotographers();
+      console.log('尝试登录摄影师账号');
+      console.log('输入用户名:', username);
+      console.log('所有摄影师:', photographers);
+      
       const photographer = photographers.find(p => 
         p.username === username && p.password === password
       );
+      
+      console.log('找到的摄影师:', photographer);
       
       if (photographer) {
         const user = {

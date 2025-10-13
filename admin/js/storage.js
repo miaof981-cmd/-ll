@@ -253,10 +253,16 @@ const Storage = {
       const index = photographers.findIndex(p => p.id === photographer.id);
       if (index >= 0) {
         photographers[index] = { ...photographers[index], ...photographer };
+        photographer = photographers[index]; // 更新返回对象
+      } else {
+        // ID不存在，作为新摄影师添加
+        photographer.createdAt = new Date().toISOString();
+        photographers.push(photographer);
       }
     }
     
     this.set('photographers', photographers);
+    console.log('保存摄影师成功:', photographer);
     return photographer;
   },
 
