@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轮播图管理 - 次元学校管理后台</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .banners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .banner-card {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s;
+        }
+        
+        .banner-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        .banner-image {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            background: var(--bg-secondary);
+        }
+        
+        .banner-info {
+            padding: 16px;
+        }
+        
+        .banner-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>次元学校</h2>
+                <p class="user-info">
+                    <span id="currentUser">管理员</span>
+                    <span class="user-role" id="currentRole">admin</span>
+                </p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="../dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>数据概览</span>
+                </a>
+                <a href="students.html" class="nav-item">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span>学生管理</span>
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>申请订单</span>
+                </a>
+                <a href="photographers.html" class="nav-item">
+                    <span class="nav-icon">📷</span>
+                    <span>摄影师管理</span>
+                </a>
+                <a href="announcements.html" class="nav-item">
+                    <span class="nav-icon">📢</span>
+                    <span>公告管理</span>
+                </a>
+                <a href="banners.html" class="nav-item active">
+                    <span class="nav-icon">🖼️</span>
+                    <span>轮播图管理</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>轮播图管理</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showAddBannerModal()">+ 添加轮播图</button>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <div class="banners-grid" id="bannersGrid">
+                    <p class="empty-message" style="grid-column: 1/-1;">暂无轮播图</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 添加轮播图模态框 -->
+    <div class="modal" id="bannerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">添加轮播图</h2>
+                <button class="modal-close" onclick="closeBannerModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>轮播图图片 *</label>
+                <div class="image-upload">
+                    <div id="bannerPreview" class="image-preview" style="display: none; width: 100%; height: 200px;">
+                        <img id="bannerImage" src="" alt="轮播图" style="width: 100%; height: 100%; object-fit: contain;">
+                        <button type="button" class="remove-btn" onclick="removeBanner()">&times;</button>
+                    </div>
+                    <label class="upload-btn" id="bannerUploadBtn" style="width: 100%; height: 200px;">
+                        <input type="file" accept="image/*" onchange="uploadBanner(event)" style="display: none;">
+                        +
+                    </label>
+                </div>
+                <small style="color: var(--text-tertiary);">建议尺寸: 750x300-400，图片将完整显示不裁剪</small>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBannerModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveBanner()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/banners.js"></script>
+</body>
+</html>
+

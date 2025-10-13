@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公告管理 - 次元学校管理后台</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>次元学校</h2>
+                <p class="user-info">
+                    <span id="currentUser">管理员</span>
+                    <span class="user-role" id="currentRole">admin</span>
+                </p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="../dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>数据概览</span>
+                </a>
+                <a href="students.html" class="nav-item">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span>学生管理</span>
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>申请订单</span>
+                </a>
+                <a href="photographers.html" class="nav-item">
+                    <span class="nav-icon">📷</span>
+                    <span>摄影师管理</span>
+                </a>
+                <a href="announcements.html" class="nav-item active">
+                    <span class="nav-icon">📢</span>
+                    <span>公告管理</span>
+                </a>
+                <a href="banners.html" class="nav-item">
+                    <span class="nav-icon">🖼️</span>
+                    <span>轮播图管理</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>公告管理</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showAddAnnouncementModal()">+ 发布公告</button>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <div class="section-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">封面</th>
+                                    <th>标题</th>
+                                    <th>内容摘要</th>
+                                    <th style="width: 150px;">发布时间</th>
+                                    <th style="width: 180px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="announcementsTableBody">
+                                <tr>
+                                    <td colspan="5" class="empty-message">暂无公告</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 添加/编辑公告模态框 -->
+    <div class="modal" id="announcementModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">发布公告</h2>
+                <button class="modal-close" onclick="closeAnnouncementModal()">&times;</button>
+            </div>
+            
+            <form id="announcementForm">
+                <input type="hidden" id="announcementId">
+                
+                <div class="form-group">
+                    <label for="title">公告标题 *</label>
+                    <input type="text" id="title" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">公告内容 *</label>
+                    <textarea id="content" class="form-control" rows="6" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>封面图片</label>
+                    <div class="image-upload">
+                        <div id="coverPreview" class="image-preview" style="display: none; width: 200px; height: 150px;">
+                            <img id="coverImage" src="" alt="封面" style="width: 100%; height: 100%; object-fit: cover;">
+                            <button type="button" class="remove-btn" onclick="removeCover()">&times;</button>
+                        </div>
+                        <label class="upload-btn" id="coverUploadBtn" style="width: 200px; height: 150px;">
+                            <input type="file" accept="image/*" onchange="uploadCover(event)" style="display: none;">
+                            +
+                        </label>
+                    </div>
+                    <small style="color: var(--text-tertiary);">建议尺寸: 750x400，图片将完整显示不裁剪</small>
+                </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAnnouncementModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveAnnouncement()">发布</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/announcements.js"></script>
+</body>
+</html>
+

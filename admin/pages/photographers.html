@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摄影师管理 - 次元学校管理后台</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .photographers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .photographer-card {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s;
+        }
+        
+        .photographer-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--box-shadow-hover);
+        }
+        
+        .photographer-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .photographer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .photographer-info h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        
+        .photographer-info p {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .photographer-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-item .number {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .stat-item .label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        
+        .photographer-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .samples-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .sample-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>次元学校</h2>
+                <p class="user-info">
+                    <span id="currentUser">管理员</span>
+                    <span class="user-role" id="currentRole">admin</span>
+                </p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="../dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>数据概览</span>
+                </a>
+                <a href="students.html" class="nav-item">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span>学生管理</span>
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>申请订单</span>
+                </a>
+                <a href="photographers.html" class="nav-item active">
+                    <span class="nav-icon">📷</span>
+                    <span>摄影师管理</span>
+                </a>
+                <a href="announcements.html" class="nav-item">
+                    <span class="nav-icon">📢</span>
+                    <span>公告管理</span>
+                </a>
+                <a href="banners.html" class="nav-item">
+                    <span class="nav-icon">🖼️</span>
+                    <span>轮播图管理</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>摄影师管理</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showAddPhotographerModal()">+ 添加摄影师</button>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <div class="photographers-grid" id="photographersGrid">
+                    <p class="empty-message">暂无摄影师</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 添加/编辑摄影师模态框 -->
+    <div class="modal" id="photographerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">添加摄影师</h2>
+                <button class="modal-close" onclick="closePhotographerModal()">&times;</button>
+            </div>
+            
+            <form id="photographerForm">
+                <input type="hidden" id="photographerId">
+                
+                <div class="form-group">
+                    <label for="photographerName">摄影师姓名 *</label>
+                    <input type="text" id="photographerName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="specialty">专长风格</label>
+                    <input type="text" id="specialty" class="form-control" placeholder="如: 星空风格、清新自然等">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">简介</label>
+                    <textarea id="description" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">登录用户名</label>
+                    <input type="text" id="username" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="photographerPassword">登录密码</label>
+                    <input type="text" id="photographerPassword" class="form-control" value="photo123">
+                </div>
+                
+                <div class="form-group">
+                    <label>头像</label>
+                    <div class="image-upload">
+                        <div id="avatarPreview" class="image-preview" style="display: none;">
+                            <img id="avatarImage" src="" alt="头像">
+                            <button type="button" class="remove-btn" onclick="removeAvatar()">&times;</button>
+                        </div>
+                        <label class="upload-btn" id="avatarUploadBtn">
+                            <input type="file" accept="image/*" onchange="uploadAvatar(event)" style="display: none;">
+                            +
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>作品样例</label>
+                    <div class="image-upload" id="samplesContainer">
+                        <label class="upload-btn">
+                            <input type="file" accept="image/*" multiple onchange="uploadSamples(event)" style="display: none;">
+                            +
+                        </label>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePhotographerModal()">取消</button>
+                <button class="btn btn-primary" onclick="savePhotographer()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/photographers.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理 - 次元学校管理后台</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>次元学校</h2>
+                <p class="user-info">
+                    <span id="currentUser">管理员</span>
+                    <span class="user-role" id="currentRole">admin</span>
+                </p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="../dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>数据概览</span>
+                </a>
+                <a href="students.html" class="nav-item active">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span>学生管理</span>
+                </a>
+                <a href="applications.html" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>申请订单</span>
+                </a>
+                <a href="photographers.html" class="nav-item">
+                    <span class="nav-icon">📷</span>
+                    <span>摄影师管理</span>
+                </a>
+                <a href="announcements.html" class="nav-item">
+                    <span class="nav-icon">📢</span>
+                    <span>公告管理</span>
+                </a>
+                <a href="banners.html" class="nav-item">
+                    <span class="nav-icon">🖼️</span>
+                    <span>轮播图管理</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>学生管理</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showAddStudentModal()">+ 添加学生</button>
+                    <button class="btn btn-secondary" onclick="exportStudents()">导出数据</button>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <!-- 搜索栏 -->
+                <div class="search-bar">
+                    <input type="text" id="searchInput" class="form-control" placeholder="搜索学号、姓名、家长姓名...">
+                    <button class="btn btn-primary" onclick="searchStudents()">搜索</button>
+                </div>
+                
+                <!-- 学生列表 -->
+                <div class="section-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>学号</th>
+                                    <th>姓名</th>
+                                    <th>性别</th>
+                                    <th>年龄</th>
+                                    <th>家长姓名</th>
+                                    <th>联系电话</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <tr>
+                                    <td colspan="8" class="empty-message">暂无学生数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 分页 -->
+                    <div class="pagination" id="pagination"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 添加/编辑学生模态框 -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">添加学生</h2>
+                <button class="modal-close" onclick="closeStudentModal()">&times;</button>
+            </div>
+            
+            <form id="studentForm">
+                <input type="hidden" id="studentId">
+                
+                <div class="form-group">
+                    <label for="studentNumber">学号</label>
+                    <input type="text" id="studentNumber" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentName">学生姓名 *</label>
+                    <input type="text" id="studentName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gender">性别</label>
+                    <select id="gender" class="form-control">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="age">年龄</label>
+                    <input type="number" id="age" class="form-control" min="3" max="18">
+                </div>
+                
+                <div class="form-group">
+                    <label for="parentName">家长姓名 *</label>
+                    <input type="text" id="parentName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">联系电话 *</label>
+                    <input type="tel" id="phone" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="wechat">微信号</label>
+                    <input type="text" id="wechat" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">登录密码</label>
+                    <input type="text" id="password" class="form-control" value="123456">
+                    <small style="color: var(--text-tertiary);">默认密码: 123456</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>录取通知书</label>
+                    <div class="image-upload">
+                        <div id="admissionPreview" class="image-preview" style="display: none;">
+                            <img id="admissionImage" src="" alt="录取通知书">
+                            <button type="button" class="remove-btn" onclick="removeAdmission()">&times;</button>
+                        </div>
+                        <label class="upload-btn" id="admissionUploadBtn">
+                            <input type="file" accept="image/*" onchange="uploadAdmission(event)" style="display: none;">
+                            +
+                        </label>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeStudentModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveStudent()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 查看档案模态框 -->
+    <div class="modal" id="recordsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">学生档案</h2>
+                <button class="modal-close" onclick="closeRecordsModal()">&times;</button>
+            </div>
+            
+            <div id="recordsContent"></div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeRecordsModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/students.js"></script>
+</body>
+</html>
+

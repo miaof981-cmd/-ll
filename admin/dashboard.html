@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>控制台 - 次元学校管理后台</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>次元学校</h2>
+                <p class="user-info">
+                    <span id="currentUser">管理员</span>
+                    <span class="user-role" id="currentRole">admin</span>
+                </p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="nav-icon">📊</span>
+                    <span>数据概览</span>
+                </a>
+                <a href="pages/students.html" class="nav-item">
+                    <span class="nav-icon">👨‍🎓</span>
+                    <span>学生管理</span>
+                </a>
+                <a href="pages/applications.html" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>申请订单</span>
+                </a>
+                <a href="pages/photographers.html" class="nav-item">
+                    <span class="nav-icon">📷</span>
+                    <span>摄影师管理</span>
+                </a>
+                <a href="pages/announcements.html" class="nav-item">
+                    <span class="nav-icon">📢</span>
+                    <span>公告管理</span>
+                </a>
+                <a href="pages/banners.html" class="nav-item">
+                    <span class="nav-icon">🖼️</span>
+                    <span>轮播图管理</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span>退出登录</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>数据概览</h1>
+                <div class="header-actions">
+                    <button class="btn-refresh" onclick="loadDashboard()">刷新数据</button>
+                </div>
+            </header>
+            
+            <div class="dashboard-content">
+                <!-- 数据统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="location.href='pages/students.html'">
+                        <div class="stat-icon" style="background: #1f6feb;">👨‍🎓</div>
+                        <div class="stat-info">
+                            <h3>学生总数</h3>
+                            <p class="stat-number" id="totalStudents">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" onclick="location.href='pages/applications.html'">
+                        <div class="stat-icon" style="background: #28a745;">📝</div>
+                        <div class="stat-info">
+                            <h3>申请订单</h3>
+                            <p class="stat-number" id="totalApplications">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" onclick="location.href='pages/photographers.html'">
+                        <div class="stat-icon" style="background: #6f42c1;">📷</div>
+                        <div class="stat-info">
+                            <h3>摄影师</h3>
+                            <p class="stat-number" id="totalPhotographers">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" onclick="location.href='pages/announcements.html'">
+                        <div class="stat-icon" style="background: #fd7e14;">📢</div>
+                        <div class="stat-info">
+                            <h3>公告数量</h3>
+                            <p class="stat-number" id="totalAnnouncements">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 最近申请订单 -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>最近申请订单</h2>
+                        <a href="pages/applications.html" class="link-more">查看全部 →</a>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>订单号</th>
+                                    <th>孩子姓名</th>
+                                    <th>家长姓名</th>
+                                    <th>联系电话</th>
+                                    <th>状态</th>
+                                    <th>申请时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentApplications">
+                                <tr>
+                                    <td colspan="7" class="empty-message">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 摄影师工作状态 -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>摄影师工作状态</h2>
+                        <a href="pages/photographers.html" class="link-more">查看全部 →</a>
+                    </div>
+                    <div class="photographers-grid" id="photographersStatus">
+                        <p class="empty-message">暂无数据</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
+
