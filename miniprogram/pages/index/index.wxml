@@ -79,38 +79,5 @@
         </view>
       </view>
     </view>
-
-    <!-- 校园新闻区 -->
-    <view class="content-section">
-      <view class="section-header">
-        <view class="section-title-wrapper">
-          <view class="section-icon">📰</view>
-          <text class="section-title">校园新闻</text>
-        </view>
-      </view>
-
-      <view wx:if="{{articles.length === 0}}" class="empty-state">
-        <view class="empty-icon">📰</view>
-        <text class="empty-text">暂无新闻</text>
-      </view>
-
-      <view class="news-list">
-        <view 
-          wx:for="{{articles}}" 
-          wx:key="id" 
-          class="news-card fade-in"
-          style="animation-delay: {{index * 0.1}}s"
-          bindtap="viewArticle" 
-          data-article="{{item}}"
-        >
-          <view class="news-title">{{item.title}}</view>
-          <view class="news-content">{{item.content}}</view>
-          <view class="news-footer">
-            <text class="news-time">📅 {{item.createdAt}}</text>
-            <text class="news-action">查看详情 →</text>
-          </view>
-        </view>
-      </view>
-    </view>
   </view>
 </view>

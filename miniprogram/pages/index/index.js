@@ -4,10 +4,10 @@ const storage = require('../../utils/storage.js');
 Page({
   data: {
     announcements: [],
-    articles: [],
     banners: [],
     bannerHeight: 400, // 默认高度
-    bannerHeights: {} // 存储每张图片的高度
+    bannerHeights: {}, // 存储每张图片的高度
+    currentBanner: 0 // 当前轮播图索引
   },
 
   onLoad() {
@@ -25,27 +25,10 @@ Page({
     // 从本地存储获取真实数据
     const banners = storage.getBanners();
     const announcements = storage.getAnnouncements();
-    
-    // 如果没有数据，使用模拟数据
-    const articles = [
-      {
-        id: '1',
-        title: '我校举办科技创新大赛',
-        content: '为培养学生创新精神，我校成功举办了第五届科技创新大赛，共有200多名学生参与。',
-        createdAt: '2024-10-10'
-      },
-      {
-        id: '2',
-        title: '校园文化艺术节圆满落幕',
-        content: '历时一周的校园文化艺术节圆满结束，展现了同学们的才华和创造力。',
-        createdAt: '2024-10-09'
-      }
-    ];
 
     this.setData({
       banners,
-      announcements: announcements.length > 0 ? announcements : [],
-      articles
+      announcements: announcements.length > 0 ? announcements : []
     });
   },
 
@@ -79,6 +62,11 @@ Page({
     const current = e.detail.current;
     const bannerHeights = this.data.bannerHeights;
     
+    // 更新当前索引
+    this.setData({
+      currentBanner: current
+    });
+    
     // 如果有对应图片的高度，更新swiper高度
     if (bannerHeights[current]) {
       this.setData({
@@ -97,17 +85,6 @@ Page({
     // 跳转到详情页
     wx.navigateTo({
       url: '/pages/announcement/detail'
-    });
-  },
-
-  // 查看文章详情
-  viewArticle(e) {
-    const article = e.currentTarget.dataset.article;
-    wx.showModal({
-      title: article.title,
-      content: article.content,
-      showCancel: false,
-      confirmText: '知道了'
     });
   }
 });
