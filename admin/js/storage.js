@@ -161,7 +161,13 @@ const Storage = {
     if (!application.id) {
       application.id = 'APP' + Date.now();
       application.createdAt = new Date().toISOString();
-      application.status = application.status || 'pending';
+      application.status = application.status || 'waiting_draw'; // 等待绘制
+      application.statusHistory = [{
+        status: 'waiting_draw',
+        time: new Date().toISOString(),
+        operator: 'system',
+        note: '订单创建'
+      }];
       applications.unshift(application);
     } else {
       const index = applications.findIndex(a => a.id === application.id);
@@ -179,11 +185,45 @@ const Storage = {
     const index = applications.findIndex(a => a.id === id);
     
     if (index >= 0) {
-      applications[index] = { ...applications[index], ...updates };
+      const app = applications[index];
+      
+      // 如果状态改变，记录历史
+      if (updates.status && updates.status !== app.status) {
+        if (!app.statusHistory) app.statusHistory = [];
+        app.statusHistory.push({
+          status: updates.status,
+          time: new Date().toISOString(),
+          operator: updates.operator || 'system',
+          note: updates.statusNote || ''
+        });
+      }
+      
+      applications[index] = { ...app, ...updates, updatedAt: new Date().toISOString() };
       this.set('applications', applications);
+      
+      // 触发通知
+      this.addNotification({
+        type: 'status_change',
+        applicationId: id,
+        status: updates.status,
+        targetRole: this.getNotificationTarget(updates.status)
+      });
+      
       return applications[index];
     }
     return null;
+  },
+  
+  // 获取通知目标角色
+  getNotificationTarget(status) {
+    const targetMap = {
+      'waiting_draw': 'photographer',
+      'pending_review': 'service',
+      'pending_confirm': 'parent',
+      'confirmed': 'service',
+      'archived': 'parent'
+    };
+    return targetMap[status] || 'admin';
   },
 
   deleteApplication(id) {
@@ -238,6 +278,129 @@ const Storage = {
     this.set('photographers', filtered);
   },
 
+  // 学籍档案相关
+  getArchives() {
+    return this.getArray('archives');
+  },
+  
+  createArchive(applicationId) {
+    const app = this.getApplicationById(applicationId);
+    if (!app || !app.idPhoto) {
+      return null;
+    }
+    
+    // 生成学号
+    const studentId = this.generateStudentId();
+    const password = '123456';
+    
+    const archive = {
+      id: 'ARC' + Date.now(),
+      studentId,
+      password,
+      childName: app.childName,
+      childGender: app.childGender,
+      childAge: app.childAge,
+      parentName: app.parentName,
+      phone: app.phone,
+      wechat: app.wechat,
+      expectations: app.expectations,
+      lifePhoto: app.lifePhoto,
+      idPhoto: app.idPhoto, // 证件照
+      photographerId: app.photographerId,
+      photographerName: app.photographerName,
+      applicationId,
+      status: 'pending_admission_letter', // 待上传录取通知书
+      admissionLetter: null,
+      createdAt: new Date().toISOString()
+    };
+    
+    const archives = this.getArchives();
+    archives.unshift(archive);
+    this.set('archives', archives);
+    
+    return archive;
+  },
+  
+  updateArchive(id, updates) {
+    const archives = this.getArchives();
+    const index = archives.findIndex(a => a.id === id);
+    
+    if (index >= 0) {
+      archives[index] = { ...archives[index], ...updates, updatedAt: new Date().toISOString() };
+      this.set('archives', archives);
+      return archives[index];
+    }
+    return null;
+  },
+  
+  getArchiveById(id) {
+    const archives = this.getArchives();
+    return archives.find(a => a.id === id);
+  },
+  
+  getArchiveByStudentId(studentId) {
+    const archives = this.getArchives();
+    return archives.find(a => a.studentId === studentId);
+  },
+  
+  // 生成学号
+  generateStudentId() {
+    const year = new Date().getFullYear();
+    const students = this.getStudents();
+    const archives = this.getArchives();
+    
+    // 合并已有学号
+    const existingIds = [
+      ...students.map(s => s.id),
+      ...archives.map(a => a.studentId)
+    ].filter(id => id && id.startsWith(year.toString()));
+    
+    let sequence = 1;
+    let studentId;
+    
+    do {
+      studentId = `${year}${String(sequence).padStart(4, '0')}`;
+      sequence++;
+    } while (existingIds.includes(studentId));
+    
+    return studentId;
+  },
+  
+  // 通知系统
+  getNotifications() {
+    return this.getArray('notifications');
+  },
+  
+  addNotification(notification) {
+    const notifications = this.getNotifications();
+    notification.id = 'NOT' + Date.now();
+    notification.createdAt = new Date().toISOString();
+    notification.read = false;
+    notifications.unshift(notification);
+    
+    // 只保留最近100条
+    if (notifications.length > 100) {
+      notifications.length = 100;
+    }
+    
+    this.set('notifications', notifications);
+    return notification;
+  },
+  
+  markNotificationAsRead(id) {
+    const notifications = this.getNotifications();
+    const notification = notifications.find(n => n.id === id);
+    if (notification) {
+      notification.read = true;
+      this.set('notifications', notifications);
+    }
+  },
+  
+  getUnreadNotifications(role) {
+    const notifications = this.getNotifications();
+    return notifications.filter(n => !n.read && n.targetRole === role);
+  },
+
   // 统计数据
   getStats() {
     return {
@@ -245,7 +408,8 @@ const Storage = {
       totalApplications: this.getApplications().length,
       totalPhotographers: this.getPhotographers().length,
       totalAnnouncements: this.getAnnouncements().length,
-      totalBanners: this.getBanners().length
+      totalBanners: this.getBanners().length,
+      totalArchives: this.getArchives().length
     };
   },
 

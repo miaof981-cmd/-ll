@@ -45,13 +45,21 @@ const Utils = {
   // 状态文本映射
   getStatusText(status) {
     const statusMap = {
+      // 旧状态（兼容）
       pending: '待处理',
       processing: '处理中',
       photographer_assigned: '已分配摄影师',
       shooting: '拍摄中',
       photo_uploaded: '照片已上传',
       completed: '已完成',
-      cancelled: '已取消'
+      cancelled: '已取消',
+      // 新状态
+      waiting_draw: '等待绘制',
+      pending_review: '待审核',
+      pending_confirm: '待客户确认',
+      confirmed: '已确认',
+      archived: '档案已归档',
+      overdue: '已超期'
     };
     return statusMap[status] || status;
   },
@@ -59,15 +67,36 @@ const Utils = {
   // 状态样式类
   getStatusClass(status) {
     const classMap = {
+      // 旧状态
       pending: 'status-pending',
       processing: 'status-processing',
       photographer_assigned: 'status-processing',
       shooting: 'status-processing',
       photo_uploaded: 'status-processing',
       completed: 'status-completed',
-      cancelled: 'status-cancelled'
+      cancelled: 'status-cancelled',
+      // 新状态
+      waiting_draw: 'status-waiting',      // 蓝色
+      pending_review: 'status-review',     // 黄色
+      pending_confirm: 'status-confirm',   // 橙色
+      confirmed: 'status-confirmed',       // 绿色
+      archived: 'status-archived',         // 灰色
+      overdue: 'status-overdue'            // 红色
     };
     return classMap[status] || 'status-pending';
+  },
+  
+  // 状态颜色
+  getStatusColor(status) {
+    const colorMap = {
+      waiting_draw: '#3b82f6',      // 蓝色
+      pending_review: '#f59e0b',    // 黄色
+      pending_confirm: '#fb923c',   // 橙色
+      confirmed: '#10b981',         // 绿色
+      archived: '#6b7280',          // 灰色
+      overdue: '#ef4444'            // 红色
+    };
+    return colorMap[status] || '#6b7280';
   },
 
   // 显示提示消息

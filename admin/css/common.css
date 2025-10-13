@@ -198,6 +198,7 @@ textarea.form-control {
     white-space: nowrap;
 }
 
+/* 旧状态样式（兼容） */
 .status-pending {
     background-color: #fff3cd;
     color: #856404;
@@ -216,6 +217,37 @@ textarea.form-control {
 .status-cancelled {
     background-color: #f8d7da;
     color: #842029;
+}
+
+/* 新状态样式 */
+.status-waiting {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-review {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-confirm {
+    background-color: #fed7aa;
+    color: #9a3412;
+}
+
+.status-confirmed {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-archived {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+
+.status-overdue {
+    background-color: #fee2e2;
+    color: #991b1b;
 }
 
 /* 卡片样式 */
