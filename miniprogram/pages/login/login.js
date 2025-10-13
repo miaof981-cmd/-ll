@@ -100,7 +100,23 @@ Page({
       }
     } else {
       // 学生/家长登录 - 从本地存储验证
-      const students = storage.getStudents();
+      let students = storage.getStudents();
+      
+      // 如果没有学生数据，初始化测试学生
+      if (students.length === 0) {
+        console.log('初始化测试学生数据');
+        const testStudent = {
+          studentId: '20250001',
+          name: '测试学生',
+          parentName: '测试家长',
+          password: '123456',
+          admissionLetter: '',
+          createdAt: new Date().toLocaleDateString('zh-CN')
+        };
+        students = [testStudent];
+        storage.saveStudents(students);
+      }
+      
       const student = students.find(s => s.studentId === studentId.trim());
       
       if (student) {
