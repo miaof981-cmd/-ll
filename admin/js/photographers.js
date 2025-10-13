@@ -58,6 +58,13 @@ function loadPhotographers() {
         
         ${photographer.description ? `<p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">${photographer.description}</p>` : ''}
         
+        ${photographer.price ? `
+          <div style="text-align: center; padding: 8px; background: var(--bg-tertiary); border-radius: 6px; margin-bottom: 12px;">
+            <span style="color: var(--text-secondary); font-size: 12px;">服务价格：</span>
+            <span style="color: var(--primary-color); font-size: 18px; font-weight: 600;">¥${photographer.price}</span>
+          </div>
+        ` : ''}
+        
         <div class="photographer-stats">
           <div class="stat-item">
             <div class="number">${activeOrders.length}</div>
@@ -106,6 +113,7 @@ function showAddPhotographerModal() {
   document.getElementById('photographerForm').reset();
   document.getElementById('photographerId').value = '';
   document.getElementById('photographerPassword').value = 'photo123';
+  document.getElementById('price').value = '';
   
   document.getElementById('avatarPreview').style.display = 'none';
   document.getElementById('avatarUploadBtn').style.display = 'flex';
@@ -117,7 +125,10 @@ function showAddPhotographerModal() {
 
 function editPhotographer(id) {
   editingPhotographer = Storage.getPhotographers().find(p => p.id === id);
-  if (!editingPhotographer) return;
+  if (!editingPhotographer) {
+    Utils.showToast('摄影师不存在', 'error');
+    return;
+  }
   
   avatarData = editingPhotographer.avatar || null;
   samplesData = editingPhotographer.samples || [];
@@ -127,6 +138,7 @@ function editPhotographer(id) {
   document.getElementById('photographerName').value = editingPhotographer.name;
   document.getElementById('specialty').value = editingPhotographer.specialty || '';
   document.getElementById('description').value = editingPhotographer.description || '';
+  document.getElementById('price').value = editingPhotographer.price || '';
   document.getElementById('username').value = editingPhotographer.username || '';
   document.getElementById('photographerPassword').value = editingPhotographer.password || 'photo123';
   
@@ -208,9 +220,21 @@ function removeSample(index) {
 
 function savePhotographer() {
   const name = document.getElementById('photographerName').value.trim();
+  const username = document.getElementById('username').value.trim();
+  const price = document.getElementById('price').value.trim();
   
   if (!name) {
     Utils.showToast('请填写摄影师姓名', 'error');
+    return;
+  }
+  
+  if (!username) {
+    Utils.showToast('请填写登录用户名', 'error');
+    return;
+  }
+  
+  if (!price || parseFloat(price) < 0) {
+    Utils.showToast('请填写有效的服务价格', 'error');
     return;
   }
   
@@ -219,7 +243,8 @@ function savePhotographer() {
     name,
     specialty: document.getElementById('specialty').value.trim(),
     description: document.getElementById('description').value.trim(),
-    username: document.getElementById('username').value.trim() || name,
+    price: parseFloat(price),
+    username,
     password: document.getElementById('photographerPassword').value || 'photo123',
     avatar: avatarData,
     samples: samplesData,
@@ -227,9 +252,15 @@ function savePhotographer() {
     orderCount: editingPhotographer ? editingPhotographer.orderCount : 0
   };
   
-  Storage.savePhotographer(photographerData);
+  const savedPhotographer = Storage.savePhotographer(photographerData);
   
-  Utils.showToast(editingPhotographer ? '摄影师信息已更新' : '摄影师添加成功', 'success');
+  if (savedPhotographer) {
+    Utils.showToast(
+      editingPhotographer ? '摄影师信息已更新，可使用用户名和密码登录' : '摄影师添加成功，可使用用户名和密码登录', 
+      'success'
+    );
+  }
+  
   closePhotographerModal();
   loadPhotographers();
 }
@@ -239,7 +270,7 @@ function deletePhotographer(id) {
   const applications = Storage.getApplications();
   const activeOrders = applications.filter(app => 
     app.photographerId === id && 
-    ['photographer_assigned', 'shooting'].includes(app.status)
+    ['waiting_draw', 'pending_review', 'pending_confirm'].includes(app.status)
   );
   
   if (activeOrders.length > 0) {
@@ -247,9 +278,9 @@ function deletePhotographer(id) {
     return;
   }
   
-  Utils.confirm('确定要删除该摄影师吗？', () => {
+  Utils.confirm('确定要删除该摄影师吗？删除后其登录账号也将失效。', () => {
     Storage.deletePhotographer(id);
-    Utils.showToast('摄影师已删除', 'success');
+    Utils.showToast('摄影师及其登录账号已删除', 'success');
     loadPhotographers();
   });
 }

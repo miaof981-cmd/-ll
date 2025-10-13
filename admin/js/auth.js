@@ -123,6 +123,40 @@ const Auth = {
     }
   },
 
+  // 添加或更新摄影师账号
+  addOrUpdatePhotographerAccount(userAccount) {
+    // 从localStorage获取摄影师账号列表
+    let photographerAccounts = JSON.parse(localStorage.getItem('photographerAccounts') || '[]');
+    
+    // 检查是否已存在
+    const existingIndex = photographerAccounts.findIndex(acc => acc.photographerId === userAccount.photographerId);
+    
+    if (existingIndex >= 0) {
+      // 更新现有账号
+      photographerAccounts[existingIndex] = userAccount;
+    } else {
+      // 添加新账号
+      photographerAccounts.push(userAccount);
+    }
+    
+    // 保存到localStorage
+    localStorage.setItem('photographerAccounts', JSON.stringify(photographerAccounts));
+    
+    return true;
+  },
+  
+  // 获取所有摄影师账号（用于登录验证）
+  getPhotographerAccounts() {
+    return JSON.parse(localStorage.getItem('photographerAccounts') || '[]');
+  },
+  
+  // 删除摄影师账号
+  deletePhotographerAccount(photographerId) {
+    let photographerAccounts = JSON.parse(localStorage.getItem('photographerAccounts') || '[]');
+    photographerAccounts = photographerAccounts.filter(acc => acc.photographerId !== photographerId);
+    localStorage.setItem('photographerAccounts', JSON.stringify(photographerAccounts));
+  },
+
   // 要求特定权限
   requirePermission(permission) {
     if (!this.requireLogin()) return false;
