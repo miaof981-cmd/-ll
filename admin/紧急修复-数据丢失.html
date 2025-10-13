@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紧急修复 - 数据丢失问题</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #dc3545;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 5px;
+            cursor: pointer;
+            background: #1f6feb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        button:hover { background: #0d47a1; }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+        .log.success { color: #28a745; }
+        .log.error { color: #dc3545; }
+        .log.info { color: #17a2b8; }
+        .log.warning { color: #ffc107; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 紧急修复：数据丢失问题</h1>
+        <p style="color: #666; margin-bottom: 20px;">诊断并修复localStorage数据刷新后丢失的问题</p>
+        
+        <div class="alert">
+            <strong>⚠️ 重要提示：</strong> 如果您使用的是<strong>无痕/隐私模式</strong>，localStorage数据会在关闭标签页后丢失！请使用<strong>普通模式</strong>。
+        </div>
+        
+        <!-- 诊断1 -->
+        <div class="section">
+            <h2>📋 步骤1：检查localStorage是否可用</h2>
+            <button onclick="checkLocalStorage()">运行检查</button>
+            <div class="result" id="result1"></div>
+        </div>
+        
+        <!-- 诊断2 -->
+        <div class="section">
+            <h2>💾 步骤2：测试数据保存和读取</h2>
+            <button onclick="testSaveAndRead()">测试保存</button>
+            <button onclick="location.reload()">刷新页面</button>
+            <button onclick="testAfterRefresh()">验证刷新后</button>
+            <div class="result" id="result2"></div>
+        </div>
+        
+        <!-- 诊断3 -->
+        <div class="section">
+            <h2>🔍 步骤3：查看当前摄影师数据</h2>
+            <button onclick="viewCurrentData()">查看数据</button>
+            <button class="danger" onclick="clearAllData()">清空所有数据</button>
+            <div class="result" id="result3"></div>
+        </div>
+        
+        <!-- 修复方案 -->
+        <div class="section">
+            <h2>🔧 步骤4：手动创建并保存摄影师</h2>
+            <button class="success" onclick="manualCreate()">手动创建测试摄影师</button>
+            <div class="result" id="result4"></div>
+        </div>
+        
+        <!-- 最终验证 -->
+        <div class="section">
+            <h2>✅ 步骤5：最终验证</h2>
+            <p style="margin-bottom: 10px;">创建摄影师后，请按以下步骤验证：</p>
+            <ol style="margin-left: 20px; line-height: 1.8;">
+                <li>点击"手动创建测试摄影师"</li>
+                <li>查看是否显示"保存成功"</li>
+                <li>点击浏览器的刷新按钮（F5）</li>
+                <li>刷新后点击"验证刷新后的数据"</li>
+                <li>如果数据还在，说明修复成功！</li>
+            </ol>
+            <button onclick="finalVerify()">验证刷新后的数据</button>
+            <div class="result" id="result5"></div>
+        </div>
+    </div>
+    
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${time}] ${message}`;
+            element.appendChild(div);
+            element.scrollTop = element.scrollHeight;
+        }
+        
+        function checkLocalStorage() {
+            const result = document.getElementById('result1');
+            result.innerHTML = '';
+            
+            log('result1', '开始检查localStorage...', 'info');
+            
+            try {
+                // 测试1：localStorage是否存在
+                if (typeof localStorage === 'undefined') {
+                    log('result1', '❌ localStorage不存在！浏览器不支持localStorage', 'error');
+                    return;
+                }
+                log('result1', '✅ localStorage对象存在', 'success');
+                
+                // 测试2：是否可以写入
+                const testKey = '__test__' + Date.now();
+                localStorage.setItem(testKey, 'test_value');
+                log('result1', '✅ 可以写入数据', 'success');
+                
+                // 测试3：是否可以读取
+                const testValue = localStorage.getItem(testKey);
+                if (testValue === 'test_value') {
+                    log('result1', '✅ 可以读取数据', 'success');
+                } else {
+                    log('result1', '❌ 读取的数据不正确', 'error');
+                }
+                
+                // 测试4：是否可以删除
+                localStorage.removeItem(testKey);
+                const afterRemove = localStorage.getItem(testKey);
+                if (afterRemove === null) {
+                    log('result1', '✅ 可以删除数据', 'success');
+                } else {
+                    log('result1', '❌ 删除失败', 'error');
+                }
+                
+                // 测试5：检查容量
+                let totalSize = 0;
+                for (let key in localStorage) {
+                    if (localStorage.hasOwnProperty(key)) {
+                        totalSize += localStorage[key].length + key.length;
+                    }
+                }
+                log('result1', `✅ localStorage使用量: ${(totalSize / 1024).toFixed(2)} KB`, 'info');
+                
+                // 测试6：检查是否是隐私模式
+                try {
+                    localStorage.setItem('__privacy_test__', '1');
+                    localStorage.removeItem('__privacy_test__');
+                    log('result1', '✅ 不是隐私模式（或隐私模式支持localStorage）', 'success');
+                } catch (e) {
+                    log('result1', '❌ 可能是隐私模式！数据可能不会持久化', 'error');
+                    log('result1', '请使用普通模式打开浏览器', 'warning');
+                }
+                
+                log('result1', '=== 检查完成 ===', 'success');
+                
+            } catch (e) {
+                log('result1', '❌ 错误: ' + e.message, 'error');
+                log('result1', '可能的原因：', 'warning');
+                log('result1', '1. 浏览器禁用了localStorage', 'warning');
+                log('result1', '2. 使用了隐私/无痕模式', 'warning');
+                log('result1', '3. 浏览器设置阻止了数据存储', 'warning');
+            }
+        }
+        
+        function testSaveAndRead() {
+            const result = document.getElementById('result2');
+            result.innerHTML = '';
+            
+            log('result2', '开始测试保存和读取...', 'info');
+            
+            try {
+                const testData = {
+                    id: 'TEST_' + Date.now(),
+                    name: '测试摄影师_' + Date.now(),
+                    username: 'test_' + Date.now(),
+                    password: 'photo123',
+                    price: 99,
+                    createdAt: new Date().toISOString()
+                };
+                
+                log('result2', '准备保存的数据:', 'info');
+                log('result2', JSON.stringify(testData, null, 2), 'info');
+                
+                // 保存
+                localStorage.setItem('test_photographers', JSON.stringify([testData]));
+                log('result2', '✅ 数据已保存到localStorage', 'success');
+                
+                // 立即读取
+                const saved = JSON.parse(localStorage.getItem('test_photographers'));
+                if (saved && saved.length > 0 && saved[0].id === testData.id) {
+                    log('result2', '✅ 立即读取成功！数据正确', 'success');
+                    log('result2', '读取到的数据:', 'info');
+                    log('result2', JSON.stringify(saved[0], null, 2), 'info');
+                } else {
+                    log('result2', '❌ 立即读取失败！', 'error');
+                }
+                
+                log('result2', '=== 现在请点击"刷新页面"按钮 ===', 'warning');
+                log('result2', '刷新后点击"验证刷新后"按钮', 'warning');
+                
+            } catch (e) {
+                log('result2', '❌ 错误: ' + e.message, 'error');
+            }
+        }
+        
+        function testAfterRefresh() {
+            const result = document.getElementById('result2');
+            
+            log('result2', '=== 验证刷新后的数据 ===', 'info');
+            
+            try {
+                const saved = localStorage.getItem('test_photographers');
+                
+                if (!saved) {
+                    log('result2', '❌ 刷新后数据丢失！localStorage中没有test_photographers', 'error');
+                    log('result2', '这说明localStorage不能持久化数据', 'error');
+                    log('result2', '可能原因：', 'warning');
+                    log('result2', '1. 使用了隐私/无痕模式', 'warning');
+                    log('result2', '2. 浏览器设置不允许持久化存储', 'warning');
+                    return;
+                }
+                
+                const data = JSON.parse(saved);
+                if (data && data.length > 0) {
+                    log('result2', '✅ 刷新后数据仍然存在！', 'success');
+                    log('result2', '数据内容:', 'info');
+                    log('result2', JSON.stringify(data[0], null, 2), 'info');
+                    log('result2', '=== localStorage工作正常！===', 'success');
+                } else {
+                    log('result2', '❌ 数据格式不正确', 'error');
+                }
+                
+            } catch (e) {
+                log('result2', '❌ 错误: ' + e.message, 'error');
+            }
+        }
+        
+        function viewCurrentData() {
+            const result = document.getElementById('result3');
+            result.innerHTML = '';
+            
+            log('result3', '查看当前摄影师数据...', 'info');
+            
+            try {
+                const photographers = localStorage.getItem('photographers');
+                
+                if (!photographers) {
+                    log('result3', '⚠️ 没有找到photographers数据', 'warning');
+                    log('result3', 'localStorage中的所有键:', 'info');
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        log('result3', `  ${i + 1}. ${key}`, 'info');
+                    }
+                    return;
+                }
+                
+                const data = JSON.parse(photographers);
+                log('result3', `找到 ${data.length} 个摄影师:`, 'success');
+                
+                data.forEach((p, index) => {
+                    log('result3', `摄影师${index + 1}: ${p.name} (${p.username}) - ¥${p.price}`, 'info');
+                });
+                
+                log('result3', '完整数据:', 'info');
+                log('result3', JSON.stringify(data, null, 2), 'info');
+                
+            } catch (e) {
+                log('result3', '❌ 错误: ' + e.message, 'error');
+            }
+        }
+        
+        function clearAllData() {
+            if (!confirm('确定要清空所有数据吗？此操作不可恢复！')) {
+                return;
+            }
+            
+            const result = document.getElementById('result3');
+            log('result3', '清空所有数据...', 'warning');
+            
+            localStorage.clear();
+            log('result3', '✅ 所有数据已清空', 'success');
+        }
+        
+        function manualCreate() {
+            const result = document.getElementById('result4');
+            result.innerHTML = '';
+            
+            log('result4', '开始手动创建摄影师...', 'info');
+            
+            try {
+                const photographer = {
+                    id: 'PHO' + Date.now(),
+                    name: '测试摄影师',
+                    username: 'test123',
+                    password: 'photo123',
+                    price: 100,
+                    specialty: '测试风格',
+                    description: '这是一个测试摄影师',
+                    status: 'available',
+                    orderCount: 0,
+                    createdAt: new Date().toISOString()
+                };
+                
+                log('result4', '摄影师数据:', 'info');
+                log('result4', JSON.stringify(photographer, null, 2), 'info');
+                
+                // 获取现有数据
+                let photographers = [];
+                const existing = localStorage.getItem('photographers');
+                if (existing) {
+                    photographers = JSON.parse(existing);
+                    log('result4', `现有摄影师数量: ${photographers.length}`, 'info');
+                }
+                
+                // 添加新摄影师
+                photographers.push(photographer);
+                
+                // 保存
+                localStorage.setItem('photographers', JSON.stringify(photographers));
+                log('result4', '✅ 保存成功！', 'success');
+                
+                // 验证
+                const saved = JSON.parse(localStorage.getItem('photographers'));
+                const found = saved.find(p => p.id === photographer.id);
+                
+                if (found) {
+                    log('result4', '✅ 验证成功：数据已保存', 'success');
+                    log('result4', `当前摄影师总数: ${saved.length}`, 'info');
+                    log('result4', '=== 现在请刷新页面（F5），然后点击"验证刷新后的数据" ===', 'warning');
+                } else {
+                    log('result4', '❌ 验证失败：保存后找不到数据', 'error');
+                }
+                
+            } catch (e) {
+                log('result4', '❌ 错误: ' + e.message, 'error');
+            }
+        }
+        
+        function finalVerify() {
+            const result = document.getElementById('result5');
+            result.innerHTML = '';
+            
+            log('result5', '=== 最终验证 ===', 'info');
+            
+            try {
+                const photographers = localStorage.getItem('photographers');
+                
+                if (!photographers) {
+                    log('result5', '❌ 失败：刷新后数据丢失！', 'error');
+                    log('result5', '', 'error');
+                    log('result5', '问题确认：localStorage不能持久化数据', 'error');
+                    log('result5', '', 'error');
+                    log('result5', '解决方案：', 'warning');
+                    log('result5', '1. 检查是否使用了隐私/无痕模式', 'warning');
+                    log('result5', '2. 关闭隐私模式，使用普通模式', 'warning');
+                    log('result5', '3. 检查浏览器设置，允许网站存储数据', 'warning');
+                    log('result5', '4. 尝试使用其他浏览器（Chrome、Firefox、Safari）', 'warning');
+                    return;
+                }
+                
+                const data = JSON.parse(photographers);
+                log('result5', '✅ 成功：刷新后数据仍然存在！', 'success');
+                log('result5', `摄影师数量: ${data.length}`, 'success');
+                
+                data.forEach((p, index) => {
+                    log('result5', `摄影师${index + 1}: ${p.name} (${p.username})`, 'info');
+                });
+                
+                log('result5', '', 'success');
+                log('result5', '=== ✅ localStorage工作正常！===', 'success');
+                log('result5', '现在可以正常使用摄影师管理功能了', 'success');
+                
+            } catch (e) {
+                log('result5', '❌ 错误: ' + e.message, 'error');
+            }
+        }
+        
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkLocalStorage();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+
