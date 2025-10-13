@@ -96,12 +96,21 @@
       </view>
       <view class="hint-list">
         <view class="hint-item">
-          <text class="hint-label">学生账号：</text>
-          <text class="hint-value">使用学号登录，默认密码 123456</text>
+          <text class="hint-label">📚 测试学号：</text>
+          <text class="hint-value">20250001</text>
         </view>
         <view class="hint-item">
-          <text class="hint-label">管理员：</text>
-          <text class="hint-value">admin / admin123</text>
+          <text class="hint-label">🔑 默认密码：</text>
+          <text class="hint-value">123456</text>
+        </view>
+        <view class="hint-divider"></view>
+        <view class="hint-item">
+          <text class="hint-label">👨‍💼 管理员账号：</text>
+          <text class="hint-value">admin</text>
+        </view>
+        <view class="hint-item">
+          <text class="hint-label">🔑 管理员密码：</text>
+          <text class="hint-value">admin123</text>
         </view>
       </view>
     </view>
