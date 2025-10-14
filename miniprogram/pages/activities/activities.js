@@ -6,21 +6,39 @@ Page({
     activities: [],
     activeCategory: 'all',
     categories: [
-      { id: 'all', name: '全部' },
-      { id: '校园活动', name: '校园活动' },
-      { id: '毕业照', name: '毕业照' },
-      { id: '节日活动', name: '节日活动' }
+      { id: 'all', name: '全部' }
     ],
     loading: true
   },
 
   onLoad() {
+    this.loadCategories();
     this.loadActivities();
   },
 
   onShow() {
     // 每次显示时刷新
+    this.loadCategories();
     this.loadActivities();
+  },
+
+  // 加载分类列表
+  async loadCategories() {
+    try {
+      const db = wx.cloud.database();
+      const res = await db.collection('activity_categories')
+        .orderBy('sort', 'asc')
+        .get();
+
+      const categories = [
+        { id: 'all', name: '全部' },
+        ...res.data.map(c => ({ id: c.name, name: c.name, icon: c.icon }))
+      ];
+
+      this.setData({ categories });
+    } catch (e) {
+      console.error('加载分类失败:', e);
+    }
   },
 
   // 加载活动列表

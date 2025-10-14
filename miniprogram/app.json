@@ -25,7 +25,12 @@
     "pages/admin/photographers/photographers",
     "pages/admin/photographers/edit",
     "pages/admin/admins/admins",
-    "pages/admin/admins/edit"
+    "pages/admin/admins/edit",
+    "pages/admin/categories/categories",
+    "pages/admin/orders/orders",
+    "pages/admin/orders/detail",
+    "pages/user/orders/orders",
+    "pages/user/orders/detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

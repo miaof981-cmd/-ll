@@ -1,0 +1,91 @@
+<view class="categories-page">
+  <!-- 顶部栏 -->
+  <view class="top-bar">
+    <view class="page-title">分类管理</view>
+    <view class="add-btn" bindtap="showAddCategory">
+      <text>添加分类</text>
+    </view>
+  </view>
+
+  <!-- 分类列表 -->
+  <view class="categories-list">
+    <view wx:if="{{categories.length === 0}}" class="empty-tip">
+      <text class="empty-icon">📁</text>
+      <text class="empty-text">暂无分类</text>
+      <text class="empty-hint">点击右上角"添加分类"按钮创建分类</text>
+    </view>
+
+    <view 
+      wx:for="{{categories}}" 
+      wx:key="_id"
+      class="category-card"
+    >
+      <view class="category-icon">{{item.icon}}</view>
+      <view class="category-info">
+        <text class="category-name">{{item.name}}</text>
+        <text class="category-sort">排序: {{item.sort}}</text>
+      </view>
+      <view class="action-buttons">
+        <view class="btn-edit" bindtap="editCategory" data-id="{{item._id}}">编辑</view>
+        <view class="btn-delete" bindtap="deleteCategory" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加分类弹窗 -->
+  <view wx:if="{{showAddModal}}" class="modal-mask" bindtap="hideAddModal">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">添加分类</text>
+        <text class="modal-close" bindtap="hideAddModal">✕</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="label">分类名称</text>
+          <input class="input" placeholder="请输入分类名称" value="{{categoryName}}" bindinput="onNameInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">分类图标</text>
+          <input class="input" placeholder="如：📁" value="{{categoryIcon}}" bindinput="onIconInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">排序（数字越小越靠前）</text>
+          <input class="input" type="number" placeholder="0" value="{{categorySort}}" bindinput="onSortInput" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideAddModal">取消</button>
+        <button class="btn-confirm" bindtap="saveCategory">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 编辑分类弹窗 -->
+  <view wx:if="{{showEditModal}}" class="modal-mask" bindtap="hideEditModal">
+    <view class="modal-content" catchtap>
+      <view class="modal-header">
+        <text class="modal-title">编辑分类</text>
+        <text class="modal-close" bindtap="hideEditModal">✕</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="label">分类名称</text>
+          <input class="input" placeholder="请输入分类名称" value="{{categoryName}}" bindinput="onNameInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">分类图标</text>
+          <input class="input" placeholder="如：📁" value="{{categoryIcon}}" bindinput="onIconInput" />
+        </view>
+        <view class="form-item">
+          <text class="label">排序（数字越小越靠前）</text>
+          <input class="input" type="number" placeholder="0" value="{{categorySort}}" bindinput="onSortInput" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideEditModal">取消</button>
+        <button class="btn-confirm" bindtap="updateCategory">更新</button>
+      </view>
+    </view>
+  </view>
+</view>
+

@@ -119,6 +119,20 @@ Page({
     });
   },
 
+  // 管理分类
+  manageCategories() {
+    wx.navigateTo({
+      url: '/pages/admin/categories/categories'
+    });
+  },
+
+  // 管理订单
+  manageOrders() {
+    wx.navigateTo({
+      url: '/pages/admin/orders/orders'
+    });
+  },
+
   // 管理管理员
   manageAdmins() {
     wx.navigateTo({

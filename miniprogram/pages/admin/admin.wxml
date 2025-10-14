@@ -106,6 +106,20 @@
         <view class="function-arrow">→</view>
       </view>
 
+      <view class="function-card" bindtap="manageCategories">
+        <view class="function-icon categories">📁</view>
+        <text class="function-title">分类管理</text>
+        <text class="function-desc">管理活动分类</text>
+        <view class="function-arrow">→</view>
+      </view>
+
+      <view class="function-card" bindtap="manageOrders">
+        <view class="function-icon orders">📋</view>
+        <text class="function-title">订单管理</text>
+        <text class="function-desc">查看和处理订单</text>
+        <view class="function-arrow">→</view>
+      </view>
+
       <view class="function-card" bindtap="manageAdmins">
         <view class="function-icon admins">👨‍💼</view>
         <text class="function-title">管理员管理</text>

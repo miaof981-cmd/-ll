@@ -1,0 +1,84 @@
+<view class="orders-page">
+  <!-- 顶部栏 -->
+  <view class="top-bar">
+    <view class="page-title">我的订单</view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <scroll-view class="status-filter" scroll-x>
+    <view class="filter-tabs">
+      <view
+        wx:for="{{statusFilters}}"
+        wx:key="id"
+        class="filter-tab {{activeStatus === item.id ? 'active' : ''}}"
+        bindtap="switchStatus"
+        data-status="{{item.id}}"
+      >
+        {{item.name}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 订单列表 -->
+  <view class="orders-list">
+    <view wx:if="{{loading}}" class="loading-tip">
+      <text>加载中...</text>
+    </view>
+
+    <view wx:elif="{{filteredOrders.length === 0}}" class="empty-tip">
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无订单</text>
+      <view class="empty-btn" bindtap="goActivities">去看看活动</view>
+    </view>
+
+    <view
+      wx:for="{{filteredOrders}}"
+      wx:key="_id"
+      class="order-card"
+      bindtap="viewOrder"
+      data-id="{{item._id}}"
+    >
+      <!-- 订单状态 -->
+      <view class="order-header">
+        <view class="order-time">{{item.createdAt}}</view>
+        <view class="order-status" style="color: {{item.statusColor}}">
+          {{item.statusIcon}} {{item.statusText}}
+        </view>
+      </view>
+
+      <!-- 活动信息 -->
+      <view class="order-content">
+        <image 
+          wx:if="{{item.activityInfo}}" 
+          class="activity-cover" 
+          src="{{item.activityInfo.coverImage}}" 
+          mode="aspectFill"
+        ></image>
+        <view class="order-info">
+          <text class="activity-title">{{item.activityInfo ? item.activityInfo.title : '活动已删除'}}</text>
+          <text wx:if="{{item.photographerInfo}}" class="photographer-name">
+            摄影师: {{item.photographerInfo.name}}
+          </text>
+          <text class="order-price">¥{{item.totalPrice}}</text>
+        </view>
+      </view>
+
+      <!-- 订单操作 -->
+      <view wx:if="{{item.userActions && item.userActions.length > 0}}" class="order-actions" catchtap>
+        <view
+          wx:for="{{item.userActions}}"
+          wx:key="index"
+          wx:for-item="action"
+          class="action-btn action-{{action}}"
+          bindtap="handleAction"
+          data-id="{{item._id}}"
+          data-action="{{action}}"
+          catchtap
+        >
+          {{action === 'pay' ? '立即支付' : action === 'cancel' ? '取消订单' : action === 'contact' ? '联系摄影师' : action === 'after_sale' ? '申请售后' : action === 'evaluate' ? '评价' : action}}
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+

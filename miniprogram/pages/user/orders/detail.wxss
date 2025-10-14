@@ -1,0 +1,240 @@
+.order-detail-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 24rpx;
+  padding-bottom: 120rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+}
+
+/* 状态卡片 */
+.status-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  margin-bottom: 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.status-icon {
+  font-size: 80rpx;
+}
+
+.status-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.status-text {
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.status-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 通用卡片 */
+.section-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+/* 活动信息 */
+.activity-info {
+  display: flex;
+  gap: 20rpx;
+}
+
+.activity-cover {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+}
+
+.activity-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  justify-content: center;
+}
+
+.activity-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.activity-subtitle {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.activity-price {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #f59e0b;
+  margin-top: 8rpx;
+}
+
+/* 信息行 */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  max-width: 60%;
+  text-align: right;
+}
+
+.value.code {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.value.price {
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+/* 摄影师信息 */
+.photographer-info {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.photographer-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+}
+
+.photographer-avatar-placeholder {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.photographer-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.photographer-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.photographer-specialty {
+  font-size: 24rpx;
+  color: #667eea;
+  background: #f0f7ff;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  width: fit-content;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #999;
+}
+
+/* 操作栏 */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 32rpx;
+  background: white;
+  border-top: 1rpx solid #eee;
+  display: flex;
+  gap: 16rpx;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.action-button {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.action-pay {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  color: white;
+}
+
+.action-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.action-contact {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.action-after_sale {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.action-evaluate {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+

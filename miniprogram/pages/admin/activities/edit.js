@@ -26,8 +26,8 @@ Page({
     },
     
     // 分类选项
-    categories: ['证件照', '校园活动', '毕业照', '节日活动'],
-    categoryIndex: 1,
+    categories: [],
+    categoryIndex: 0,
     
     // 所有摄影师
     allPhotographers: [],
@@ -43,7 +43,28 @@ Page({
       this.loadActivity(options.id);
     }
     
+    this.loadCategories();
     this.loadPhotographers();
+  },
+
+  // 加载分类列表
+  async loadCategories() {
+    try {
+      const db = wx.cloud.database();
+      const res = await db.collection('activity_categories')
+        .orderBy('sort', 'asc')
+        .get();
+
+      const categories = res.data.map(c => c.name);
+      this.setData({
+        categories: categories.length > 0 ? categories : ['未分类']
+      });
+    } catch (e) {
+      console.error('加载分类失败:', e);
+      this.setData({
+        categories: ['未分类']
+      });
+    }
   },
 
   // 加载活动信息
