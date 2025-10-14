@@ -84,11 +84,37 @@ Page({
       const db = wx.cloud.database();
       
       // 获取当前用户的 openid
-      const { result } = await wx.cloud.callFunction({
-        name: 'unifiedLogin'
-      });
+      let userOpenId = '';
       
-      const userOpenId = result.userInfo._openid || result.userInfo.openid;
+      try {
+        const { result } = await wx.cloud.callFunction({
+          name: 'unifiedLogin'
+        });
+        
+        console.log('登录结果:', result);
+        
+        // 兼容多种返回格式
+        userOpenId = result.userInfo?._openid || result.userInfo?.openid || result._openid || result.openid;
+        
+        if (!userOpenId) {
+          console.error('无法获取OpenID, result:', result);
+          throw new Error('无法获取用户OpenID');
+        }
+        
+        console.log('用户OpenID:', userOpenId);
+      } catch (loginError) {
+        console.error('登录失败:', loginError);
+        wx.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        setTimeout(() => {
+          wx.switchTab({
+            url: '/pages/my/my'
+          });
+        }, 1500);
+        return;
+      }
       
       // 查询用户的孩子列表
       const res = await db.collection('students')
