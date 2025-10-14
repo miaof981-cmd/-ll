@@ -23,9 +23,9 @@
           </view>
         </view>
         <!-- OpenID 显示区域（用于添加管理员） -->
-        <view class="openid-box" wx:if="{{userInfo.openid}}" bindtap="copyOpenId">
+        <view class="openid-box" wx:if="{{userInfo.openid || userInfo._openid}}" bindtap="copyOpenId">
           <text class="openid-label">OpenID: </text>
-          <text class="openid-value">{{userInfo.openid}}</text>
+          <text class="openid-value">{{userInfo.openid || userInfo._openid}}</text>
           <text class="copy-icon">📋</text>
         </view>
       </view>

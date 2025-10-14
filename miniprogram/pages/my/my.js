@@ -114,7 +114,7 @@ Page({
 
   // 复制 OpenID（用于添加管理员配置）
   copyOpenId() {
-    const openid = this.data.userInfo?.openid;
+    const openid = this.data.userInfo?.openid || this.data.userInfo?._openid;
     if (!openid) {
       wx.showToast({
         title: 'OpenID 不存在',
