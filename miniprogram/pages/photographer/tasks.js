@@ -152,15 +152,25 @@ Page({
           }
         }
         
-        // 判断订单显示状态
+        // 判断订单显示状态和拒绝类型
         let displayStatus = '';
         let displayStatusColor = '';
+        let rejectType = ''; // 'admin' 或 'user'
+        let rejectByAdmin = null; // 管理员信息
+        
         if (order.status === 'in_progress' && !hasPhotos) {
           displayStatus = '待上传';
           displayStatusColor = 'urgent';
-        } else if (order.status === 'in_progress' && hasPhotos && (order.adminRejectReason || order.rejectReason)) {
-          displayStatus = '需修改';
-          displayStatusColor = 'warning';
+        } else if (order.status === 'in_progress' && hasPhotos && order.adminRejectReason) {
+          // 管理员驳回
+          displayStatus = '管理员驳回';
+          displayStatusColor = 'admin-reject';
+          rejectType = 'admin';
+        } else if (order.status === 'in_progress' && hasPhotos && order.rejectReason) {
+          // 用户拒绝
+          displayStatus = '用户要求修改';
+          displayStatusColor = 'user-reject';
+          rejectType = 'user';
         } else if (order.status === 'pending_review') {
           displayStatus = '待审核';
           displayStatusColor = 'review';
@@ -182,7 +192,10 @@ Page({
           activityInfo,
           displayStatus,
           displayStatusColor,
-          rejectReasonText: order.adminRejectReason || order.rejectReason || ''
+          rejectType,
+          rejectReasonText: order.adminRejectReason || order.rejectReason || '',
+          adminRejectReason: order.adminRejectReason || '',
+          userRejectReason: order.rejectReason || ''
         };
       }));
 

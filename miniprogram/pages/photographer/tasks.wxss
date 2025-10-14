@@ -103,23 +103,27 @@
 /* 筛选标签 */
 .filter-tabs {
   display: flex;
+  flex-wrap: wrap; /* 允许换行 */
   padding: 24rpx;
   background: #fff;
   margin: 24rpx;
   border-radius: 24rpx;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-  gap: 16rpx;
+  gap: 12rpx; /* 减小间距 */
 }
 
 .filter-tab {
-  flex: 1;
+  flex: 0 0 calc(33.333% - 8rpx); /* 每行3个，减去gap */
   text-align: center;
-  padding: 16rpx 0;
-  font-size: 28rpx;
+  padding: 16rpx 8rpx; /* 减小左右padding */
+  font-size: 26rpx; /* 稍微减小字体 */
   color: #666;
   background: #f5f5f5;
   border-radius: 12rpx;
   transition: all 0.3s ease;
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .filter-tab.active {
@@ -198,8 +202,12 @@
   background: #ef4444;
 }
 
-.status-badge.warning {
-  background: #ff9800;
+.status-badge.admin-reject {
+  background: #dc2626;
+}
+
+.status-badge.user-reject {
+  background: #f59e0b;
 }
 
 .status-badge.review {
@@ -282,18 +290,36 @@
 
 /* 拒绝原因区域 */
 .reject-section {
-  background: #fff1f0;
-  border-left: 4rpx solid #ff4d4f;
   padding: 16rpx;
   margin-bottom: 12rpx;
   border-radius: 8rpx;
+}
+
+/* 管理员驳回样式 */
+.reject-section.admin-reject {
+  background: #fee;
+  border-left: 4rpx solid #dc2626;
+}
+
+.reject-section.admin-reject .reject-title {
+  color: #dc2626;
+}
+
+/* 用户拒绝样式 */
+.reject-section.user-reject {
+  background: #fef3c7;
+  border-left: 4rpx solid #f59e0b;
+}
+
+.reject-section.user-reject .reject-title {
+  color: #f59e0b;
 }
 
 .reject-header {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
 }
 
 .reject-icon {
@@ -303,14 +329,41 @@
 .reject-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: #ff4d4f;
+}
+
+.reject-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+  font-size: 22rpx;
+  color: #999;
+}
+
+.reject-time {
+  flex: 1;
+}
+
+.reject-count {
+  color: #ef4444;
+  font-weight: 600;
 }
 
 .reject-reason {
   font-size: 26rpx;
-  color: #666;
+  color: #333;
   line-height: 1.6;
   display: block;
+  margin-bottom: 12rpx;
+  padding: 12rpx;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 6rpx;
+}
+
+.reject-tip {
+  font-size: 22rpx;
+  color: #666;
+  font-style: italic;
 }
 
 /* 作品上传状态 */

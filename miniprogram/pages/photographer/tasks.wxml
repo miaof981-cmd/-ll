@@ -129,13 +129,31 @@
           <text class="order-no">订单号：{{item.orderNo}}</text>
         </view>
 
-        <!-- 拒绝原因（如果有） -->
-        <view wx:if="{{item.rejectReasonText}}" class="reject-section">
+        <!-- 管理员驳回原因 -->
+        <view wx:if="{{item.rejectType === 'admin'}}" class="reject-section admin-reject">
           <view class="reject-header">
-            <text class="reject-icon">⚠️</text>
-            <text class="reject-title">拒绝原因</text>
+            <text class="reject-icon">🚫</text>
+            <text class="reject-title">管理员驳回</text>
           </view>
-          <text class="reject-reason">{{item.rejectReasonText}}</text>
+          <view class="reject-meta">
+            <text class="reject-time">驳回时间：{{item.adminRejectedAt}}</text>
+          </view>
+          <text class="reject-reason">{{item.adminRejectReason}}</text>
+          <view class="reject-tip">请根据管理员要求重新拍摄并上传</view>
+        </view>
+
+        <!-- 用户要求修改 -->
+        <view wx:elif="{{item.rejectType === 'user'}}" class="reject-section user-reject">
+          <view class="reject-header">
+            <text class="reject-icon">💬</text>
+            <text class="reject-title">用户要求修改</text>
+          </view>
+          <view class="reject-meta">
+            <text class="reject-time">拒绝时间：{{item.rejectedAt}}</text>
+            <text class="reject-count">剩余修改次数：{{3 - (item.rejectCount || 0)}}次</text>
+          </view>
+          <text class="reject-reason">{{item.rejectReason}}</text>
+          <view class="reject-tip">请根据用户反馈进行调整</view>
         </view>
 
         <!-- 作品上传状态 -->
@@ -155,7 +173,8 @@
         <!-- 操作提示 -->
         <view class="action-hint">
           <text wx:if="{{item.displayStatusColor === 'urgent'}}">→ 点击上传作品</text>
-          <text wx:elif="{{item.displayStatusColor === 'warning'}}">→ 点击修改作品</text>
+          <text wx:elif="{{item.displayStatusColor === 'admin-reject'}}">→ 点击重新拍摄上传</text>
+          <text wx:elif="{{item.displayStatusColor === 'user-reject'}}">→ 点击修改作品</text>
           <text wx:elif="{{item.displayStatusColor === 'review'}}">→ 等待管理员审核</text>
           <text wx:elif="{{item.displayStatusColor === 'confirm'}}">→ 等待用户确认</text>
           <text wx:else>→ 点击查看详情</text>
