@@ -1,4 +1,9 @@
 <view class="order-detail-page">
+  <!-- 浮动返回按钮 -->
+  <view wx:if="{{!canGoBack}}" class="float-back-btn" bindtap="goBack">
+    <text class="back-icon">←</text>
+  </view>
+
   <view wx:if="{{loading}}" class="loading">加载中...</view>
 
   <view wx:else class="order-container">

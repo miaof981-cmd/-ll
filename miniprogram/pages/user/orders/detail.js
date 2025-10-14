@@ -295,7 +295,7 @@ Page({
                 
                 // 绘制水印
                 const watermarkText = '确认收图后水印自动消除';
-                const fontSize = Math.min(imgWidth, imgHeight) * 0.06; // 适中字体大小
+                const fontSize = Math.min(imgWidth, imgHeight) * 0.05; // 适中字体大小
                 
                 ctx.font = `bold ${fontSize}px sans-serif`; // 加粗字体
                 ctx.globalAlpha = 0.65; // 略微提高透明度
@@ -310,9 +310,9 @@ Page({
                 ctx.translate(imgWidth / 2, imgHeight / 2);
                 ctx.rotate(-45 * Math.PI / 180);
                 
-                // 计算水印间距（密集覆盖）
-                const spacingX = Math.min(imgWidth, imgHeight) * 0.5; // 横向间距
-                const spacingY = Math.min(imgWidth, imgHeight) * 0.3; // 纵向间距（更密集）
+                // 计算水印间距（密集但不重叠）
+                const spacingX = Math.min(imgWidth, imgHeight) * 0.55; // 横向间距
+                const spacingY = Math.min(imgWidth, imgHeight) * 0.32; // 纵向间距
                 
                 // 密集覆盖整个画面
                 for (let x = -imgWidth * 1.5; x <= imgWidth * 1.5; x += spacingX) {
