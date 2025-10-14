@@ -1,0 +1,217 @@
+/* pages/activities/activities.wxss */
+.activities-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 20rpx;
+}
+
+/* ==================== 分类筛选 ==================== */
+.category-tabs {
+  display: flex;
+  white-space: nowrap;
+  padding: 24rpx 32rpx;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.category-tab {
+  display: inline-block;
+  padding: 12rpx 32rpx;
+  margin-right: 24rpx;
+  font-size: 28rpx;
+  color: #666;
+  background: #f5f5f5;
+  border-radius: 40rpx;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.category-tab.active {
+  color: white;
+  background: linear-gradient(135deg, #1a56db 0%, #3b82f6 100%);
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(26, 86, 219, 0.3);
+}
+
+/* ==================== 活动网格 ==================== */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+  padding: 24rpx 32rpx;
+}
+
+.activity-card {
+  background: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.activity-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.12);
+}
+
+/* ==================== 活动封面 ==================== */
+.activity-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 280rpx;
+  overflow: hidden;
+}
+
+.activity-cover {
+  width: 100%;
+  height: 100%;
+}
+
+.activity-badges {
+  position: absolute;
+  top: 16rpx;
+  left: 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  font-size: 22rpx;
+  border-radius: 20rpx;
+  backdrop-filter: blur(10rpx);
+  font-weight: 600;
+}
+
+.badge-hot {
+  background: rgba(255, 77, 79, 0.9);
+  color: white;
+}
+
+.badge-new {
+  background: rgba(52, 199, 89, 0.9);
+  color: white;
+}
+
+/* ==================== 活动信息 ==================== */
+.activity-info {
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.activity-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+/* ==================== 价格样式 ==================== */
+.activity-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.price-current {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ff4d4f;
+}
+
+.price-original {
+  font-size: 24rpx;
+  color: #999;
+  text-decoration: line-through;
+}
+
+/* ==================== 统计信息 ==================== */
+.activity-stats {
+  display: flex;
+  gap: 16rpx;
+}
+
+.stat-item {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* ==================== 空状态 ==================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 0;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* ==================== 加载状态 ==================== */
+.loading-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 0;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ==================== 动画 ==================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
