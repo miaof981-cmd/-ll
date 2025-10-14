@@ -257,6 +257,91 @@
   line-height: 1.6;
 }
 
+/* 时间线 */
+.timeline {
+  padding: 24rpx 0;
+}
+
+.timeline-item {
+  display: flex;
+  padding-bottom: 40rpx;
+  position: relative;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 15rpx;
+  top: 40rpx;
+  bottom: 0;
+  width: 2rpx;
+  background: #e5e7eb;
+}
+
+.timeline-dot {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: #e5e7eb;
+  flex-shrink: 0;
+  margin-right: 24rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-dot.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+}
+
+.timeline-dot.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.4);
+}
+
+.timeline-dot.warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  box-shadow: 0 4rpx 12rpx rgba(245, 158, 11, 0.4);
+}
+
+.timeline-content {
+  flex: 1;
+  padding-top: 2rpx;
+}
+
+.timeline-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.timeline-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.timeline-desc {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  background: #f8f9fa;
+  padding: 12rpx 16rpx;
+  border-radius: 8rpx;
+  margin-top: 12rpx;
+}
+
+.timeline-desc.reject {
+  background: #fef2f2;
+  color: #dc2626;
+  border-left: 4rpx solid #ef4444;
+}
+
 /* 操作栏 */
 .action-bar {
   position: fixed;
