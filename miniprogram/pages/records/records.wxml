@@ -64,7 +64,7 @@
       </view>
       <view class="card-footer">
         <view class="average-badge">
-          <text>平均分：{{((item.chinese + item.math + item.english) / 3).toFixed(1)}}</text>
+          <text>平均分：{{item.average || '-'}}</text>
         </view>
       </view>
     </view>

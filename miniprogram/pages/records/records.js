@@ -241,6 +241,11 @@ Page({
         recordData.chinese = parseFloat(newRecord.chinese) || 0;
         recordData.math = parseFloat(newRecord.math) || 0;
         recordData.english = parseFloat(newRecord.english) || 0;
+        
+        // 计算平均分
+        const total = recordData.chinese + recordData.math + recordData.english;
+        const count = [recordData.chinese, recordData.math, recordData.english].filter(s => s > 0).length;
+        recordData.average = count > 0 ? (total / count).toFixed(1) : '-';
       }
 
       await cloudDB.addRecord(studentId, recordData);
