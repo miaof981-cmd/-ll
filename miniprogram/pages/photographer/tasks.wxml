@@ -12,20 +12,24 @@
   <!-- 统计卡片 -->
   <view class="stats-container">
     <view class="stat-item urgent">
-      <text class="stat-value">{{stats.notUploaded}}</text>
+      <text class="stat-value">{{stats.toUpload}}</text>
       <text class="stat-label">待上传</text>
     </view>
-    <view class="stat-item">
-      <text class="stat-value processing">{{stats.uploaded}}</text>
+    <view class="stat-item warning">
+      <text class="stat-value">{{stats.rejected}}</text>
+      <text class="stat-label">需修改</text>
+    </view>
+    <view class="stat-item review">
+      <text class="stat-value">{{stats.pendingReview}}</text>
+      <text class="stat-label">待审核</text>
+    </view>
+    <view class="stat-item confirm">
+      <text class="stat-value">{{stats.pendingConfirm}}</text>
       <text class="stat-label">待确认</text>
     </view>
-    <view class="stat-item">
-      <text class="stat-value completed">{{stats.confirmed}}</text>
+    <view class="stat-item success">
+      <text class="stat-value">{{stats.completed}}</text>
       <text class="stat-label">已完成</text>
-    </view>
-    <view class="stat-item">
-      <text class="stat-value">{{stats.total}}</text>
-      <text class="stat-label">总订单</text>
     </view>
   </view>
 
@@ -36,26 +40,40 @@
       bindtap="onStatusFilterChange" 
       data-status="all"
     >
-      全部订单
+      全部
     </view>
     <view 
-      class="filter-tab {{statusFilter === 'not_uploaded' ? 'active' : ''}}" 
+      class="filter-tab {{statusFilter === 'to_upload' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
-      data-status="not_uploaded"
+      data-status="to_upload"
     >
       🔥 待上传
     </view>
     <view 
-      class="filter-tab {{statusFilter === 'uploaded' ? 'active' : ''}}" 
+      class="filter-tab {{statusFilter === 'rejected' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
-      data-status="uploaded"
+      data-status="rejected"
+    >
+      ⚠️ 需修改
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'pending_review' ? 'active' : ''}}" 
+      bindtap="onStatusFilterChange" 
+      data-status="pending_review"
+    >
+      🔍 待审核
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'pending_confirm' ? 'active' : ''}}" 
+      bindtap="onStatusFilterChange" 
+      data-status="pending_confirm"
     >
       ⏳ 待确认
     </view>
     <view 
-      class="filter-tab {{statusFilter === 'confirmed' ? 'active' : ''}}" 
+      class="filter-tab {{statusFilter === 'completed' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
-      data-status="confirmed"
+      data-status="completed"
     >
       ✅ 已完成
     </view>
@@ -76,51 +94,71 @@
       <view 
         wx:for="{{orders}}" 
         wx:key="_id" 
-        class="order-card {{item.isUrgent ? 'urgent' : ''}}"
+        class="order-card"
         bindtap="viewOrderDetail"
         data-id="{{item._id}}"
       >
-        <!-- 紧急标签 -->
-        <view wx:if="{{item.isUrgent && !item.hasPhotos}}" class="urgent-tag">
-          <text>🔥 紧急</text>
-        </view>
-
-        <!-- 订单头部 -->
+        <!-- 订单头部 - 状态和紧急标签 -->
         <view class="order-header">
-          <view class="header-left">
-            <text class="student-name">{{item.studentName}}</text>
-            <text class="activity-name">{{item.activityName || '证件照拍摄'}}</text>
+          <view class="status-badge {{item.displayStatusColor}}">
+            {{item.displayStatus}}
           </view>
-          <view class="header-right">
-            <text class="time-text">{{item.timeText}}</text>
-          </view>
-        </view>
-
-        <!-- 订单状态 -->
-        <view class="order-status-row">
-          <view class="status-item">
-            <text class="status-icon">📷</text>
-            <text class="status-text">
-              {{item.hasPhotos ? '已上传 ' + item.photoCount + ' 张' : '未上传作品'}}
-            </text>
-          </view>
-          <view class="status-item" wx:if="{{item.status === 'pending_confirm'}}">
-            <text class="status-icon">⏳</text>
-            <text class="status-text">等待确认</text>
-          </view>
-          <view class="status-item success" wx:if="{{item.status === 'completed'}}">
-            <text class="status-icon">✅</text>
-            <text class="status-text">已完成</text>
+          <view wx:if="{{item.isUrgent && item.displayStatusColor === 'urgent'}}" class="urgent-badge">
+            🔥 {{item.daysAgo}}天未处理
           </view>
         </view>
 
-        <!-- 快捷操作 -->
-        <view class="quick-actions">
-          <view class="action-hint">
-            <text wx:if="{{!item.hasPhotos}}">点击进入上传作品 →</text>
-            <text wx:elif="{{item.status === 'pending_confirm'}}">点击查看详情 →</text>
-            <text wx:else>点击查看订单 →</text>
+        <!-- 活动信息 -->
+        <view class="activity-section">
+          <image 
+            wx:if="{{item.activityInfo && item.activityInfo.image}}"
+            class="activity-thumb" 
+            src="{{item.activityInfo.image}}" 
+            mode="aspectFill"
+          />
+          <view class="activity-info">
+            <text class="activity-name">{{item.activityInfo.name || '活动'}}</text>
+            <text class="activity-price">¥{{item.activityInfo.price || item.price || 0}}</text>
           </view>
+        </view>
+
+        <!-- 学生信息 -->
+        <view class="student-info">
+          <text class="label">学生：</text>
+          <text class="value">{{item.studentName}}</text>
+          <text class="order-no">订单号：{{item.orderNo}}</text>
+        </view>
+
+        <!-- 拒绝原因（如果有） -->
+        <view wx:if="{{item.rejectReasonText}}" class="reject-section">
+          <view class="reject-header">
+            <text class="reject-icon">⚠️</text>
+            <text class="reject-title">拒绝原因</text>
+          </view>
+          <text class="reject-reason">{{item.rejectReasonText}}</text>
+        </view>
+
+        <!-- 作品上传状态 -->
+        <view class="photo-status">
+          <text class="photo-icon">📷</text>
+          <text class="photo-text">
+            {{item.hasPhotos ? '已上传 ' + item.photoCount + ' 张作品' : '还未上传作品'}}
+          </text>
+        </view>
+
+        <!-- 时间信息 -->
+        <view class="time-info">
+          <text class="time-label">下单时间：</text>
+          <text class="time-value">{{item.timeText}}</text>
+        </view>
+
+        <!-- 操作提示 -->
+        <view class="action-hint">
+          <text wx:if="{{item.displayStatusColor === 'urgent'}}">→ 点击上传作品</text>
+          <text wx:elif="{{item.displayStatusColor === 'warning'}}">→ 点击修改作品</text>
+          <text wx:elif="{{item.displayStatusColor === 'review'}}">→ 等待管理员审核</text>
+          <text wx:elif="{{item.displayStatusColor === 'confirm'}}">→ 等待用户确认</text>
+          <text wx:else>→ 点击查看详情</text>
         </view>
       </view>
     </view>

@@ -4,12 +4,14 @@ Page({
     photographerInfo: null,
     orders: [],
     stats: {
-      notUploaded: 0,      // 未上传作品
-      uploaded: 0,          // 已上传待确认
-      confirmed: 0,         // 已确认完成
+      toUpload: 0,          // 待上传（进行中，无照片）
+      pendingReview: 0,     // 待审核（已提交，等管理员审核）
+      rejected: 0,          // 审核驳回（需要修改）
+      pendingConfirm: 0,    // 待用户确认
+      completed: 0,         // 已完成
       total: 0
     },
-    statusFilter: 'all',  // all, not_uploaded, uploaded, confirmed
+    statusFilter: 'all',  // all, to_upload, pending_review, rejected, pending_confirm, completed
     loading: false
   },
 
@@ -98,38 +100,77 @@ Page({
 
       // 根据筛选条件过滤订单
       let orders = allOrders;
-      if (this.data.statusFilter === 'not_uploaded') {
-        // 未上传作品：进行中且没有照片
+      if (this.data.statusFilter === 'to_upload') {
+        // 待上传：进行中且没有照片，或刚接单
         orders = allOrders.filter(o => 
-          o.status === 'in_progress' && (!o.photos || o.photos.length === 0)
+          o.status === 'in_progress' && (!o.photos || o.photos.length === 0) && !o.adminRejectReason && !o.rejectReason
         );
-      } else if (this.data.statusFilter === 'uploaded') {
-        // 已上传待确认：有照片但还未完成
+      } else if (this.data.statusFilter === 'pending_review') {
+        // 待审核：已提交，等管理员审核
+        orders = allOrders.filter(o => o.status === 'pending_review');
+      } else if (this.data.statusFilter === 'rejected') {
+        // 审核驳回：被管理员或用户拒绝，需要修改
         orders = allOrders.filter(o => 
-          o.status === 'pending_confirm' || (o.status === 'in_progress' && o.photos && o.photos.length > 0)
+          o.status === 'in_progress' && (o.adminRejectReason || o.rejectReason) && o.photos && o.photos.length > 0
         );
-      } else if (this.data.statusFilter === 'confirmed') {
-        // 已确认完成
+      } else if (this.data.statusFilter === 'pending_confirm') {
+        // 待用户确认：审核通过，等用户确认
+        orders = allOrders.filter(o => o.status === 'pending_confirm');
+      } else if (this.data.statusFilter === 'completed') {
+        // 已完成
         orders = allOrders.filter(o => o.status === 'completed');
       }
 
       // 计算统计数据
       const stats = {
-        notUploaded: allOrders.filter(o => 
-          o.status === 'in_progress' && (!o.photos || o.photos.length === 0)
+        toUpload: allOrders.filter(o => 
+          o.status === 'in_progress' && (!o.photos || o.photos.length === 0) && !o.adminRejectReason && !o.rejectReason
         ).length,
-        uploaded: allOrders.filter(o => 
-          o.status === 'pending_confirm' || (o.status === 'in_progress' && o.photos && o.photos.length > 0)
+        pendingReview: allOrders.filter(o => o.status === 'pending_review').length,
+        rejected: allOrders.filter(o => 
+          o.status === 'in_progress' && (o.adminRejectReason || o.rejectReason) && o.photos && o.photos.length > 0
         ).length,
-        confirmed: allOrders.filter(o => o.status === 'completed').length,
+        pendingConfirm: allOrders.filter(o => o.status === 'pending_confirm').length,
+        completed: allOrders.filter(o => o.status === 'completed').length,
         total: allOrders.length
       };
 
-      // 添加订单的时间信息
-      const ordersWithTime = orders.map(order => {
+      // 加载活动信息并添加订单的时间信息
+      const ordersWithTime = await Promise.all(orders.map(async (order) => {
         const daysAgo = this.getDaysAgo(order.createdAt);
         const isUrgent = daysAgo >= 2; // 2天以上算紧急
         const hasPhotos = order.photos && order.photos.length > 0;
+        
+        // 加载活动信息
+        let activityInfo = null;
+        if (order.activityId) {
+          try {
+            const activityRes = await db.collection('activities').doc(order.activityId).get();
+            activityInfo = activityRes.data;
+          } catch (e) {
+            console.error('加载活动信息失败:', e);
+          }
+        }
+        
+        // 判断订单显示状态
+        let displayStatus = '';
+        let displayStatusColor = '';
+        if (order.status === 'in_progress' && !hasPhotos) {
+          displayStatus = '待上传';
+          displayStatusColor = 'urgent';
+        } else if (order.status === 'in_progress' && hasPhotos && (order.adminRejectReason || order.rejectReason)) {
+          displayStatus = '需修改';
+          displayStatusColor = 'warning';
+        } else if (order.status === 'pending_review') {
+          displayStatus = '待审核';
+          displayStatusColor = 'review';
+        } else if (order.status === 'pending_confirm') {
+          displayStatus = '待用户确认';
+          displayStatusColor = 'confirm';
+        } else if (order.status === 'completed') {
+          displayStatus = '已完成';
+          displayStatusColor = 'success';
+        }
         
         return {
           ...order,
@@ -137,9 +178,13 @@ Page({
           isUrgent,
           hasPhotos,
           photoCount: order.photos ? order.photos.length : 0,
-          timeText: this.getTimeText(order.createdAt)
+          timeText: this.getTimeText(order.createdAt),
+          activityInfo,
+          displayStatus,
+          displayStatusColor,
+          rejectReasonText: order.adminRejectReason || order.rejectReason || ''
         };
-      });
+      }));
 
       this.setData({
         orders: ordersWithTime,
