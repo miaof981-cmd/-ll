@@ -1,69 +1,91 @@
-<!--pages/login/login.wxml - 统一登录页面-->
+<!--pages/login/login.wxml - 统一登录（保留原设计风格）-->
 <view class="login-container">
-  <!-- 顶部装饰 -->
-  <view class="header-wave">
-    <image class="wave-img" src="/images/wave-bg.png" mode="widthFix"></image>
+  <!-- 顶部装饰圆圈 -->
+  <view class="header-decoration">
+    <view class="decoration-circle circle-1"></view>
+    <view class="decoration-circle circle-2"></view>
+    <view class="decoration-circle circle-3"></view>
   </view>
 
-  <!-- Logo 和标题 -->
-  <view class="logo-section">
-    <view class="logo-circle">
-      <image class="logo-img" src="/images/school-logo.png" mode="aspectFit"></image>
+  <!-- 登录卡片 -->
+  <view class="login-card">
+    <!-- Logo 和标题（漂浮的博士帽） -->
+    <view class="login-header">
+      <view class="logo-large">🎓</view>
+      <text class="login-title">学校官网登录</text>
+      <text class="login-subtitle">欢迎回来，请选择登录方式</text>
     </view>
-    <text class="school-name">学校官网小程序</text>
-    <text class="welcome-text">欢迎登录</text>
-  </view>
 
-  <!-- 登录按钮区域 -->
-  <view class="login-section">
-    <button 
-      class="login-btn primary"
-      bindtap="wechatLogin"
-      loading="{{loading}}"
-      disabled="{{loading}}"
-    >
-      <view class="btn-content">
-        <image class="wechat-icon" src="/images/wechat-icon.png" mode="aspectFit"></image>
-        <text>微信一键登录</text>
+    <!-- 微信登录按钮 -->
+    <view class="login-section">
+      <button 
+        class="btn-wechat-login"
+        bindtap="wechatLogin"
+        loading="{{loading}}"
+        disabled="{{loading}}"
+      >
+        <view class="btn-content">
+          <text class="wechat-icon">💚</text>
+          <text class="btn-text">微信一键登录</text>
+        </view>
+      </button>
+
+      <view class="login-desc">
+        <text class="desc-icon">✨</text>
+        <text class="desc-text">自动识别身份，无需密码</text>
       </view>
-    </button>
-
-    <view class="divider">
-      <view class="line"></view>
-      <text class="divider-text">或</text>
-      <view class="line"></view>
     </view>
 
+    <!-- 分隔线 -->
+    <view class="divider-section">
+      <view class="divider-line"></view>
+      <text class="divider-text">其他方式</text>
+      <view class="divider-line"></view>
+    </view>
+
+    <!-- 快捷入口 -->
     <view class="quick-actions">
-      <view class="action-item" bindtap="guestMode">
+      <view class="action-card" bindtap="guestMode">
         <view class="action-icon">👁️</view>
-        <text class="action-text">游客浏览</text>
+        <text class="action-title">游客浏览</text>
+        <text class="action-desc">查看校园活动</text>
       </view>
-      <view class="action-item" bindtap="goToApply">
+      <view class="action-card" bindtap="goToApply">
         <view class="action-icon">📝</view>
-        <text class="action-text">申请入学</text>
+        <text class="action-title">申请入学</text>
+        <text class="action-desc">开启求学之旅</text>
+      </view>
+    </view>
+
+    <!-- 提示信息 -->
+    <view class="hint-box">
+      <view class="hint-title">
+        <text class="hint-icon">ℹ️</text>
+        <text>智能识别说明</text>
+      </view>
+      <view class="hint-list">
+        <view class="hint-item">
+          <text class="hint-icon-small">👨‍👩‍👧‍👦</text>
+          <text class="hint-text">家长自动识别，查看孩子档案</text>
+        </view>
+        <view class="hint-item">
+          <text class="hint-icon-small">⚙️</text>
+          <text class="hint-text">管理员自动识别，直达后台</text>
+        </view>
+        <view class="hint-item">
+          <text class="hint-icon-small">📷</text>
+          <text class="hint-text">摄影师自动识别，查看任务</text>
+        </view>
+        <view class="hint-item">
+          <text class="hint-icon-small">🔄</text>
+          <text class="hint-text">多角色支持，随时切换</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- 说明文字 -->
-  <view class="info-section">
-    <view class="info-item">
-      <view class="info-icon">✅</view>
-      <text class="info-text">家长自动识别，查看孩子档案</text>
-    </view>
-    <view class="info-item">
-      <view class="info-icon">✅</view>
-      <text class="info-text">管理员自动识别，直达后台</text>
-    </view>
-    <view class="info-item">
-      <view class="info-icon">✅</view>
-      <text class="info-text">多角色支持，一键切换</text>
-    </view>
-  </view>
-
-  <!-- 底部提示 -->
-  <view class="footer-tip">
-    <text class="tip-text">首次登录将自动创建账号</text>
+  <!-- 底部文字 -->
+  <view class="footer-text">
+    <text>© 2025 学校官网 · 安全可靠</text>
   </view>
 </view>
