@@ -44,5 +44,6 @@
     "tabSize": 2
   },
   "cloudfunctionRoot": "cloudfunctions/",
-  "miniprogramRoot": "miniprogram/"
+  "miniprogramRoot": "miniprogram/",
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
 }

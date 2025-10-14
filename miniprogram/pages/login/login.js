@@ -65,7 +65,7 @@ Page({
         
         // 4. 处理角色跳转
         if (roles.length === 1) {
-          // 单一角色，直接跳转
+          // 单一角色
           const role = roles[0];
           wx.setStorageSync('currentRole', role);
           
@@ -81,7 +81,14 @@ Page({
           });
           
           setTimeout(() => {
-            this.navigateToHomePage(role);
+            // 家长角色检查是否有孩子
+            if (role === 'parent' && (!user.children || user.children.length === 0)) {
+              // 未入学，引导申请
+              this.showEnrollmentGuide();
+            } else {
+              // 已入学或其他角色，正常跳转
+              this.navigateToHomePage(role);
+            }
           }, 1500);
         } else {
           // 多角色，跳转到角色选择页
@@ -116,6 +123,28 @@ Page({
     }
   },
 
+  // 引导申请入学
+  showEnrollmentGuide() {
+    wx.showModal({
+      title: '欢迎加入',
+      content: '检测到您还未绑定孩子信息\n\n请先完成入学申请，审核通过后即可查看孩子档案',
+      confirmText: '去申请',
+      cancelText: '稍后再说',
+      success: (res) => {
+        if (res.confirm) {
+          wx.navigateTo({
+            url: '/pages/apply/apply'
+          });
+        } else {
+          // 仍然进入个人中心，但会显示"未入学"状态
+          wx.reLaunch({
+            url: '/pages/my/my'
+          });
+        }
+      }
+    });
+  },
+
   // 根据角色跳转到对应首页
   navigateToHomePage(role) {
     const homePageMap = {
@@ -127,19 +156,5 @@ Page({
     const url = homePageMap[role] || '/pages/my/my';
     
     wx.reLaunch({ url });
-  },
-
-  // 游客模式（查看活动）
-  guestMode() {
-    wx.switchTab({
-      url: '/pages/index/index'
-    });
-  },
-
-  // 申请入学（无需登录）
-  goToApply() {
-    wx.navigateTo({
-      url: '/pages/apply/apply'
-    });
   }
 });
