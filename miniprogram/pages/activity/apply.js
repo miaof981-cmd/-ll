@@ -88,7 +88,7 @@ Page({
         name: 'unifiedLogin'
       });
       
-      const userOpenId = result.userInfo._openid;
+      const userOpenId = result.userInfo._openid || result.userInfo.openid;
       
       // 查询用户的孩子列表
       const res = await db.collection('students')
@@ -117,13 +117,22 @@ Page({
   selectChild(e) {
     const child = e.currentTarget.dataset.child;
     
+    console.log('选中的孩子:', child);
+    
     // 加载孩子的生活照
     const lifePhotos = child.lifePhotos || [];
+    
+    console.log('孩子的生活照:', lifePhotos);
     
     this.setData({
       selectedChild: child,
       lifePhotos: lifePhotos,
       showAddChildTip: false
+    }, () => {
+      console.log('设置后的数据:', {
+        selectedChild: this.data.selectedChild,
+        lifePhotos: this.data.lifePhotos
+      });
     });
   },
 
