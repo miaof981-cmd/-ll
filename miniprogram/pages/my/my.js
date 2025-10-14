@@ -11,6 +11,7 @@ Page({
     isAdmin: false,
     isPhotographer: false,
     isParent: false,
+    loading: true, // 添加加载状态
     roleConfig: {
       'parent': { name: '家长', icon: '👨‍👩‍👧‍👦', color: '#3b82f6' },
       'admin': { name: '管理员', icon: '⚙️', color: '#ef4444' },
@@ -61,7 +62,8 @@ Page({
           isLoggedIn: true,
           isAdmin,
           isPhotographer,
-          isParent
+          isParent,
+          loading: false
         });
         
         // 更新全局数据
@@ -76,7 +78,8 @@ Page({
           isLoggedIn: false,
           isAdmin: false,
           isPhotographer: false,
-          isParent: false
+          isParent: false,
+          loading: false
         });
       }
     } catch (e) {
@@ -85,7 +88,8 @@ Page({
         isLoggedIn: false,
         isAdmin: false,
         isPhotographer: false,
-        isParent: false
+        isParent: false,
+        loading: false
       });
     }
   },

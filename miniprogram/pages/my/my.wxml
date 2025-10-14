@@ -1,7 +1,12 @@
 <!--pages/my/my.wxml - 个人中心-->
 <view class="my-page">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <text class="loading-text">加载中...</text>
+  </view>
+
   <!-- 已登录状态 -->
-  <view wx:if="{{isLoggedIn}}">
+  <view wx:elif="{{isLoggedIn}}">
     <!-- 用户信息卡片 -->
     <view class="user-card">
       <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>

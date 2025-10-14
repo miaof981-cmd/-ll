@@ -5,6 +5,19 @@
   padding-bottom: 40rpx;
 }
 
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
 /* ==================== 用户卡片 ==================== */
 .user-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
