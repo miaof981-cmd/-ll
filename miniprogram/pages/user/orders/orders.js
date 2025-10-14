@@ -35,7 +35,15 @@ Page({
         name: 'unifiedLogin'
       });
       
-      const userOpenId = result.userInfo._openid;
+      console.log('登录结果:', result);
+      
+      const userOpenId = result.userInfo?._openid || result.userInfo?.openid || result._openid || result.openid;
+      
+      if (!userOpenId) {
+        throw new Error('无法获取用户OpenID');
+      }
+      
+      console.log('用户OpenID:', userOpenId);
       
       // 查询当前用户的订单
       const res = await db.collection('activity_orders')
