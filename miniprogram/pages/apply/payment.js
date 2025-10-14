@@ -41,35 +41,103 @@ Page({
   },
 
   // 提交支付
-  submitPayment() {
+  async submitPayment() {
     wx.showLoading({
-      title: '支付处理中...'
+      title: '提交中...'
     });
 
-    // 模拟支付过程
-    setTimeout(() => {
-      wx.hideLoading();
+    try {
+      // 获取当前用户的 openid
+      const { result } = await wx.cloud.callFunction({
+        name: 'unifiedLogin'
+      });
+      
+      const userOpenId = result.userInfo?._openid || result.userInfo?.openid || result._openid || result.openid;
+      
+      if (!userOpenId) {
+        throw new Error('无法获取用户信息');
+      }
 
-      // 创建申请记录
+      const db = wx.cloud.database();
+      const createDate = wx.getStorageSync('createDate') || new Date().toISOString();
+
+      // 1. 创建学生记录
+      const studentData = {
+        studentId: this.data.studentId,
+        name: this.data.formData.childName,
+        gender: this.data.formData.childGender,
+        age: parseInt(this.data.formData.childAge) || 0,
+        grade: '待分配',
+        class: '待分配',
+        parentOpenid: userOpenId,
+        parentName: this.data.formData.parentName,
+        parentPhone: this.data.formData.parentPhone,
+        lifePhotos: this.data.formData.childPhoto ? [this.data.formData.childPhoto] : [],
+        status: 'waiting_photo', // 等待证件照拍摄
+        createdAt: createDate,
+        updatedAt: new Date().toISOString()
+      };
+
+      const studentRes = await db.collection('students').add({
+        data: studentData
+      });
+
+      console.log('✅ 学生记录创建成功:', studentRes._id);
+
+      // 2. 获取证件照活动ID（查找默认证件照活动）
+      const activityRes = await db.collection('activities')
+        .where({
+          isDefault: true,
+          category: '证件照'
+        })
+        .get();
+
+      let activityId = '';
+      if (activityRes.data && activityRes.data.length > 0) {
+        activityId = activityRes.data[0]._id;
+      }
+
+      // 3. 创建证件照订单
+      const orderData = {
+        activityId: activityId,
+        studentId: this.data.studentId,
+        studentName: this.data.formData.childName,
+        photographerId: this.data.photographer._id || this.data.photographer.id,
+        photographerName: this.data.photographer.name,
+        lifePhotos: this.data.formData.childPhoto ? [this.data.formData.childPhoto] : [],
+        remark: this.data.formData.expectations || '',
+        totalPrice: this.data.photographer.price || 20,
+        status: 'in_progress', // 进行中（拍摄中）
+        paymentMethod: this.data.paymentMethod,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const orderRes = await db.collection('activity_orders').add({
+        data: orderData
+      });
+
+      console.log('✅ 订单创建成功:', orderRes._id);
+
+      // 4. 本地也保存一份（兼容旧逻辑）
       const application = {
-        id: 'app_' + Date.now(),
+        id: orderRes._id,
         studentId: this.data.studentId,
         studentName: this.data.formData.childName,
         parentName: this.data.formData.parentName,
         parentPhone: this.data.formData.parentPhone,
         childPhoto: this.data.formData.childPhoto,
-        photographerId: this.data.photographer.id,
+        photographerId: this.data.photographer.id || this.data.photographer._id,
         photographerName: this.data.photographer.name,
         price: this.data.photographer.price,
         paymentMethod: this.data.paymentMethod,
-        status: 'photographing', // photographing: 摄影师拍摄中
+        status: 'photographing',
         formData: this.data.formData,
-        createDate: wx.getStorageSync('createDate'),
+        createDate: createDate,
         paymentTime: new Date().toLocaleString('zh-CN'),
-        idPhoto: '' // 证件照，待摄影师上传
+        idPhoto: ''
       };
 
-      // 保存申请记录
       storage.saveApplication(application);
 
       // 清除临时数据
@@ -78,19 +146,28 @@ Page({
       wx.removeStorageSync('studentId');
       wx.removeStorageSync('createDate');
 
+      wx.hideLoading();
+
       // 显示成功提示
       wx.showModal({
-        title: '支付成功',
+        title: '申请成功',
         content: '您的入学申请已提交，摄影师将在3个工作日内完成拍摄。',
         showCancel: false,
         success: () => {
-          // 跳转到状态查看页面
+          // 跳转到我的订单页面
           wx.redirectTo({
-            url: '/pages/apply/status?id=' + application.id
+            url: '/pages/user/orders/orders'
           });
         }
       });
-    }, 2000);
+    } catch (e) {
+      console.error('❌ 提交失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '提交失败: ' + e.message,
+        icon: 'none'
+      });
+    }
   }
 });
 
