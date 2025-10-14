@@ -163,7 +163,7 @@ Page({
   viewDetail(e) {
     const { id } = e.currentTarget.dataset;
     wx.navigateTo({
-      url: `/pages/admin/orders/detail?id=${id}`
+      url: `/pages/admin/review/detail?id=${id}`
     });
   }
 });

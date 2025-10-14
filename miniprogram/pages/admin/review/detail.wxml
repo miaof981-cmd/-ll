@@ -1,0 +1,161 @@
+<view class="review-detail-page">
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:else>
+    <!-- 活动参考信息 -->
+    <view class="reference-section">
+      <view class="section-header">
+        <text class="section-icon">🎯</text>
+        <text class="section-title">活动参考</text>
+        <text class="section-subtitle">对比查看作品是否符合要求</text>
+      </view>
+      
+      <view class="activity-reference">
+        <image 
+          class="activity-cover" 
+          src="{{activity.image}}" 
+          mode="aspectFill"
+          bindtap="previewActivityCover"
+        />
+        <view class="activity-details">
+          <text class="activity-name">{{activity.name}}</text>
+          <text class="activity-desc">{{activity.description}}</text>
+          <text class="activity-price">参考价格：¥{{activity.price}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交的作品 -->
+    <view class="works-section">
+      <view class="section-header">
+        <text class="section-icon">📸</text>
+        <text class="section-title">提交作品（{{order.photos.length}}张）</text>
+      </view>
+
+      <!-- 摄影师备注 -->
+      <view wx:if="{{order.photographerNote}}" class="photographer-note">
+        <view class="note-label">💬 摄影师说明：</view>
+        <text class="note-text">{{order.photographerNote}}</text>
+      </view>
+
+      <view class="photos-grid">
+        <view 
+          wx:for="{{order.photos}}" 
+          wx:key="index"
+          class="photo-item"
+          bindtap="previewPhoto"
+          data-index="{{index}}"
+        >
+          <image src="{{item}}" mode="aspectFill" class="photo" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单时间线 -->
+    <view class="timeline-section">
+      <view class="section-header">
+        <text class="section-icon">📋</text>
+        <text class="section-title">处理记录</text>
+      </view>
+
+      <view class="timeline">
+        <!-- 当前：待审核 -->
+        <view class="timeline-item current">
+          <view class="timeline-dot active"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <text class="timeline-label">📸 摄影师提交作品</text>
+              <text class="timeline-time">{{order.submittedAt}}</text>
+            </view>
+            <text class="timeline-desc">已提交 {{order.photos.length}} 张照片，等待审核</text>
+          </view>
+        </view>
+
+        <!-- 之前的管理员拒绝记录 -->
+        <view wx:if="{{order.adminRejectedAt}}" class="timeline-item">
+          <view class="timeline-dot reject"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <text class="timeline-label">🚫 管理员驳回</text>
+              <text class="timeline-time">{{order.adminRejectedAt}}</text>
+            </view>
+            <view class="reject-reason-box admin">
+              <text class="reject-label">驳回原因：</text>
+              <text class="reject-text">{{order.adminRejectReason}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 之前的用户拒绝记录 -->
+        <view wx:if="{{order.rejectedAt}}" class="timeline-item">
+          <view class="timeline-dot reject"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <text class="timeline-label">💬 用户要求修改</text>
+              <text class="timeline-time">{{order.rejectedAt}}</text>
+            </view>
+            <view class="reject-reason-box user">
+              <text class="reject-label">拒绝原因：</text>
+              <text class="reject-text">{{order.rejectReason}}</text>
+              <text class="reject-meta">修改次数：{{order.rejectCount || 0}}/3</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 摄影师接单 -->
+        <view class="timeline-item">
+          <view class="timeline-dot"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <text class="timeline-label">👍 摄影师接单</text>
+            </view>
+            <text class="timeline-desc">摄影师：{{photographer.name}}</text>
+          </view>
+        </view>
+
+        <!-- 订单创建 -->
+        <view class="timeline-item">
+          <view class="timeline-dot"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <text class="timeline-label">📝 创建订单</text>
+              <text class="timeline-time">{{order.createdAt}}</text>
+            </view>
+            <text class="timeline-desc">学生：{{order.studentName}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 订单基本信息 -->
+    <view class="info-section">
+      <view class="info-row">
+        <text class="info-label">订单号：</text>
+        <text class="info-value">{{order.orderNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">学生：</text>
+        <text class="info-value">{{order.studentName}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">摄影师：</text>
+        <text class="info-value">{{photographer.name}}</text>
+      </view>
+    </view>
+
+    <!-- 操作按钮（固定底部） -->
+    <view class="action-bar">
+      <button class="action-btn approve" bindtap="approveWork">
+        <text class="btn-icon">✓</text>
+        <text class="btn-text">审核通过</text>
+      </button>
+      <button class="action-btn reject" bindtap="rejectWork">
+        <text class="btn-icon">✕</text>
+        <text class="btn-text">拒绝重拍</text>
+      </button>
+    </view>
+  </view>
+</view>
+
