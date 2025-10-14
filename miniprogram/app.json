@@ -38,21 +38,15 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "首页",
-        "iconPath": "images/tab-home.png",
-        "selectedIconPath": "images/tab-home-active.png"
+        "text": "首页"
       },
       {
         "pagePath": "pages/activities/activities",
-        "text": "活动",
-        "iconPath": "images/tab-activity.png",
-        "selectedIconPath": "images/tab-activity-active.png"
+        "text": "活动"
       },
       {
         "pagePath": "pages/login/login",
-        "text": "我的",
-        "iconPath": "images/tab-my.png",
-        "selectedIconPath": "images/tab-my-active.png"
+        "text": "我的"
       }
     ]
   },
