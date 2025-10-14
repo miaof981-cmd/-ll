@@ -1,0 +1,114 @@
+/* pages/role-select/role-select.wxss */
+.role-select-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 40rpx 32rpx;
+}
+
+/* ==================== 用户信息 ==================== */
+.user-header {
+  background: white;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.nickname {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.tip {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* ==================== 角色列表 ==================== */
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+.role-card {
+  background: white;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.08);
+  border-left: 6rpx solid #3b82f6;
+  transition: all 0.3s;
+}
+
+.role-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.12);
+}
+
+.role-icon {
+  font-size: 72rpx;
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+.role-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.role-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.role-desc {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.5;
+}
+
+.role-arrow {
+  font-size: 40rpx;
+  color: #ccc;
+}
+
+/* ==================== 提示 ==================== */
+.hint-section {
+  padding: 24rpx;
+  text-align: center;
+}
+
+.hint-text {
+  font-size: 24rpx;
+  color: #999;
+}
+

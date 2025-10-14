@@ -3,6 +3,7 @@
     "pages/index/index",
     "pages/activities/activities",
     "pages/login/login",
+    "pages/role-select/role-select",
     "pages/records/records",
     "pages/admin/admin",
     "pages/admin/banners/banners",

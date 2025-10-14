@@ -1,204 +1,145 @@
-// pages/login/login.js
-const cloudDB = require('../../utils/cloud-db.js');
-
+// pages/login/login.js - 统一微信授权登录
 Page({
   data: {
-    studentId: '',
-    password: '',
-    loginType: 'parent',
     loading: false,
-    hasApplication: false, // 是否已有申请
-    applicationId: '' // 申请ID
+    hasAuthorized: false
   },
 
   onLoad() {
-    console.log("登录页加载");
-    this.checkApplication();
+    console.log('📱 统一登录页加载');
+    this.checkLoginStatus();
   },
 
   onShow() {
-    // 每次显示时检查是否有申请
-    this.checkApplication();
+    this.checkLoginStatus();
   },
 
-  // 检查是否有申请记录
-  async checkApplication() {
+  // 检查登录状态
+  async checkLoginStatus() {
     try {
-      const applications = await cloudDB.getApplications();
-      if (applications.length > 0) {
-        // 获取最新的申请
-        const latestApp = applications[applications.length - 1];
-        this.setData({
-          hasApplication: true,
-          applicationId: latestApp._id || latestApp.id
-        });
-      } else {
-        this.setData({
-          hasApplication: false,
-          applicationId: ''
-        });
+      const userInfo = wx.getStorageSync('unifiedUserInfo');
+      const currentRole = wx.getStorageSync('currentRole');
+      
+      if (userInfo && currentRole) {
+        console.log('✅ 已登录，角色:', currentRole);
+        this.setData({ hasAuthorized: true });
+        // 自动跳转到对应首页
+        this.navigateToHomePage(currentRole);
       }
     } catch (e) {
-      console.error('❌ 检查申请记录失败:', e);
+      console.error('检查登录状态失败:', e);
     }
   },
 
-  // 输入学号
-  onStudentIdInput(e) {
-    this.setData({
-      studentId: e.detail.value
-    });
-  },
-
-  // 输入密码
-  onPasswordInput(e) {
-    this.setData({
-      password: e.detail.value
-    });
-  },
-
-  // 切换登录类型
-  switchLoginType(e) {
-    const type = e.currentTarget.dataset.type;
-    this.setData({
-      loginType: type,
-      studentId: '',
-      password: ''
-    });
-  },
-
-  // 登录
-  async handleLogin() {
-    const { studentId, password, loginType } = this.data;
-
-    if (!studentId.trim()) {
-      wx.showToast({
-        title: loginType === 'parent' ? '请输入学号' : '请输入用户名',
-        icon: 'error'
-      });
-      return;
-    }
-
-    if (!password.trim()) {
-      wx.showToast({
-        title: '请输入密码',
-        icon: 'error'
-      });
-      return;
-    }
-
+  // 微信授权登录
+  async wechatLogin() {
     this.setData({ loading: true });
-    wx.showLoading({ title: '登录中...' });
-
+    
     try {
-      // 验证登录
-      let isValid = false;
-      let userInfo = null;
+      // 1. 获取用户信息
+      const { userInfo } = await wx.getUserProfile({
+        desc: '用于完善用户资料'
+      });
       
-      if (loginType === 'admin') {
-        // 管理员登录
-        isValid = studentId === 'admin' && password === 'admin123';
-        if (isValid) {
-          userInfo = {
-            studentId: 'admin',
-            name: '管理员'
-          };
-        }
-      } else {
-        // 学生/家长登录 - 从云数据库验证
-        const students = await cloudDB.getStudents();
-        
-        console.log('✅ 获取学生数据:', students.length);
-        
-        const student = students.find(s => s.studentId === studentId.trim());
-        
-        if (student) {
-          console.log('✅ 找到学生:', student);
-          // 验证密码（默认密码是123456，或用户修改后的密码）
-          const correctPassword = student.password || '123456';
-          isValid = password === correctPassword;
-          
-          if (isValid) {
-            userInfo = {
-              studentId: student.studentId,
-              name: student.name,
-              parentName: student.parentName
-            };
-          }
-        } else {
-          console.log('❌ 未找到学生:', studentId);
-        }
-      }
-
-      this.setData({ loading: false });
+      console.log('✅ 获取微信信息成功:', userInfo.nickName);
+      
+      // 2. 调用云函数进行登录和角色识别
+      wx.showLoading({ title: '登录中...' });
+      
+      const res = await wx.cloud.callFunction({
+        name: 'unifiedLogin',
+        data: { userInfo }
+      });
+      
       wx.hideLoading();
-
-      if (isValid && userInfo) {
-        const app = getApp();
-        app.globalData.userInfo = userInfo;
-        app.globalData.isAdmin = loginType === 'admin';
-
-        // 持久化存储登录状态
-        wx.setStorageSync('userInfo', userInfo);
-        wx.setStorageSync('isAdmin', loginType === 'admin');
-
-        wx.showToast({
-          title: '登录成功',
-          icon: 'success'
-        });
-
-        setTimeout(() => {
-          if (loginType === 'admin') {
-            // 管理员跳转到管理后台
-            wx.navigateTo({
-              url: '/pages/admin/admin'
-            });
-          } else {
-            // 学生/家长跳转到档案页面
-            wx.navigateTo({
-              url: '/pages/records/records'
-            });
-          }
-        }, 1500);
+      
+      if (res.result && res.result.success) {
+        const { user, roles } = res.result;
+        
+        console.log('✅ 登录成功');
+        console.log('👤 用户角色:', roles);
+        
+        // 3. 保存用户信息
+        wx.setStorageSync('unifiedUserInfo', user);
+        wx.setStorageSync('userRoles', roles);
+        
+        // 4. 处理角色跳转
+        if (roles.length === 1) {
+          // 单一角色，直接跳转
+          const role = roles[0];
+          wx.setStorageSync('currentRole', role);
+          
+          // 更新全局数据
+          const app = getApp();
+          app.globalData.userInfo = user;
+          app.globalData.currentRole = role;
+          app.globalData.isAdmin = role === 'admin';
+          
+          wx.showToast({
+            title: '登录成功',
+            icon: 'success'
+          });
+          
+          setTimeout(() => {
+            this.navigateToHomePage(role);
+          }, 1500);
+        } else {
+          // 多角色，跳转到角色选择页
+          wx.navigateTo({
+            url: '/pages/role-select/role-select'
+          });
+        }
       } else {
         wx.showToast({
-          title: '学号或密码错误',
+          title: res.result.error || '登录失败',
           icon: 'error'
         });
       }
+      
     } catch (e) {
       console.error('❌ 登录失败:', e);
-      this.setData({ loading: false });
       wx.hideLoading();
-      wx.showToast({
-        title: '登录失败',
-        icon: 'error'
-      });
+      
+      if (e.errMsg && e.errMsg.includes('cancel')) {
+        wx.showToast({
+          title: '已取消授权',
+          icon: 'none'
+        });
+      } else {
+        wx.showToast({
+          title: '登录失败',
+          icon: 'error'
+        });
+      }
+    } finally {
+      this.setData({ loading: false });
     }
   },
 
-  // 忘记密码
-  forgotPassword() {
-    wx.showModal({
-      title: '忘记密码',
-      content: '学生默认密码为：123456\n\n如需修改密码，请联系学校管理员\n电话：0755-12345678',
-      showCancel: false,
-      confirmText: '知道了'
+  // 根据角色跳转到对应首页
+  navigateToHomePage(role) {
+    const homePageMap = {
+      'parent': '/pages/my/my',
+      'admin': '/pages/admin/admin',
+      'photographer': '/pages/photographer/tasks'
+    };
+    
+    const url = homePageMap[role] || '/pages/my/my';
+    
+    wx.reLaunch({ url });
+  },
+
+  // 游客模式（查看活动）
+  guestMode() {
+    wx.switchTab({
+      url: '/pages/index/index'
     });
   },
 
-  // 跳转到申请入学页面或查看进度
+  // 申请入学（无需登录）
   goToApply() {
-    if (this.data.hasApplication) {
-      // 如果已有申请，跳转到状态查看页面
-      wx.navigateTo({
-        url: '/pages/apply/status?id=' + this.data.applicationId
-      });
-    } else {
-      // 否则跳转到申请页面
-      wx.navigateTo({
-        url: '/pages/apply/apply'
-      });
-    }
+    wx.navigateTo({
+      url: '/pages/apply/apply'
+    });
   }
 });

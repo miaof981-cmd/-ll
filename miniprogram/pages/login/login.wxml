@@ -1,123 +1,69 @@
-<!--pages/login/login.wxml-->
+<!--pages/login/login.wxml - 统一登录页面-->
 <view class="login-container">
   <!-- 顶部装饰 -->
-  <view class="header-decoration">
-    <view class="decoration-circle circle-1"></view>
-    <view class="decoration-circle circle-2"></view>
-    <view class="decoration-circle circle-3"></view>
+  <view class="header-wave">
+    <image class="wave-img" src="/images/wave-bg.png" mode="widthFix"></image>
   </view>
 
-  <!-- 登录卡片 -->
-  <view class="login-card">
-    <!-- Logo 和标题 -->
-    <view class="login-header">
-      <view class="logo-large">🎓</view>
-      <text class="login-title">学校官网登录</text>
-      <text class="login-subtitle">欢迎回来，请登录您的账户</text>
+  <!-- Logo 和标题 -->
+  <view class="logo-section">
+    <view class="logo-circle">
+      <image class="logo-img" src="/images/school-logo.png" mode="aspectFit"></image>
+    </view>
+    <text class="school-name">学校官网小程序</text>
+    <text class="welcome-text">欢迎登录</text>
+  </view>
+
+  <!-- 登录按钮区域 -->
+  <view class="login-section">
+    <button 
+      class="login-btn primary"
+      bindtap="wechatLogin"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >
+      <view class="btn-content">
+        <image class="wechat-icon" src="/images/wechat-icon.png" mode="aspectFit"></image>
+        <text>微信一键登录</text>
+      </view>
+    </button>
+
+    <view class="divider">
+      <view class="line"></view>
+      <text class="divider-text">或</text>
+      <view class="line"></view>
     </view>
 
-    <!-- 登录类型切换 -->
-    <view class="type-tabs">
-      <view 
-        class="type-tab {{loginType === 'parent' ? 'active' : ''}}" 
-        bindtap="switchLoginType" 
-        data-type="parent"
-      >
-        <text>学生/家长</text>
+    <view class="quick-actions">
+      <view class="action-item" bindtap="guestMode">
+        <view class="action-icon">👁️</view>
+        <text class="action-text">游客浏览</text>
       </view>
-      <view 
-        class="type-tab {{loginType === 'admin' ? 'active' : ''}}" 
-        bindtap="switchLoginType" 
-        data-type="admin"
-      >
-        <text>管理员</text>
-      </view>
-    </view>
-
-    <!-- 登录表单 -->
-    <view class="login-form">
-      <view class="form-group">
-        <view class="form-label">
-          <text class="label-icon">👤</text>
-          <text>{{loginType === 'parent' ? '学号' : '用户名'}}</text>
-        </view>
-        <view class="input-wrapper">
-          <input 
-            class="input-field" 
-            type="text" 
-            placeholder="{{loginType === 'parent' ? '请输入学号' : '请输入用户名'}}"
-            value="{{studentId}}"
-            bindinput="onStudentIdInput"
-            placeholder-class="input-placeholder"
-          />
-        </view>
-      </view>
-
-      <view class="form-group">
-        <view class="form-label">
-          <text class="label-icon">🔒</text>
-          <text>密码</text>
-        </view>
-        <view class="input-wrapper">
-          <input 
-            class="input-field" 
-            type="password" 
-            placeholder="请输入密码"
-            value="{{password}}"
-            bindinput="onPasswordInput"
-            placeholder-class="input-placeholder"
-          />
-        </view>
-      </view>
-
-      <view class="form-actions">
-        <text class="forgot-link" bindtap="forgotPassword">忘记密码？</text>
-      </view>
-
-      <button class="btn-login" bindtap="handleLogin" loading="{{loading}}">
-        {{loading ? '登录中...' : '登录'}}
-      </button>
-
-      <!-- 申请入学入口 -->
-      <view class="register-link" bindtap="goToApply">
-        <text wx:if="{{!hasApplication}}">还没有账号？</text>
-        <text wx:if="{{hasApplication}}">已提交申请</text>
-        <text class="link-text">
-          {{hasApplication ? '点击查看进度 →' : '点此申请入学 →'}}
-        </text>
-      </view>
-    </view>
-
-    <!-- 提示信息 -->
-    <view class="hint-box">
-      <view class="hint-title">
-        <text class="hint-icon">ℹ️</text>
-        <text>登录说明</text>
-      </view>
-      <view class="hint-list">
-        <view class="hint-item">
-          <text class="hint-label">📚 测试学号：</text>
-          <text class="hint-value">20250001</text>
-        </view>
-        <view class="hint-item">
-          <text class="hint-label">🔑 默认密码：</text>
-          <text class="hint-value">123456</text>
-        </view>
-        <view class="hint-divider"></view>
-        <view class="hint-item">
-          <text class="hint-label">👨‍💼 管理员账号：</text>
-          <text class="hint-value">admin</text>
-        </view>
-        <view class="hint-item">
-          <text class="hint-label">🔑 管理员密码：</text>
-          <text class="hint-value">admin123</text>
-        </view>
+      <view class="action-item" bindtap="goToApply">
+        <view class="action-icon">📝</view>
+        <text class="action-text">申请入学</text>
       </view>
     </view>
   </view>
 
-  <!-- 底部文字 -->
-  <view class="footer-text">
-    <text>© 2025 学校官网 · 安全可靠</text>
+  <!-- 说明文字 -->
+  <view class="info-section">
+    <view class="info-item">
+      <view class="info-icon">✅</view>
+      <text class="info-text">家长自动识别，查看孩子档案</text>
+    </view>
+    <view class="info-item">
+      <view class="info-icon">✅</view>
+      <text class="info-text">管理员自动识别，直达后台</text>
+    </view>
+    <view class="info-item">
+      <view class="info-icon">✅</view>
+      <text class="info-text">多角色支持，一键切换</text>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-tip">
+    <text class="tip-text">首次登录将自动创建账号</text>
   </view>
 </view>

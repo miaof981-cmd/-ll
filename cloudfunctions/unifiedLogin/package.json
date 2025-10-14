@@ -1,0 +1,10 @@
+{
+  "name": "unifiedLogin",
+  "version": "1.0.0",
+  "description": "统一登录云函数 - 自动角色识别",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+

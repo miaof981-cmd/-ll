@@ -1,0 +1,36 @@
+<!--pages/role-select/role-select.wxml-->
+<view class="role-select-page">
+  <!-- 用户信息 -->
+  <view class="user-header">
+    <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+    <view class="user-info">
+      <text class="nickname">{{userInfo.nickName}}</text>
+      <text class="tip">请选择您的身份</text>
+    </view>
+  </view>
+
+  <!-- 角色列表 -->
+  <view class="roles-list">
+    <view 
+      wx:for="{{roles}}" 
+      wx:key="index"
+      class="role-card"
+      bindtap="selectRole"
+      data-role="{{item}}"
+      style="border-left-color: {{roleConfig[item].color}};"
+    >
+      <view class="role-icon">{{roleConfig[item].icon}}</view>
+      <view class="role-info">
+        <text class="role-name">{{roleConfig[item].name}}</text>
+        <text class="role-desc">{{roleConfig[item].desc}}</text>
+      </view>
+      <view class="role-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 说明 -->
+  <view class="hint-section">
+    <text class="hint-text">💡 您可以随时在个人中心切换身份</text>
+  </view>
+</view>
+
