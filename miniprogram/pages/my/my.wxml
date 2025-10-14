@@ -1,58 +1,99 @@
-<!--pages/my/my.wxml-->
-<view class="container">
-  <!-- 未登录提示 -->
-  <view wx:if="{{!userInfo}}" class="login-tip">
-    <view class="tip-title">请先登录</view>
-    <view class="tip-desc">登录后可查看个人档案</view>
-    <navigator url="/pages/login/login" class="login-btn">去登录</navigator>
+<!--pages/my/my.wxml - 个人中心-->
+<view class="my-page">
+  <!-- 已登录状态 -->
+  <view wx:if="{{isLoggedIn}}">
+    <!-- 用户信息卡片 -->
+    <view class="user-card">
+      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <view class="user-info">
+        <text class="nickname">{{userInfo.nickName}}</text>
+        <view class="role-badge" bindtap="switchRole" style="background: {{roleConfig[currentRole].color}};">
+          <text class="role-icon">{{roleConfig[currentRole].icon}}</text>
+          <text class="role-name">{{roleConfig[currentRole].name}}</text>
+          <text wx:if="{{userRoles.length > 1}}" class="switch-icon">⇄</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 家长视图：孩子列表 -->
+    <view wx:if="{{currentRole === 'parent'}}" class="children-section">
+      <view class="section-header">
+        <text class="section-title">我的孩子</text>
+        <view class="add-btn" bindtap="addChild">+ 添加</view>
+      </view>
+      
+      <view wx:if="{{children.length === 0}}" class="empty-tip">
+        <text class="empty-text">还没有关联孩子</text>
+        <text class="empty-hint">点击右上角"添加"按钮添加孩子</text>
+      </view>
+      
+      <view 
+        wx:for="{{children}}" 
+        wx:key="studentId"
+        class="child-card"
+        bindtap="viewChildRecord"
+        data-studentid="{{item.studentId}}"
+      >
+        <view class="child-avatar">{{item.name.substr(0,1)}}</view>
+        <view class="child-info">
+          <text class="child-name">{{item.name}}</text>
+          <text class="child-detail">学号: {{item.studentId}}</text>
+          <text class="child-detail">{{item.grade}} {{item.class}}</text>
+        </view>
+        <view class="arrow">→</view>
+      </view>
+    </view>
+
+    <!-- 管理员视图：快捷入口 -->
+    <view wx:if="{{currentRole === 'admin'}}" class="admin-section">
+      <text class="section-title">管理功能</text>
+      <navigator class="menu-item" url="/pages/admin/admin">
+        <text class="menu-icon">⚙️</text>
+        <text class="menu-text">管理后台</text>
+        <text class="arrow">→</text>
+      </navigator>
+    </view>
+
+    <!-- 摄影师视图：快捷入口 -->
+    <view wx:if="{{currentRole === 'photographer'}}" class="photographer-section">
+      <text class="section-title">摄影功能</text>
+      <navigator class="menu-item" url="/pages/photographer/tasks">
+        <text class="menu-icon">📷</text>
+        <text class="menu-text">接单中心</text>
+        <text class="arrow">→</text>
+      </navigator>
+    </view>
+
+    <!-- 通用功能 -->
+    <view class="menu-section">
+      <text class="section-title">功能菜单</text>
+      <view class="menu-item" bindtap="myOrders">
+        <text class="menu-icon">📦</text>
+        <text class="menu-text">我的订单</text>
+        <text class="arrow">→</text>
+      </view>
+      <view class="menu-item" bindtap="myActivities">
+        <text class="menu-icon">🎯</text>
+        <text class="menu-text">我的活动</text>
+        <text class="arrow">→</text>
+      </view>
+      <view class="menu-item" bindtap="settings">
+        <text class="menu-icon">⚙️</text>
+        <text class="menu-text">设置</text>
+        <text class="arrow">→</text>
+      </view>
+    </view>
+
+    <!-- 退出登录 -->
+    <view class="logout-section">
+      <button class="logout-btn" bindtap="logout">退出登录</button>
+    </view>
   </view>
 
-  <!-- 已登录：个人信息 + 管理或档案 -->
-  <view wx:if="{{userInfo}}">
-    <!-- 个人信息 -->
-    <view class="profile">
-      <view class="avatar">👤</view>
-      <view class="info">
-        <view class="name">{{userInfo.name}}</view>
-        <view class="id">学号：{{userInfo.studentId}}</view>
-      </view>
-      <button class="logout" size="mini" bindtap="logout">退出</button>
-    </view>
-
-    <!-- 管理员：直接展示管理后台入口卡片（归属“我的”页，不再单独按钮页） -->
-    <view wx:if="{{isAdmin}}" class="admin-actions">
-      <view class="actions-grid">
-        <button class="action-card primary" bindtap="goAdmin">进入管理后台</button>
-      </view>
-    </view>
-
-    <!-- 非管理员：档案瀑布流 -->
-    <view wx:if="{{!isAdmin}}" class="waterfall">
-      <view class="column">
-        <block wx:for="{{leftColumn}}" wx:key="_id">
-          <view class="card" bindtap="openRecord" data-record="{{item}}">
-            <view class="card-tag success" wx:if="{{item.type === 'grade'}}">成绩</view>
-            <view class="card-tag warn" wx:if="{{item.type === 'punishment'}}">处分</view>
-            <image wx:if="{{item.type === 'image' && item.url}}" class="card-image" src="{{item.url}}" mode="widthFix" />
-            <view class="card-title">{{item.title}}</view>
-            <view class="card-content">{{item.content}}</view>
-            <view class="card-meta">{{item.date}}</view>
-          </view>
-        </block>
-      </view>
-      <view class="column">
-        <block wx:for="{{rightColumn}}" wx:key="_id">
-          <view class="card" bindtap="openRecord" data-record="{{item}}">
-            <view class="card-tag success" wx:if="{{item.type === 'grade'}}">成绩</view>
-            <view class="card-tag warn" wx:if="{{item.type === 'punishment'}}">处分</view>
-            <image wx:if="{{item.type === 'image' && item.url}}" class="card-image" src="{{item.url}}" mode="widthFix" />
-            <view class="card-title">{{item.title}}</view>
-            <view class="card-content">{{item.content}}</view>
-            <view class="card-meta">{{item.date}}</view>
-          </view>
-        </block>
-      </view>
-    </view>
+  <!-- 未登录状态 -->
+  <view wx:else class="not-login">
+    <view class="login-icon">👤</view>
+    <text class="login-tip">您还未登录</text>
+    <button class="login-btn" bindtap="goToLogin">立即登录</button>
   </view>
 </view>
-
