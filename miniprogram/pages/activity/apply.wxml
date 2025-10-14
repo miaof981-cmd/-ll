@@ -1,0 +1,191 @@
+<!--pages/activity/apply.wxml-->
+<view class="apply-page">
+  <view wx:if="{{activity}}">
+    <!-- 活动信息卡片 -->
+    <view class="activity-info-card">
+      <image class="activity-cover" src="{{activity.coverImage}}" mode="aspectFill" />
+      <view class="activity-info">
+        <text class="activity-title">{{activity.title}}</text>
+        <view class="activity-price">
+          <text class="price-label">价格：</text>
+          <text class="price-value">¥{{activity.price}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 表单区域 -->
+    <view class="form-section">
+      <!-- 孩子信息 -->
+      <view class="section-header">
+        <view class="header-icon">👶</view>
+        <text class="header-title">孩子信息</text>
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>姓名</text>
+          <text class="required">*</text>
+        </view>
+        <input 
+          class="form-input" 
+          placeholder="请输入孩子姓名" 
+          bindinput="onInputChange" 
+          data-field="childName"
+          value="{{formData.childName}}"
+        />
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>性别</text>
+          <text class="required">*</text>
+        </view>
+        <radio-group class="radio-group" bindchange="onGenderChange">
+          <label class="radio-item">
+            <radio value="男" checked="{{formData.childGender === '男'}}" color="#1a56db" />
+            <text>男</text>
+          </label>
+          <label class="radio-item">
+            <radio value="女" checked="{{formData.childGender === '女'}}" color="#1a56db" />
+            <text>女</text>
+          </label>
+        </radio-group>
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>年龄</text>
+        </view>
+        <input 
+          class="form-input" 
+          type="number"
+          placeholder="请输入年龄（选填）" 
+          bindinput="onInputChange" 
+          data-field="childAge"
+          value="{{formData.childAge}}"
+        />
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>生活照</text>
+          <text class="required">*</text>
+        </view>
+        <view wx:if="{{!formData.childPhoto}}" class="upload-btn" bindtap="uploadChildPhoto">
+          <view class="upload-icon">📷</view>
+          <text class="upload-text">点击上传</text>
+        </view>
+        <view wx:else class="photo-preview">
+          <image class="preview-image" src="{{formData.childPhoto}}" mode="aspectFill" bindtap="previewPhoto" data-url="{{formData.childPhoto}}" />
+          <view class="delete-btn" bindtap="deleteChildPhoto">×</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 家长信息 -->
+    <view class="form-section">
+      <view class="section-header">
+        <view class="header-icon">👨‍👩‍👧</view>
+        <text class="header-title">家长信息</text>
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>姓名</text>
+          <text class="required">*</text>
+        </view>
+        <input 
+          class="form-input" 
+          placeholder="请输入家长姓名" 
+          bindinput="onInputChange" 
+          data-field="parentName"
+          value="{{formData.parentName}}"
+        />
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>手机号</text>
+          <text class="required">*</text>
+        </view>
+        <input 
+          class="form-input" 
+          type="number"
+          placeholder="请输入手机号" 
+          bindinput="onInputChange" 
+          data-field="parentPhone"
+          value="{{formData.parentPhone}}"
+        />
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>微信号</text>
+          <text class="required">*</text>
+        </view>
+        <input 
+          class="form-input" 
+          placeholder="请输入微信号" 
+          bindinput="onInputChange" 
+          data-field="parentWechat"
+          value="{{formData.parentWechat}}"
+        />
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">
+          <text>期望与要求</text>
+        </view>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入您的期望与要求（选填）" 
+          bindinput="onInputChange" 
+          data-field="expectations"
+          value="{{formData.expectations}}"
+          maxlength="500"
+        />
+      </view>
+    </view>
+
+    <!-- 选择摄影师 -->
+    <view class="form-section">
+      <view class="section-header">
+        <view class="header-icon">👨‍🎨</view>
+        <text class="header-title">选择摄影师</text>
+        <text class="required">*</text>
+      </view>
+
+      <view class="photographers-grid">
+        <view 
+          wx:for="{{photographers}}" 
+          wx:key="_id" 
+          class="photographer-card {{selectedPhotographer && selectedPhotographer._id === item._id ? 'selected' : ''}}"
+          bindtap="selectPhotographer"
+          data-photographer="{{item}}"
+        >
+          <image class="photographer-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+          <text class="photographer-name">{{item.name}}</text>
+          <view class="photographer-rating">
+            <text class="rating-star">⭐</text>
+            <text class="rating-value">{{item.rating || 5.0}}</text>
+          </view>
+          <view wx:if="{{selectedPhotographer && selectedPhotographer._id === item._id}}" class="selected-badge">
+            ✓
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="bottom-bar">
+      <view class="price-info">
+        <text class="price-label">合计：</text>
+        <text class="price-value">¥{{activity.price}}</text>
+      </view>
+      <button class="btn-submit" bindtap="submitOrder">
+        提交订单
+      </button>
+    </view>
+  </view>
+</view>
+
