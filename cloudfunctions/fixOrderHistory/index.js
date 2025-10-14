@@ -11,14 +11,18 @@ exports.main = async (event, context) => {
   try {
     console.log('🔧 开始补充历史记录...');
     
-    // 查询所有 in_progress 状态且有拒绝记录的订单
+    // 查询所有可能有历史记录的订单（不限制状态）
     const orders = await db.collection('activity_orders')
-      .where({
-        status: 'in_progress'
-      })
       .get();
     
-    console.log('📋 找到订单数量:', orders.data.length);
+    console.log('📋 找到订单总数:', orders.data.length);
+    
+    // 统计各状态订单数量
+    const statusCount = {};
+    orders.data.forEach(order => {
+      statusCount[order.status] = (statusCount[order.status] || 0) + 1;
+    });
+    console.log('📊 订单状态分布:', statusCount);
     
     let addedCount = 0;
     let skippedCount = 0;
@@ -41,6 +45,15 @@ exports.main = async (event, context) => {
           });
           continue;
         }
+        
+        // 记录订单信息用于调试
+        console.log(`检查订单 ${order._id}:`, {
+          status: order.status,
+          hasPhotos: !!order.photos,
+          photoCount: order.photos?.length || 0,
+          hasAdminReject: !!order.adminRejectReason,
+          hasUserReject: !!order.rejectReason
+        });
         
         // 如果订单有照片且有拒绝原因
         if (order.photos && order.photos.length > 0 && 
