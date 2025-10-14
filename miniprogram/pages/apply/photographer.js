@@ -17,6 +17,9 @@ Page({
     wx.showLoading({ title: '加载中...' });
 
     try {
+      // 获取证件照活动价格
+      const idPhotoPrice = await this.getIDPhotoPrice();
+      
       // 从云数据库获取摄影师数据
       let photographers = await cloudDB.getPhotographers();
     
@@ -69,7 +72,7 @@ Page({
       orders: p.orderCount || 0,
       description: p.description || '专业摄影师，为您提供优质服务',
       samples: p.samples && p.samples.length > 0 ? p.samples : [],
-      price: 299
+      price: idPhotoPrice // 使用证件照活动价格
     }));
     
     this.setData({
@@ -87,6 +90,31 @@ Page({
     }
   },
   
+  // 获取证件照活动价格
+  async getIDPhotoPrice() {
+    try {
+      // 获取证件照默认活动
+      const activities = await cloudDB.getActivities({ 
+        category: '证件照'
+      });
+      
+      if (activities && activities.length > 0) {
+        const idPhotoActivity = activities.find(a => a.isDefault);
+        if (idPhotoActivity) {
+          console.log('✅ 获取证件照价格:', idPhotoActivity.price);
+          return idPhotoActivity.price;
+        }
+      }
+      
+      // 如果没有找到，返回默认价格
+      console.warn('⚠️ 未找到证件照活动，使用默认价格');
+      return 20;
+    } catch (e) {
+      console.error('❌ 获取证件照价格失败:', e);
+      return 20; // 返回默认价格
+    }
+  },
+
   // 生成默认头像
   generateDefaultAvatar(name) {
     const colors = ['#1f6feb', '#28a745', '#6f42c1', '#fd7e14', '#dc3545'];
