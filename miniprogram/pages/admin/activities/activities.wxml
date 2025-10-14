@@ -1,0 +1,115 @@
+<!--pages/admin/activities/activities.wxml-->
+<view class="activities-admin-page">
+  <!-- 顶部操作栏 -->
+  <view class="top-bar">
+    <view class="filter-tabs">
+      <view 
+        class="filter-tab {{statusFilter === 'all' ? 'active' : ''}}" 
+        bindtap="filterStatus" 
+        data-status="all"
+      >
+        全部
+      </view>
+      <view 
+        class="filter-tab {{statusFilter === 'active' ? 'active' : ''}}" 
+        bindtap="filterStatus" 
+        data-status="active"
+      >
+        已上架
+      </view>
+      <view 
+        class="filter-tab {{statusFilter === 'inactive' ? 'active' : ''}}" 
+        bindtap="filterStatus" 
+        data-status="inactive"
+      >
+        已下架
+      </view>
+    </view>
+    <button class="btn-create" bindtap="createActivity">+ 创建活动</button>
+  </view>
+
+  <!-- 活动列表 -->
+  <view wx:if="{{!loading && activities.length === 0}}" class="empty-state">
+    <view class="empty-icon">🎨</view>
+    <text class="empty-text">暂无活动</text>
+    <button class="btn-create-empty" bindtap="createActivity">创建第一个活动</button>
+  </view>
+
+  <view wx:if="{{!loading}}" class="activity-list">
+    <view 
+      wx:for="{{activities}}" 
+      wx:key="_id" 
+      class="activity-item {{item.status === 'active' ? 'active' : 'inactive'}}"
+    >
+      <!-- 活动封面 -->
+      <image class="activity-cover" src="{{item.coverImage}}" mode="aspectFill" bindtap="viewActivity" data-id="{{item._id}}" />
+      
+      <!-- 活动信息 -->
+      <view class="activity-info">
+        <view class="info-header">
+          <view class="title-row">
+            <text class="activity-title">{{item.title}}</text>
+            <view class="status-badge {{item.status}}">
+              {{item.status === 'active' ? '已上架' : '已下架'}}
+            </view>
+          </view>
+          <text class="activity-subtitle">{{item.subtitle}}</text>
+        </view>
+
+        <view class="info-details">
+          <view class="detail-item">
+            <text class="label">分类：</text>
+            <text class="value">{{item.category}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">价格：</text>
+            <text class="value price">¥{{item.price}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">浏览：</text>
+            <text class="value">{{item.viewCount || 0}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">订单：</text>
+            <text class="value">{{item.orderCount || 0}}</text>
+          </view>
+        </view>
+
+        <view class="info-tags">
+          <view wx:if="{{item.isHot}}" class="tag tag-hot">🔥 热门</view>
+          <view wx:if="{{item.isNew}}" class="tag tag-new">🆕 新品</view>
+          <view wx:if="{{item.category === '证件照'}}" class="tag tag-special">📸 证件照</view>
+        </view>
+
+        <view class="action-buttons">
+          <button class="btn-action btn-edit" bindtap="editActivity" data-id="{{item._id}}">
+            编辑
+          </button>
+          <button 
+            class="btn-action btn-toggle" 
+            bindtap="toggleStatus" 
+            data-id="{{item._id}}" 
+            data-status="{{item.status}}"
+            data-title="{{item.title}}"
+          >
+            {{item.status === 'active' ? '下架' : '上架'}}
+          </button>
+          <button 
+            class="btn-action btn-delete" 
+            bindtap="deleteActivity" 
+            data-id="{{item._id}}"
+            data-title="{{item.title}}"
+          >
+            删除
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-wrapper">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>
+

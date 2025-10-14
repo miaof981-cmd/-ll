@@ -1,0 +1,186 @@
+<!--pages/admin/activities/edit.wxml-->
+<view class="activity-edit-page">
+  <scroll-view scroll-y="true" class="form-scroll">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-title">📝 基本信息</view>
+
+      <view class="form-item">
+        <text class="label">活动标题 *</text>
+        <input 
+          class="input" 
+          placeholder="请输入活动标题" 
+          value="{{formData.title}}"
+          bindinput="onInputChange"
+          data-field="title"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label">副标题</text>
+        <input 
+          class="input" 
+          placeholder="请输入副标题" 
+          value="{{formData.subtitle}}"
+          bindinput="onInputChange"
+          data-field="subtitle"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label">分类 *</text>
+        <picker mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker">{{categories[categoryIndex]}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 价格设置 -->
+    <view class="form-section">
+      <view class="section-title">💰 价格设置</view>
+
+      <view class="form-item">
+        <text class="label">当前价格 *</text>
+        <input 
+          class="input" 
+          type="digit"
+          placeholder="请输入价格" 
+          value="{{formData.price}}"
+          bindinput="onInputChange"
+          data-field="price"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label">原价</text>
+        <input 
+          class="input" 
+          type="digit"
+          placeholder="请输入原价（选填）" 
+          value="{{formData.originalPrice}}"
+          bindinput="onInputChange"
+          data-field="originalPrice"
+        />
+      </view>
+    </view>
+
+    <!-- 图片设置 -->
+    <view class="form-section">
+      <view class="section-title">📷 图片设置</view>
+
+      <view class="form-item">
+        <text class="label">封面图 *</text>
+        <view class="image-upload">
+          <image wx:if="{{formData.coverImage}}" class="cover-preview" src="{{formData.coverImage}}" mode="aspectFill" />
+          <view wx:else class="upload-btn" bindtap="uploadCover">
+            <text class="upload-icon">+</text>
+            <text class="upload-text">上传封面</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <text class="label">详情图片（最多9张）</text>
+        <view class="images-grid">
+          <image 
+            wx:for="{{formData.images}}" 
+            wx:key="index"
+            class="image-item" 
+            src="{{item}}" 
+            mode="aspectFill"
+          >
+            <view class="delete-btn" bindtap="deleteImage" data-index="{{index}}">×</view>
+          </image>
+          <view wx:if="{{formData.images.length < 9}}" class="upload-btn-small" bindtap="uploadImages">+</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 活动介绍 -->
+    <view class="form-section">
+      <view class="section-title">📄 活动介绍</view>
+
+      <view class="form-item">
+        <text class="label">简介</text>
+        <textarea 
+          class="textarea" 
+          placeholder="请输入活动简介" 
+          value="{{formData.description}}"
+          bindinput="onInputChange"
+          data-field="description"
+          maxlength="200"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label">详细说明</text>
+        <textarea 
+          class="textarea large" 
+          placeholder="请输入详细说明" 
+          value="{{formData.details}}"
+          bindinput="onInputChange"
+          data-field="details"
+          maxlength="1000"
+        />
+      </view>
+    </view>
+
+    <!-- 摄影师配置 -->
+    <view class="form-section">
+      <view class="section-title">👨‍🎨 摄影师配置</view>
+
+      <view class="form-item">
+        <text class="label">可选摄影师</text>
+        <button class="btn-select" bindtap="selectPhotographers">
+          选择摄影师（已选{{formData.photographerIds.length}}位）
+        </button>
+      </view>
+
+      <view wx:if="{{selectedPhotographers.length > 0}}" class="photographers-list">
+        <view wx:for="{{selectedPhotographers}}" wx:key="_id" class="photographer-chip">
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 其他设置 -->
+    <view class="form-section">
+      <view class="section-title">⚙️ 其他设置</view>
+
+      <view class="form-item row">
+        <text class="label">热门推荐</text>
+        <switch checked="{{formData.isHot}}" bindchange="onSwitchChange" data-field="isHot" color="#ff4d4f" />
+      </view>
+
+      <view class="form-item row">
+        <text class="label">新品标记</text>
+        <switch checked="{{formData.isNew}}" bindchange="onSwitchChange" data-field="isNew" color="#34c759" />
+      </view>
+
+      <view class="form-item row">
+        <text class="label">上架状态</text>
+        <switch checked="{{formData.status === 'active'}}" bindchange="onSwitchChange" data-field="status" color="#1a56db" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">排序权重</text>
+        <input 
+          class="input" 
+          type="number"
+          placeholder="数字越小越靠前" 
+          value="{{formData.sortOrder}}"
+          bindinput="onInputChange"
+          data-field="sortOrder"
+        />
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <button class="btn-save" bindtap="saveActivity">
+      {{isEdit ? '保存修改' : '创建活动'}}
+    </button>
+  </view>
+</view>
+
