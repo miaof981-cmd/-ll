@@ -66,12 +66,12 @@ const USER_ACTIONS = {
 // 管理员可用操作
 const ADMIN_ACTIONS = {
   [ORDER_STATUS.PENDING_PAYMENT]: ['cancel'],                  // 取消订单
-  [ORDER_STATUS.PAID]: ['start', 'refund'],                    // 开始拍摄、退款
-  [ORDER_STATUS.IN_PROGRESS]: ['complete', 'refund'],          // 标记完成、退款
+  [ORDER_STATUS.PAID]: ['cancel'],                             // 取消订单（用户已支付但未开始）
+  [ORDER_STATUS.IN_PROGRESS]: [],                              // 无操作（等待摄影师提交）
   [ORDER_STATUS.PENDING_REVIEW]: ['approve', 'reject_review'], // 审核通过、审核拒绝
-  [ORDER_STATUS.PENDING_CONFIRM]: ['force_complete'],          // 强制完成
-  [ORDER_STATUS.COMPLETED]: ['refund'],                        // 退款
-  [ORDER_STATUS.AFTER_SALE]: ['refund', 'reject'],             // 同意退款、拒绝售后
+  [ORDER_STATUS.PENDING_CONFIRM]: [],                          // 无操作（等待用户确认）
+  [ORDER_STATUS.COMPLETED]: [],                                // 无操作（订单已完成）
+  [ORDER_STATUS.AFTER_SALE]: ['refund', 'reject_after_sale'],  // 同意退款、拒绝售后
   [ORDER_STATUS.REFUNDED]: [],                                 // 无操作
   [ORDER_STATUS.CANCELLED]: []                                 // 无操作
 };
@@ -115,7 +115,8 @@ const ACTION_TEXT = {
   force_complete: '强制完成',
   refund: '同意退款',
   approve: '审核通过',
-  reject_review: '审核拒绝'
+  reject_review: '审核拒绝',
+  reject_after_sale: '拒绝售后'
 };
 
 function getActionText(action) {

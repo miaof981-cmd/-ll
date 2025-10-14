@@ -397,7 +397,18 @@ Page({
 
   // 拒绝作品
   async rejectWork() {
-    // 跳转到拒绝原因填写页面（使用页面路由传递数据）
+    // 检查拒绝次数
+    const rejectCount = this.data.order.rejectCount || 0;
+    if (rejectCount >= 3) {
+      wx.showModal({
+        title: '无法拒绝',
+        content: '您的修改机会已用完（3次），只能选择确认收货。如有问题请联系客服申请售后。',
+        showCancel: false
+      });
+      return;
+    }
+
+    // 显示拒绝弹窗
     this.setData({
       showRejectModal: true,
       rejectReason: ''
@@ -437,12 +448,16 @@ Page({
 
     try {
       const db = wx.cloud.database();
+      const currentRejectCount = this.data.order.rejectCount || 0;
+      
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
-          status: 'in_progress', // 返回拍摄中状态
+          status: 'in_progress', // 返回拍摄中状态，但保留照片
           rejectReason: reason,
           rejectedAt: new Date().toISOString(),
+          rejectCount: currentRejectCount + 1, // 增加拒绝次数
           updatedAt: new Date().toISOString()
+          // 注意：不删除photos字段，让摄影师可以基于原照片修改
         }
       });
 
@@ -453,9 +468,14 @@ Page({
         rejectReason: ''
       });
 
+      const remainingChances = 3 - (currentRejectCount + 1);
+      const tipContent = remainingChances > 0 
+        ? `已将您的意见反馈给摄影师。您还有${remainingChances}次修改机会。`
+        : '已将您的意见反馈给摄影师。这是最后一次修改机会。';
+
       wx.showModal({
         title: '已提交',
-        content: '已将您的意见反馈给摄影师，摄影师将重新拍摄。',
+        content: tipContent,
         showCancel: false,
         success: () => {
           this.loadOrderDetail(this.data.orderId);

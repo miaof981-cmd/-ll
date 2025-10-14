@@ -204,6 +204,19 @@
   line-height: 1.6;
 }
 
+.reject-count-tip {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #52c41a;
+}
+
+.reject-count-warning {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
 /* 高亮时间线项 */
 .timeline-item.highlight {
   background: #f0f9ff;

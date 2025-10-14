@@ -59,6 +59,12 @@
             <!-- 待确认状态提示 -->
             <view wx:if="{{order.status === 'pending_confirm'}}" class="timeline-tip">
               💡 请仔细查看作品，满意请点击下方"确认满意"
+              <view wx:if="{{order.rejectCount < 3}}" class="reject-count-tip">
+                剩余修改机会：{{3 - (order.rejectCount || 0)}}次
+              </view>
+              <view wx:else class="reject-count-warning">
+                ⚠️ 修改机会已用完，只能确认收货
+              </view>
             </view>
 
             <!-- 照片预览（时间线中） -->

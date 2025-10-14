@@ -120,7 +120,7 @@ Page({
       case 'refund':
         await this.refundOrder();
         break;
-      case 'reject':
+      case 'reject_after_sale':
         await this.rejectAfterSale();
         break;
       case 'cancel':
