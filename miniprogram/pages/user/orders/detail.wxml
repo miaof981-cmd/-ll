@@ -11,120 +11,20 @@
       </view>
     </view>
 
-    <!-- 活动信息 -->
-    <view class="section-card">
-      <view class="section-title">活动信息</view>
-      <view wx:if="{{activityInfo}}" class="activity-info">
-        <image class="activity-cover" src="{{activityInfo.coverImage}}" mode="aspectFill"></image>
-        <view class="activity-details">
-          <text class="activity-title">{{activityInfo.title}}</text>
-          <text class="activity-subtitle">{{activityInfo.subtitle}}</text>
-          <text class="activity-price">¥{{order.totalPrice}}</text>
-        </view>
-      </view>
-      <view wx:else class="no-data">活动已删除</view>
-    </view>
-
-    <!-- 摄影师信息 -->
-    <view wx:if="{{photographerInfo}}" class="section-card">
-      <view class="section-title">摄影师信息</view>
-      <view class="photographer-info">
-        <image wx:if="{{photographerInfo.avatar}}" class="photographer-avatar" src="{{photographerInfo.avatar}}" mode="aspectFill"></image>
-        <view wx:else class="photographer-avatar-placeholder">{{photographerInfo.name.substring(0,1)}}</view>
-        <view class="photographer-details">
-          <text class="photographer-name">{{photographerInfo.name}}</text>
-          <text class="photographer-specialty">{{photographerInfo.specialty || '专业摄影师'}}</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 摄影师作品 -->
-    <view wx:if="{{order.photos && order.photos.length > 0}}" class="section-card">
-      <view class="section-title">
-        <text>📸 摄影师作品</text>
-        <text class="photo-count">共{{order.photos.length}}张</text>
-      </view>
+    <!-- 订单时间线（最新在上） -->
+    <view class="section-card timeline-card">
+      <view class="section-title">📋 最新进展</view>
       
-      <view class="photos-grid">
-        <image
-          wx:for="{{order.photos}}"
-          wx:key="index"
-          class="photo-item"
-          src="{{item}}"
-          mode="aspectFill"
-          bindtap="previewPhoto"
-          data-index="{{index}}"
-        ></image>
-      </view>
-
-      <!-- 待确认状态提示 -->
-      <view wx:if="{{order.status === 'pending_confirm'}}" class="confirm-tip">
-        <text class="tip-icon">💡</text>
-        <text class="tip-text">请仔细查看摄影师的作品，如满意请确认，如不满意可以拒绝并提出修改意见</text>
-      </view>
-    </view>
-
-    <!-- 订单信息 -->
-    <view class="section-card">
-      <view class="section-title">订单信息</view>
-      <view class="info-row">
-        <text class="label">订单号</text>
-        <text class="value code">{{order.orderNo || order._id.slice(-12)}}</text>
-      </view>
-      <view class="info-row">
-        <text class="label">下单时间</text>
-        <text class="value">{{order.createdAt}}</text>
-      </view>
-      <view wx:if="{{order.submittedAt}}" class="info-row">
-        <text class="label">提交时间</text>
-        <text class="value">{{order.submittedAt}}</text>
-      </view>
-      <view class="info-row">
-        <text class="label">订单金额</text>
-        <text class="value price">¥{{order.totalPrice}}</text>
-      </view>
-      <view wx:if="{{order.remark}}" class="info-row">
-        <text class="label">我的备注</text>
-        <text class="value">{{order.remark}}</text>
-      </view>
-      <view wx:if="{{order.rejectReason}}" class="info-row reject-reason">
-        <text class="label">拒绝原因</text>
-        <text class="value">{{order.rejectReason}}</text>
-      </view>
-    </view>
-
-    <!-- 订单时间线 -->
-    <view class="section-card">
-      <view class="section-title">📋 订单进度</view>
-      
-      <view class="timeline">
-        <!-- 订单创建 -->
-        <view class="timeline-item">
-          <view class="timeline-dot active"></view>
+      <view class="timeline reverse">
+        <!-- 确认完成 -->
+        <view wx:if="{{order.confirmedAt}}" class="timeline-item">
+          <view class="timeline-dot success"></view>
           <view class="timeline-content">
-            <view class="timeline-title">订单创建</view>
-            <view class="timeline-time">{{order.createdAt}}</view>
-            <view class="timeline-desc" wx:if="{{order.remark}}">备注：{{order.remark}}</view>
-          </view>
-        </view>
-
-        <!-- 摄影师接单 -->
-        <view wx:if="{{order.status !== 'pending_payment' && order.status !== 'cancelled'}}" class="timeline-item">
-          <view class="timeline-dot active"></view>
-          <view class="timeline-content">
-            <view class="timeline-title">摄影师接单</view>
-            <view class="timeline-time">{{order.createdAt}}</view>
-            <view class="timeline-desc">摄影师 {{photographerInfo.name}} 已开始拍摄</view>
-          </view>
-        </view>
-
-        <!-- 提交作品 -->
-        <view wx:if="{{order.submittedAt}}" class="timeline-item">
-          <view class="timeline-dot {{order.status === 'pending_confirm' || order.status === 'completed' ? 'active' : ''}}"></view>
-          <view class="timeline-content">
-            <view class="timeline-title">提交作品</view>
-            <view class="timeline-time">{{order.submittedAt}}</view>
-            <view class="timeline-desc">摄影师已提交 {{order.photos.length}} 张照片</view>
+            <view class="timeline-header">
+              <view class="timeline-title">✅ 确认完成</view>
+              <view class="timeline-time">{{order.confirmedAt}}</view>
+            </view>
+            <view class="timeline-desc">订单已完成，感谢您的确认</view>
           </view>
         </view>
 
@@ -132,47 +32,138 @@
         <view wx:if="{{order.rejectedAt && order.rejectReason}}" class="timeline-item">
           <view class="timeline-dot warning"></view>
           <view class="timeline-content">
-            <view class="timeline-title">作品被拒绝</view>
-            <view class="timeline-time">{{order.rejectedAt}}</view>
+            <view class="timeline-header">
+              <view class="timeline-title">❌ 作品被拒绝</view>
+              <view class="timeline-time">{{order.rejectedAt}}</view>
+            </view>
             <view class="timeline-desc reject">拒绝原因：{{order.rejectReason}}</view>
+            <view class="timeline-note">摄影师将重新拍摄</view>
           </view>
         </view>
 
-        <!-- 确认完成 -->
-        <view wx:if="{{order.confirmedAt}}" class="timeline-item">
-          <view class="timeline-dot success"></view>
+        <!-- 提交作品 -->
+        <view wx:if="{{order.submittedAt}}" class="timeline-item {{order.status === 'pending_confirm' ? 'highlight' : ''}}">
+          <view class="timeline-dot {{order.status === 'pending_confirm' || order.status === 'completed' ? 'active' : ''}}"></view>
           <view class="timeline-content">
-            <view class="timeline-title">确认完成</view>
-            <view class="timeline-time">{{order.confirmedAt}}</view>
-            <view class="timeline-desc">订单已完成，感谢您的确认</view>
+            <view class="timeline-header">
+              <view class="timeline-title">📸 提交作品</view>
+              <view class="timeline-time">{{order.submittedAt}}</view>
+            </view>
+            <view class="timeline-desc">摄影师已提交 {{order.photos.length}} 张照片</view>
+            
+            <!-- 待确认状态提示 -->
+            <view wx:if="{{order.status === 'pending_confirm'}}" class="timeline-tip">
+              💡 请仔细查看作品，满意请点击下方"确认满意"
+            </view>
+
+            <!-- 照片预览（时间线中） -->
+            <view class="timeline-photos">
+              <view
+                wx:for="{{order.photos}}"
+                wx:key="index"
+                class="timeline-photo-item"
+                bindtap="previewPhoto"
+                data-index="{{index}}"
+              >
+                <image class="timeline-photo-img" src="{{item}}" mode="aspectFill"></image>
+                <view wx:if="{{order.status === 'pending_confirm'}}" class="watermark-badge">预览</view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 摄影师接单 -->
+        <view wx:if="{{order.status !== 'pending_payment' && order.status !== 'cancelled'}}" class="timeline-item">
+          <view class="timeline-dot active"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <view class="timeline-title">👍 摄影师接单</view>
+            </view>
+            <view class="timeline-desc">摄影师 {{photographerInfo.name}} 已开始拍摄</view>
+          </view>
+        </view>
+
+        <!-- 订单创建 -->
+        <view class="timeline-item">
+          <view class="timeline-dot active"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <view class="timeline-title">📝 订单创建</view>
+              <view class="timeline-time">{{order.createdAt}}</view>
+            </view>
+            <view wx:if="{{order.remark}}" class="timeline-desc">备注：{{order.remark}}</view>
           </view>
         </view>
       </view>
     </view>
 
+    <!-- 订单详情卡片（整合：活动+摄影师+订单信息） -->
+    <view class="section-card detail-card">
+      <view class="section-title">📋 订单详情</view>
+      
+      <!-- 活动信息 -->
+      <view class="detail-section">
+        <view class="detail-section-header">
+          <text class="detail-section-title">📸 活动信息</text>
+        </view>
+        <view wx:if="{{activityInfo}}" class="activity-info-compact">
+          <image class="activity-thumb" src="{{activityInfo.coverImage}}" mode="aspectFill"></image>
+          <view class="activity-text">
+            <text class="activity-name">{{activityInfo.title}}</text>
+            <text class="activity-subtitle">{{activityInfo.subtitle}}</text>
+          </view>
+          <text class="activity-price">¥{{order.totalPrice}}</text>
+        </view>
+        <view wx:else class="no-data">活动已删除</view>
+      </view>
+
+      <view class="divider"></view>
+
+      <!-- 摄影师信息 -->
+      <view wx:if="{{photographerInfo}}" class="detail-section">
+        <view class="detail-section-header">
+          <text class="detail-section-title">📷 摄影师</text>
+        </view>
+        <view class="photographer-info-compact">
+          <image wx:if="{{photographerInfo.avatar}}" class="photographer-avatar-small" src="{{photographerInfo.avatar}}" mode="aspectFill"></image>
+          <view wx:else class="photographer-avatar-small placeholder">{{photographerInfo.name.substring(0,1)}}</view>
+          <view class="photographer-text">
+            <text class="photographer-name-small">{{photographerInfo.name}}</text>
+            <text class="photographer-specialty-small">{{photographerInfo.specialty || '专业摄影师'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+
+      <!-- 订单信息 -->
+      <view class="detail-section">
+        <view class="detail-section-header">
+          <text class="detail-section-title">📄 订单信息</text>
+        </view>
+        <view class="info-row">
+          <text class="label">订单号</text>
+          <text class="value code">{{order.orderNo || order._id.slice(-12)}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">下单时间</text>
+          <text class="value">{{order.createdAt}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">订单金额</text>
+          <text class="value price">¥{{order.totalPrice}}</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 操作按钮 -->
-    <view class="action-bar">
-      <!-- 待确认状态：显示确认和拒绝按钮 -->
-      <view wx:if="{{order.status === 'pending_confirm'}}" class="confirm-actions">
+    <view wx:if="{{order.status === 'pending_confirm'}}" class="action-bar">
+      <view class="confirm-actions">
         <button class="action-btn reject-btn" bindtap="rejectWork">
           ❌ 拒绝作品
         </button>
         <button class="action-btn confirm-btn" bindtap="confirmWork">
           ✅ 确认满意
-        </button>
-      </view>
-
-      <!-- 其他状态：显示原有操作按钮 -->
-      <view wx:elif="{{order.userActions && order.userActions.length > 0}}" class="other-actions">
-        <button
-          wx:for="{{order.userActions}}"
-          wx:key="index"
-          wx:for-item="action"
-          class="action-btn {{action === 'after_sale' ? 'secondary-btn' : 'primary-btn'}}"
-          bindtap="handleAction"
-          data-action="{{action}}"
-        >
-          {{getActionText(action)}}
         </button>
       </view>
     </view>
@@ -212,4 +203,3 @@
     <canvas canvas-id="watermarkCanvas" class="watermark-canvas"></canvas>
   </view>
 </view>
-

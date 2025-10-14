@@ -18,6 +18,21 @@ Page({
     }
   },
 
+  // 右上角菜单
+  onShareAppMessage() {
+    return {
+      title: '订单详情',
+      path: `/pages/user/orders/detail?id=${this.data.orderId}`
+    };
+  },
+
+  // 页面菜单按钮
+  onShareTimeline() {
+    return {
+      title: '订单详情'
+    };
+  },
+
   async loadOrderDetail(orderId) {
     wx.showLoading({ title: '加载中...' });
 
