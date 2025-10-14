@@ -2,7 +2,7 @@
 App({
   onLaunch() {
     // 根据是否正确配置环境 ID 决定是否启用云开发
-    const envId = 'school-env-xxxxx'; // 请替换为您的云环境 ID
+    const envId = 'cloud1-9gdsq5jxb7e60ab4'; // 已配置云环境 ID
     const canUseCloud = !!wx.cloud && envId && !/xxxxx/i.test(envId);
 
     if (canUseCloud) {
