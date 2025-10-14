@@ -197,6 +197,195 @@ async function generateStudentId() {
   }
 }
 
+/**
+ * 保存/更新学生信息
+ */
+async function saveStudent(student) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.saveStudent(student);
+  }
+  
+  try {
+    const db = getDB();
+    
+    if (student._id) {
+      // 更新 - 需要排除 _id 字段
+      const updateData = { ...student };
+      delete updateData._id;
+      
+      await db.collection('students').doc(student._id).update({
+        data: updateData
+      });
+      console.log('✅ 云端更新学生成功');
+      return student;
+    } else {
+      // 新增
+      // 生成学号
+      if (!student.studentId) {
+        student.studentId = await generateStudentId();
+      }
+      
+      const addData = { ...student };
+      delete addData._id;
+      
+      const res = await db.collection('students').add({
+        data: {
+          ...addData,
+          password: addData.password || '123456',
+          createdAt: new Date().toISOString()
+        }
+      });
+      
+      student._id = res._id;
+      console.log('✅ 云端添加学生成功, 学号:', student.studentId);
+      return student;
+    }
+  } catch (e) {
+    console.error('❌ 保存学生失败:', e);
+    throw e;
+  }
+}
+
+/**
+ * 根据学号获取学生信息
+ */
+async function getStudentById(studentId) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.getStudentById(studentId);
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection('students')
+      .where({
+        studentId: studentId
+      })
+      .get();
+    
+    if (res.data.length > 0) {
+      console.log('✅ 云端获取学生信息成功');
+      return res.data[0];
+    }
+    return null;
+  } catch (e) {
+    console.error('❌ 获取学生信息失败:', e);
+    const storage = require('./storage.js');
+    return storage.getStudentById(studentId);
+  }
+}
+
+/**
+ * 更新学生信息
+ */
+async function updateStudent(studentId, updates) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.updateStudent(studentId, updates);
+  }
+  
+  try {
+    const db = getDB();
+    
+    // 先获取学生文档ID
+    const student = await getStudentById(studentId);
+    if (!student) {
+      throw new Error('学生不存在');
+    }
+    
+    // 排除 _id 和 studentId
+    const updateData = { ...updates };
+    delete updateData._id;
+    delete updateData.studentId;
+    
+    await db.collection('students').doc(student._id).update({
+      data: updateData
+    });
+    
+    console.log('✅ 云端更新学生成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 更新学生失败:', e);
+    throw e;
+  }
+}
+
+/**
+ * 删除学生
+ */
+async function deleteStudent(studentId) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.deleteStudent(studentId);
+  }
+  
+  try {
+    const db = getDB();
+    
+    // 先获取学生文档ID
+    const student = await getStudentById(studentId);
+    if (!student) {
+      throw new Error('学生不存在');
+    }
+    
+    await db.collection('students').doc(student._id).remove();
+    
+    console.log('✅ 云端删除学生成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 删除学生失败:', e);
+    throw e;
+  }
+}
+
+/**
+ * 获取学生档案记录
+ */
+async function getRecords(studentId) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.getRecords(studentId);
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection(`records:${studentId}`).get();
+    console.log('✅ 云端获取档案成功:', res.data.length);
+    return res.data;
+  } catch (e) {
+    console.error('❌ 获取档案失败:', e);
+    // 如果集合不存在，返回空数组
+    return [];
+  }
+}
+
+/**
+ * 添加档案记录
+ */
+async function addRecord(studentId, record) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.addRecord(studentId, record);
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection(`records:${studentId}`).add({
+      data: {
+        ...record,
+        createdAt: new Date().toISOString()
+      }
+    });
+    
+    console.log('✅ 云端添加档案成功');
+    return { _id: res._id, ...record };
+  } catch (e) {
+    console.error('❌ 添加档案失败:', e);
+    throw e;
+  }
+}
+
 // ==================== 订单管理 ====================
 
 /**
@@ -572,13 +761,22 @@ module.exports = {
   
   // 摄影师
   getPhotographers,
+  getPhotographerById,
   savePhotographer,
   deletePhotographer,
   
   // 学生
   getStudents,
+  getStudentById,
+  saveStudent,
   addStudent,
+  updateStudent,
+  deleteStudent,
   generateStudentId,
+  
+  // 档案记录
+  getRecords,
+  addRecord,
   
   // 订单
   getApplications,
