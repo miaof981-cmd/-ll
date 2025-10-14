@@ -1,5 +1,5 @@
 // pages/admin/announcements/announcements.js
-const storage = require('../../../utils/storage.js');
+const cloudDB = require('../../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -23,8 +23,10 @@ Page({
   },
 
   // 加载公告列表
-  loadAnnouncements() {
-    const announcements = storage.getAnnouncements();
+  async loadAnnouncements() {
+    wx.showLoading({ title: '加载中...' });
+    const announcements = await cloudDB.getAnnouncements();
+    wx.hideLoading();
     this.setData({ announcements });
   },
 
@@ -77,16 +79,46 @@ Page({
       count: 1,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
-      success: (res) => {
-        this.setData({
-          'formData.coverImage': res.tempFiles[0].tempFilePath
-        });
+      success: async (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+        
+        wx.showLoading({ title: '上传中...' });
+        
+        try {
+          // 上传到云存储
+          const timestamp = Date.now();
+          const cloudPath = `announcements/${timestamp}_${Math.random().toString(36).slice(2)}.jpg`;
+          
+          const uploadResult = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: tempFilePath
+          });
+          
+          console.log('✅ 封面上传成功:', uploadResult.fileID);
+          
+          this.setData({
+            'formData.coverImage': uploadResult.fileID
+          });
+          
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+        } catch (e) {
+          console.error('❌ 上传失败:', e);
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传失败',
+            icon: 'error'
+          });
+        }
       }
     });
   },
 
   // 保存公告
-  saveAnnouncement() {
+  async saveAnnouncement() {
     const { title, content } = this.data.formData;
 
     if (!title.trim()) {
@@ -105,24 +137,34 @@ Page({
       return;
     }
 
-    let success = false;
+    wx.showLoading({ title: '保存中...' });
     
-    if (this.data.editingId) {
-      // 更新公告
-      success = storage.updateAnnouncement(this.data.editingId, this.data.formData);
-    } else {
-      // 添加公告
-      success = storage.addAnnouncement(this.data.formData);
-    }
-
-    if (success) {
-      wx.showToast({
-        title: '保存成功',
-        icon: 'success'
-      });
-      this.hideDialog();
-      this.loadAnnouncements();
-    } else {
+    try {
+      const announcementData = {
+        ...this.data.formData,
+        _id: this.data.editingId || undefined
+      };
+      
+      const result = await cloudDB.saveAnnouncement(announcementData);
+      
+      wx.hideLoading();
+      
+      if (result) {
+        wx.showToast({
+          title: '保存成功',
+          icon: 'success'
+        });
+        this.hideDialog();
+        this.loadAnnouncements();
+      } else {
+        wx.showToast({
+          title: '保存失败',
+          icon: 'error'
+        });
+      }
+    } catch (e) {
+      console.error('❌ 保存公告失败:', e);
+      wx.hideLoading();
       wx.showToast({
         title: '保存失败',
         icon: 'error'
@@ -135,7 +177,7 @@ Page({
     const item = e.currentTarget.dataset.item;
     this.setData({
       showDialog: true,
-      editingId: item.id,
+      editingId: item._id,  // 使用云数据库的_id
       formData: {
         title: item.title,
         content: item.content,
@@ -152,9 +194,11 @@ Page({
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这条公告吗？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          const success = storage.deleteAnnouncement(id);
+          wx.showLoading({ title: '删除中...' });
+          const success = await cloudDB.deleteAnnouncement(id);
+          wx.hideLoading();
 
           if (success) {
             wx.showToast({

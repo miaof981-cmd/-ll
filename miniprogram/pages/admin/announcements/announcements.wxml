@@ -36,7 +36,7 @@
         <button class="btn-action btn-edit" bindtap="editAnnouncement" data-item="{{item}}">
           编辑
         </button>
-        <button class="btn-action btn-delete" bindtap="deleteAnnouncement" data-id="{{item.id}}">
+        <button class="btn-action btn-delete" bindtap="deleteAnnouncement" data-id="{{item._id}}">
           删除
         </button>
       </view>
