@@ -25,26 +25,135 @@
 .label-with-help {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 12rpx;
   margin-bottom: var(--spacing-sm);
 }
 
+.label-with-help .label {
+  margin-bottom: 0;
+}
+
 .help-icon {
-  width: 36rpx;
-  height: 36rpx;
+  width: 40rpx;
+  height: 40rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f0f0f0;
   border-radius: 50%;
-  font-size: 20rpx;
+  font-size: 24rpx;
+  line-height: 1;
 }
 
 .hint {
-  margin-top: 8rpx;
+  margin-top: 16rpx;
   font-size: 24rpx;
   color: #999;
   line-height: 1.5;
+}
+
+/* 绑定选项 */
+.bind-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.bind-option {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s;
+}
+
+.bind-option:active:not(.disabled) {
+  background: #e9ecef;
+  border-color: #667eea;
+  transform: scale(0.98);
+}
+
+.bind-option.disabled {
+  opacity: 0.5;
+}
+
+.option-icon {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+}
+
+.option-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.option-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.option-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.option-arrow {
+  font-size: 32rpx;
+  color: #667eea;
+}
+
+.coming-soon {
+  font-size: 22rpx;
+  color: #f59e0b;
+  padding: 4rpx 12rpx;
+  background: #fef3c7;
+  border-radius: 8rpx;
+}
+
+/* 已绑定显示 */
+.bound-openid {
+  margin-top: 16rpx;
+  padding: 16rpx;
+  background: #f0f7ff;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.bound-label {
+  font-size: 24rpx;
+  color: #1a56db;
+  font-weight: 500;
+}
+
+.bound-value {
+  flex: 1;
+  font-size: 22rpx;
+  color: #1a56db;
+  font-family: 'Monaco', 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.unbind-btn {
+  padding: 8rpx 20rpx;
+  background: #ef4444;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 24rpx;
 }
 
 .input, .textarea {

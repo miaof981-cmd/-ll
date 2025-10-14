@@ -8,7 +8,9 @@ Page({
     description: '',
     avatar: '',
     wechatOpenid: '',
-    showOpenidHelp: false
+    showOpenidHelp: false,
+    showBindQRCode: false,
+    bindToken: ''
   },
 
   onLoad(options) {
@@ -74,6 +76,60 @@ Page({
 
   hideOpenidHelp() {
     this.setData({ showOpenidHelp: false });
+  },
+
+  // 生成绑定二维码
+  generateBindQRCode() {
+    // 生成唯一的绑定token
+    const token = `photographer_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    
+    this.setData({ 
+      bindToken: token,
+      showBindQRCode: true 
+    });
+    
+    // 这里可以将token保存到云数据库，设置30分钟过期
+    // 摄影师扫码后，通过token将其openid绑定到这个摄影师
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none',
+      duration: 2000
+    });
+  },
+
+  hideBindQRCode() {
+    this.setData({ showBindQRCode: false });
+  },
+
+  // 手动输入OpenID
+  manualInputOpenid() {
+    wx.showModal({
+      title: '输入OpenID',
+      content: '让摄影师登录小程序后，在「我的」页面复制OpenID',
+      editable: true,
+      placeholderText: '请粘贴OpenID',
+      success: (res) => {
+        if (res.confirm && res.content) {
+          this.setData({ wechatOpenid: res.content.trim() });
+        }
+      }
+    });
+  },
+
+  unbindOpenid() {
+    wx.showModal({
+      title: '确认解绑',
+      content: '解绑后该用户将失去摄影师权限',
+      success: (res) => {
+        if (res.confirm) {
+          this.setData({ wechatOpenid: '' });
+          wx.showToast({
+            title: '已解绑',
+            icon: 'success'
+          });
+        }
+      }
+    });
   },
 
   uploadAvatar() {
