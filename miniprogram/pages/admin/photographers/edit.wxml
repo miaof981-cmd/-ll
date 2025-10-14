@@ -23,19 +23,10 @@
       
       <!-- 绑定方式选择 -->
       <view class="bind-options">
-        <view class="bind-option disabled" bindtap="generateBindQRCode">
-          <view class="option-icon">📱</view>
-          <view class="option-content">
-            <text class="option-title">扫码绑定（推荐）</text>
-            <text class="option-desc">生成二维码让摄影师扫码</text>
-          </view>
-          <text class="coming-soon">敬请期待</text>
-        </view>
-        
         <view class="bind-option" bindtap="manualInputOpenid">
           <view class="option-icon">⌨️</view>
           <view class="option-content">
-            <text class="option-title">手动输入</text>
+            <text class="option-title">绑定微信账号</text>
             <text class="option-desc">输入摄影师的OpenID</text>
           </view>
           <text class="option-arrow">→</text>
