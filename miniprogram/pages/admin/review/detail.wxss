@@ -179,6 +179,10 @@
   box-shadow: 0 0 0 4rpx rgba(59, 130, 246, 0.2);
 }
 
+.timeline-dot.submit {
+  background: #8b5cf6;
+}
+
 .timeline-dot.reject {
   background: #ef4444;
 }
@@ -260,6 +264,20 @@
   margin-top: 4rpx;
 }
 
+/* 当前照片提示 */
+.current-photos {
+  margin-top: 12rpx;
+  padding: 12rpx;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8rpx;
+  text-align: center;
+}
+
+.photos-label {
+  font-size: 22rpx;
+  color: #3b82f6;
+}
+
 /* 历史照片 */
 .history-photos {
   margin-top: 12rpx;
@@ -273,6 +291,7 @@
   font-size: 22rpx;
   color: #666;
   margin-bottom: 8rpx;
+  font-weight: 600;
 }
 
 .history-photos-grid {

@@ -451,7 +451,7 @@ Page({
       const currentRejectCount = this.data.order.rejectCount || 0;
       const now = new Date().toISOString();
 
-      // 保存历史记录
+      // 保存历史记录（包含提交时间和拒绝时间）
       try {
         await db.collection('order_photo_history').add({
           data: {
@@ -459,8 +459,9 @@ Page({
             photos: this.data.order.photos || [],
             rejectType: 'user',
             rejectReason: reason,
-            rejectCount: currentRejectCount,
-            rejectedAt: now,
+            rejectCount: currentRejectCount + 1, // 记录是第几次拒绝
+            submittedAt: this.data.order.submittedAt || now, // 提交时间
+            rejectedAt: now, // 拒绝时间
             createdAt: now
           }
         });

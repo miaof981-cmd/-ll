@@ -36,10 +36,15 @@ Page({
       // 获取活动信息
       let activity = null;
       if (order.activityId) {
-        const activityRes = await db.collection('activities')
-          .doc(order.activityId)
-          .get();
-        activity = activityRes.data;
+        try {
+          const activityRes = await db.collection('activities')
+            .doc(order.activityId)
+            .get();
+          activity = activityRes.data;
+          console.log('✅ 活动信息:', activity);
+        } catch (e) {
+          console.error('获取活动信息失败:', e);
+        }
       }
 
       // 获取摄影师信息
@@ -183,7 +188,7 @@ Page({
       const db = wx.cloud.database();
       const now = new Date().toISOString();
 
-      // 保存历史记录
+      // 保存历史记录（包含提交时间和拒绝时间）
       try {
         await db.collection('order_photo_history').add({
           data: {
@@ -191,7 +196,8 @@ Page({
             photos: this.data.order.photos || [],
             rejectType: 'admin',
             rejectReason: rejectReason,
-            rejectedAt: now,
+            submittedAt: this.data.order.submittedAt || now, // 提交时间
+            rejectedAt: now, // 拒绝时间
             createdAt: now
           }
         });
