@@ -783,6 +783,236 @@ async function getArchiveByStudentId(studentId) {
   }
 }
 
+// ==================== 活动管理 ====================
+
+/**
+ * 获取活动列表
+ */
+async function getActivities(options = {}) {
+  if (!isCloudEnabled()) {
+    console.warn('云开发未启用，活动功能需要云开发支持');
+    return [];
+  }
+  
+  try {
+    const { category, status, keyword, limit = 20, skip = 0 } = options;
+    
+    const res = await wx.cloud.callFunction({
+      name: 'getActivities',
+      data: { category, status, keyword, limit, skip }
+    });
+    
+    if (res.result && res.result.success) {
+      console.log('✅ 云端获取活动成功:', res.result.data.length);
+      return res.result.data;
+    }
+    
+    return [];
+  } catch (e) {
+    console.error('❌ 获取活动失败:', e);
+    return [];
+  }
+}
+
+/**
+ * 获取活动详情
+ */
+async function getActivityDetail(activityId) {
+  if (!isCloudEnabled()) {
+    console.warn('云开发未启用');
+    return null;
+  }
+  
+  try {
+    const res = await wx.cloud.callFunction({
+      name: 'getActivityDetail',
+      data: { activityId }
+    });
+    
+    if (res.result && res.result.success) {
+      console.log('✅ 云端获取活动详情成功');
+      return res.result;
+    }
+    
+    return null;
+  } catch (e) {
+    console.error('❌ 获取活动详情失败:', e);
+    return null;
+  }
+}
+
+/**
+ * 创建活动订单
+ */
+async function createActivityOrder(orderData) {
+  if (!isCloudEnabled()) {
+    console.warn('云开发未启用');
+    return { success: false, error: '云开发未启用' };
+  }
+  
+  try {
+    const res = await wx.cloud.callFunction({
+      name: 'createActivityOrder',
+      data: orderData
+    });
+    
+    if (res.result && res.result.success) {
+      console.log('✅ 云端创建订单成功');
+      return res.result;
+    }
+    
+    return res.result || { success: false, error: '创建订单失败' };
+  } catch (e) {
+    console.error('❌ 创建订单失败:', e);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * 保存活动（后台用）
+ */
+async function saveActivity(activity) {
+  if (!isCloudEnabled()) {
+    console.warn('云开发未启用');
+    return false;
+  }
+  
+  try {
+    const db = getDB();
+    
+    if (activity._id) {
+      // 更新
+      const updateData = { ...activity };
+      delete updateData._id;
+      updateData.updatedAt = new Date().toISOString();
+      
+      await db.collection('activities').doc(activity._id).update({
+        data: updateData
+      });
+      console.log('✅ 云端更新活动成功');
+    } else {
+      // 新增
+      const addData = { ...activity };
+      delete addData._id;
+      addData.createdAt = new Date().toISOString();
+      addData.updatedAt = new Date().toISOString();
+      addData.viewCount = 0;
+      addData.orderCount = 0;
+      
+      const res = await db.collection('activities').add({
+        data: addData
+      });
+      activity._id = res._id;
+      console.log('✅ 云端添加活动成功');
+    }
+    
+    return activity;
+  } catch (e) {
+    console.error('❌ 保存活动失败:', e);
+    return false;
+  }
+}
+
+/**
+ * 删除活动
+ */
+async function deleteActivity(activityId) {
+  if (!isCloudEnabled()) {
+    console.warn('云开发未启用');
+    return false;
+  }
+  
+  try {
+    const db = getDB();
+    await db.collection('activities').doc(activityId).remove();
+    console.log('✅ 云端删除活动成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 删除活动失败:', e);
+    return false;
+  }
+}
+
+/**
+ * 获取活动订单列表
+ */
+async function getActivityOrders(options = {}) {
+  if (!isCloudEnabled()) {
+    console.warn('云开发未启用');
+    return [];
+  }
+  
+  try {
+    const db = getDB();
+    const { status, keyword, limit = 20, skip = 0 } = options;
+    
+    let query = {};
+    if (status) query.status = status;
+    if (keyword) {
+      query.childName = db.RegExp({
+        regexp: keyword,
+        options: 'i'
+      });
+    }
+    
+    const res = await db.collection('activity_orders')
+      .where(query)
+      .orderBy('createdAt', 'desc')
+      .skip(skip)
+      .limit(limit)
+      .get();
+    
+    console.log('✅ 云端获取订单成功:', res.data.length);
+    return res.data;
+  } catch (e) {
+    console.error('❌ 获取订单失败:', e);
+    return [];
+  }
+}
+
+/**
+ * 获取订单详情
+ */
+async function getActivityOrderById(orderId) {
+  if (!isCloudEnabled()) {
+    return null;
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection('activity_orders').doc(orderId).get();
+    console.log('✅ 云端获取订单详情成功');
+    return res.data;
+  } catch (e) {
+    console.error('❌ 获取订单详情失败:', e);
+    return null;
+  }
+}
+
+/**
+ * 更新订单状态
+ */
+async function updateActivityOrder(orderId, updates) {
+  if (!isCloudEnabled()) {
+    return false;
+  }
+  
+  try {
+    const db = getDB();
+    updates.updatedAt = new Date().toISOString();
+    
+    await db.collection('activity_orders').doc(orderId).update({
+      data: updates
+    });
+    
+    console.log('✅ 云端更新订单成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 更新订单失败:', e);
+    return false;
+  }
+}
+
 // ==================== 导出接口 ====================
 
 module.exports = {
@@ -827,6 +1057,18 @@ module.exports = {
   createArchive,
   updateArchive,
   getArchiveById,
-  getArchiveByStudentId
+  getArchiveByStudentId,
+  
+  // 活动管理
+  getActivities,
+  getActivityDetail,
+  createActivityOrder,
+  saveActivity,
+  deleteActivity,
+  
+  // 活动订单
+  getActivityOrders,
+  getActivityOrderById,
+  updateActivityOrder
 };
 
