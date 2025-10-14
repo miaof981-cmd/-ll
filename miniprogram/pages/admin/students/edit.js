@@ -1,5 +1,5 @@
 // pages/admin/students/edit.js
-const storage = require('../../../utils/storage.js');
+const cloudDB = require('../../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -25,15 +25,36 @@ Page({
   },
 
   // 加载学生信息
-  loadStudent(studentId) {
-    const student = storage.getStudentById(studentId);
-    if (student) {
-      this.setData({
-        formData: {
-          name: student.name,
-          parentName: student.parentName,
-          admissionLetter: student.admissionLetter || ''
-        }
+  async loadStudent(studentId) {
+    console.log('📡 加载学生信息:', studentId);
+    wx.showLoading({ title: '加载中...' });
+
+    try {
+      const student = await cloudDB.getStudentById(studentId);
+
+      wx.hideLoading();
+
+      if (student) {
+        console.log('✅ 学生信息:', student);
+        this.setData({
+          formData: {
+            name: student.name,
+            parentName: student.parentName,
+            admissionLetter: student.admissionLetter || ''
+          }
+        });
+      } else {
+        wx.showToast({
+          title: '学生不存在',
+          icon: 'error'
+        });
+      }
+    } catch (e) {
+      console.error('❌ 加载学生失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '加载失败',
+        icon: 'error'
       });
     }
   },
@@ -58,10 +79,40 @@ Page({
       count: 1,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
-      success: (res) => {
-        this.setData({
-          'formData.admissionLetter': res.tempFiles[0].tempFilePath
-        });
+      success: async (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+
+        wx.showLoading({ title: '上传中...' });
+
+        try {
+          // 上传到云存储
+          const timestamp = Date.now();
+          const cloudPath = `admissions/${timestamp}_${Math.random().toString(36).slice(2)}.jpg`;
+
+          const uploadResult = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: tempFilePath
+          });
+
+          console.log('✅ 录取通知书上传成功:', uploadResult.fileID);
+
+          this.setData({
+            'formData.admissionLetter': uploadResult.fileID
+          });
+
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+        } catch (e) {
+          console.error('❌ 上传失败:', e);
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传失败',
+            icon: 'error'
+          });
+        }
       }
     });
   },
@@ -115,18 +166,48 @@ Page({
       count: 1,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
-      success: (res) => {
-        const updateKey = `initRecords[${index}].data.imageUrl`;
-        const updateData = {};
-        updateData[updateKey] = res.tempFiles[0].tempFilePath;
-        
-        this.setData(updateData);
+      success: async (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+
+        wx.showLoading({ title: '上传中...' });
+
+        try {
+          // 上传到云存储
+          const timestamp = Date.now();
+          const cloudPath = `records/${timestamp}_${Math.random().toString(36).slice(2)}.jpg`;
+
+          const uploadResult = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: tempFilePath
+          });
+
+          console.log('✅ 档案图片上传成功:', uploadResult.fileID);
+
+          const updateKey = `initRecords[${index}].data.imageUrl`;
+          const updateData = {};
+          updateData[updateKey] = uploadResult.fileID;
+
+          this.setData(updateData);
+
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+        } catch (e) {
+          console.error('❌ 上传失败:', e);
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传失败',
+            icon: 'error'
+          });
+        }
       }
     });
   },
 
   // 保存学生
-  saveStudent() {
+  async saveStudent() {
     const { name, parentName, admissionLetter } = this.data.formData;
 
     // 验证必填字段
@@ -159,21 +240,30 @@ Page({
     try {
       if (this.data.isEdit) {
         // 更新学生信息
-        const success = storage.updateStudent(this.data.studentId, this.data.formData);
+        const success = await cloudDB.updateStudent(this.data.studentId, this.data.formData);
         
         if (!success) {
           throw new Error('更新失败');
         }
       } else {
         // 添加新学生
-        const newStudent = storage.addStudent(this.data.formData);
+        const studentData = {
+          name,
+          parentName,
+          admissionLetter,
+          password: '123456'
+        };
+
+        const newStudent = await cloudDB.saveStudent(studentData);
         
         if (!newStudent) {
           throw new Error('添加失败');
         }
 
+        console.log('✅ 新学生添加成功:', newStudent);
+
         // 添加初始档案记录
-        this.data.initRecords.forEach(record => {
+        for (const record of this.data.initRecords) {
           const recordData = {
             type: record.type,
             ...record.data
@@ -194,8 +284,8 @@ Page({
             recordData.reason = record.data.reason || '';
           }
 
-          storage.addRecord(newStudent.studentId, recordData);
-        });
+          await cloudDB.addRecord(newStudent.studentId, recordData);
+        }
       }
 
       wx.hideLoading();
@@ -209,6 +299,7 @@ Page({
       }, 1500);
 
     } catch (error) {
+      console.error('❌ 保存学生失败:', error);
       wx.hideLoading();
       wx.showToast({
         title: error.message || '保存失败',

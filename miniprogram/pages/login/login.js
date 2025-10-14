@@ -1,5 +1,5 @@
 // pages/login/login.js
-const storage = require('../../utils/storage.js');
+const cloudDB = require('../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -22,20 +22,24 @@ Page({
   },
 
   // 检查是否有申请记录
-  checkApplication() {
-    const applications = storage.getApplications();
-    if (applications.length > 0) {
-      // 获取最新的申请
-      const latestApp = applications[applications.length - 1];
-      this.setData({
-        hasApplication: true,
-        applicationId: latestApp.id
-      });
-    } else {
-      this.setData({
-        hasApplication: false,
-        applicationId: ''
-      });
+  async checkApplication() {
+    try {
+      const applications = await cloudDB.getApplications();
+      if (applications.length > 0) {
+        // 获取最新的申请
+        const latestApp = applications[applications.length - 1];
+        this.setData({
+          hasApplication: true,
+          applicationId: latestApp._id || latestApp.id
+        });
+      } else {
+        this.setData({
+          hasApplication: false,
+          applicationId: ''
+        });
+      }
+    } catch (e) {
+      console.error('❌ 检查申请记录失败:', e);
     }
   },
 
@@ -64,7 +68,7 @@ Page({
   },
 
   // 登录
-  handleLogin() {
+  async handleLogin() {
     const { studentId, password, loginType } = this.data;
 
     if (!studentId.trim()) {
@@ -84,84 +88,90 @@ Page({
     }
 
     this.setData({ loading: true });
+    wx.showLoading({ title: '登录中...' });
 
-    // 验证登录
-    let isValid = false;
-    let userInfo = null;
-    
-    if (loginType === 'admin') {
-      // 管理员登录
-      isValid = studentId === 'admin' && password === 'admin123';
-      if (isValid) {
-        userInfo = {
-          studentId: 'admin',
-          name: '管理员'
-        };
-      }
-    } else {
-      // 学生/家长登录 - 从本地存储验证
-      let students = storage.getStudents();
+    try {
+      // 验证登录
+      let isValid = false;
+      let userInfo = null;
       
-      // 如果没有学生数据，初始化测试学生
-      if (students.length === 0) {
-        console.log('初始化测试学生数据');
-        const testStudent = {
-          studentId: '20250001',
-          name: '测试学生',
-          parentName: '测试家长',
-          password: '123456',
-          admissionLetter: '',
-          createdAt: new Date().toLocaleDateString('zh-CN')
-        };
-        students = [testStudent];
-        storage.saveStudents(students);
-      }
-      
-      const student = students.find(s => s.studentId === studentId.trim());
-      
-      if (student) {
-        // 验证密码（默认密码是123456，或用户修改后的密码）
-        const correctPassword = student.password || '123456';
-        isValid = password === correctPassword;
-        
+      if (loginType === 'admin') {
+        // 管理员登录
+        isValid = studentId === 'admin' && password === 'admin123';
         if (isValid) {
           userInfo = {
-            studentId: student.studentId,
-            name: student.name,
-            parentName: student.parentName
+            studentId: 'admin',
+            name: '管理员'
           };
         }
-      }
-    }
-
-    this.setData({ loading: false });
-
-    if (isValid && userInfo) {
-      const app = getApp();
-      app.globalData.userInfo = userInfo;
-      app.globalData.isAdmin = loginType === 'admin';
-
-      wx.showToast({
-        title: '登录成功',
-        icon: 'success'
-      });
-
-      setTimeout(() => {
-        if (loginType === 'admin') {
-          // 管理员跳转到管理后台
-          wx.navigateTo({
-            url: '/pages/admin/admin'
-          });
+      } else {
+        // 学生/家长登录 - 从云数据库验证
+        const students = await cloudDB.getStudents();
+        
+        console.log('✅ 获取学生数据:', students.length);
+        
+        const student = students.find(s => s.studentId === studentId.trim());
+        
+        if (student) {
+          console.log('✅ 找到学生:', student);
+          // 验证密码（默认密码是123456，或用户修改后的密码）
+          const correctPassword = student.password || '123456';
+          isValid = password === correctPassword;
+          
+          if (isValid) {
+            userInfo = {
+              studentId: student.studentId,
+              name: student.name,
+              parentName: student.parentName
+            };
+          }
         } else {
-          // 学生/家长跳转到档案页面
-          wx.navigateTo({
-            url: '/pages/records/records'
-          });
+          console.log('❌ 未找到学生:', studentId);
         }
-      }, 1500);
-    } else {
+      }
+
+      this.setData({ loading: false });
+      wx.hideLoading();
+
+      if (isValid && userInfo) {
+        const app = getApp();
+        app.globalData.userInfo = userInfo;
+        app.globalData.isAdmin = loginType === 'admin';
+
+        // 持久化存储登录状态
+        wx.setStorageSync('userInfo', userInfo);
+        wx.setStorageSync('isAdmin', loginType === 'admin');
+
+        wx.showToast({
+          title: '登录成功',
+          icon: 'success'
+        });
+
+        setTimeout(() => {
+          if (loginType === 'admin') {
+            // 管理员跳转到管理后台
+            wx.navigateTo({
+              url: '/pages/admin/admin'
+            });
+          } else {
+            // 学生/家长跳转到档案页面
+            wx.navigateTo({
+              url: '/pages/records/records'
+            });
+          }
+        }, 1500);
+      } else {
+        wx.showToast({
+          title: '学号或密码错误',
+          icon: 'error'
+        });
+      }
+    } catch (e) {
+      console.error('❌ 登录失败:', e);
+      this.setData({ loading: false });
+      wx.hideLoading();
       wx.showToast({
-        title: '学号或密码错误',
+        title: '登录失败',
         icon: 'error'
       });
     }

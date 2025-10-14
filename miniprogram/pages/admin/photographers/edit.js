@@ -1,4 +1,4 @@
-const storage = require('../../../utils/storage.js');
+const cloudDB = require('../../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -16,15 +16,35 @@ Page({
     }
   },
 
-  loadPhotographer(id) {
-    const photographers = storage.getPhotographers();
-    const photographer = photographers.find(p => p.id === id);
-    if (photographer) {
-      this.setData({
-        name: photographer.name,
-        specialty: photographer.specialty || '',
-        description: photographer.description || '',
-        avatar: photographer.avatar || ''
+  async loadPhotographer(id) {
+    console.log('📡 加载摄影师信息:', id);
+    wx.showLoading({ title: '加载中...' });
+
+    try {
+      const photographer = await cloudDB.getPhotographerById(id);
+
+      wx.hideLoading();
+
+      if (photographer) {
+        console.log('✅ 摄影师信息:', photographer);
+        this.setData({
+          name: photographer.name,
+          specialty: photographer.specialty || '',
+          description: photographer.description || '',
+          avatar: photographer.avatar || ''
+        });
+      } else {
+        wx.showToast({
+          title: '摄影师不存在',
+          icon: 'error'
+        });
+      }
+    } catch (e) {
+      console.error('❌ 加载摄影师失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '加载失败',
+        icon: 'error'
       });
     }
   },
@@ -47,16 +67,38 @@ Page({
       mediaType: ['image'],
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
-      success: (res) => {
+      success: async (res) => {
         const tempFilePath = res.tempFiles[0].tempFilePath;
-        wx.getFileSystemManager().readFile({
-          filePath: tempFilePath,
-          encoding: 'base64',
-          success: (fileRes) => {
-            const base64 = 'data:image/jpeg;base64,' + fileRes.data;
-            this.setData({ avatar: base64 });
-          }
-        });
+
+        wx.showLoading({ title: '上传中...' });
+
+        try {
+          // 上传到云存储
+          const timestamp = Date.now();
+          const cloudPath = `photographers/${timestamp}_${Math.random().toString(36).slice(2)}.jpg`;
+
+          const uploadResult = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: tempFilePath
+          });
+
+          console.log('✅ 头像上传成功:', uploadResult.fileID);
+
+          this.setData({ avatar: uploadResult.fileID });
+
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+        } catch (e) {
+          console.error('❌ 上传失败:', e);
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传失败',
+            icon: 'error'
+          });
+        }
       }
     });
   },
@@ -74,7 +116,7 @@ Page({
     wx.navigateBack();
   },
 
-  save() {
+  async save() {
     const { id, name, specialty, description, avatar } = this.data;
 
     if (!name) {
@@ -85,27 +127,46 @@ Page({
       return;
     }
 
-    const photographerData = {
-      id: id || 'PHO' + Date.now(),
-      name,
-      specialty,
-      description,
-      avatar,
-      status: 'available',
-      orderCount: 0,
-      createdAt: new Date().toISOString()
-    };
+    wx.showLoading({ title: '保存中...' });
 
-    storage.savePhotographer(photographerData);
+    try {
+      const photographerData = {
+        _id: id || undefined,
+        name,
+        specialty,
+        description,
+        avatar,
+        status: 'available',
+        orderCount: 0
+      };
 
-    wx.showToast({
-      title: id ? '更新成功' : '添加成功',
-      icon: 'success'
-    });
+      const result = await cloudDB.savePhotographer(photographerData);
 
-    setTimeout(() => {
-      wx.navigateBack();
-    }, 1500);
+      wx.hideLoading();
+
+      if (result) {
+        wx.showToast({
+          title: id ? '更新成功' : '添加成功',
+          icon: 'success'
+        });
+
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1500);
+      } else {
+        wx.showToast({
+          title: '保存失败',
+          icon: 'error'
+        });
+      }
+    } catch (e) {
+      console.error('❌ 保存摄影师失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '保存失败',
+        icon: 'error'
+      });
+    }
   }
 });
 

@@ -1,5 +1,5 @@
 // pages/apply/photographer.js - 选择摄影师逻辑
-const storage = require('../../utils/storage.js');
+const cloudDB = require('../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -12,9 +12,13 @@ Page({
   },
 
   // 加载摄影师列表
-  loadPhotographers() {
-    // 从本地存储获取摄影师数据
-    let photographers = storage.getPhotographers();
+  async loadPhotographers() {
+    console.log('📡 开始加载摄影师列表...');
+    wx.showLoading({ title: '加载中...' });
+
+    try {
+      // 从云数据库获取摄影师数据
+      let photographers = await cloudDB.getPhotographers();
     
     // 如果没有数据，初始化默认摄影师数据
     if (photographers.length === 0) {
@@ -43,17 +47,19 @@ Page({
         }
       ];
       
-      // 保存默认数据到存储
-      defaultPhotographers.forEach(p => {
-        storage.savePhotographer(p);
-      });
+      // 保存默认数据到云数据库
+      for (const p of defaultPhotographers) {
+        await cloudDB.savePhotographer(p);
+      }
       
       photographers = defaultPhotographers;
     }
+
+    console.log('✅ 摄影师数量:', photographers.length);
     
     // 转换为小程序展示格式
     const displayPhotographers = photographers.map(p => ({
-      id: p.id,
+      id: p._id || p.id,
       name: p.name,
       title: p.specialty || '专业摄影师',
       level: p.orderCount > 50 ? '金牌' : p.orderCount > 20 ? '银牌' : '新星',
@@ -69,6 +75,16 @@ Page({
     this.setData({
       photographers: displayPhotographers
     });
+
+    wx.hideLoading();
+    } catch (e) {
+      console.error('❌ 加载摄影师失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '加载失败',
+        icon: 'error'
+      });
+    }
   },
   
   // 生成默认头像

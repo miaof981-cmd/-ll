@@ -1,5 +1,5 @@
 // pages/admin/students/students.js
-const storage = require('../../../utils/storage.js');
+const cloudDB = require('../../../utils/cloud-db.js');
 
 const PAGE_SIZE = 10;
 
@@ -22,11 +22,27 @@ Page({
   },
 
   // 加载学生列表
-  loadStudents() {
-    const students = storage.getStudents();
-    this.setData({ students }, () => {
-      this.applyFilter();
-    });
+  async loadStudents() {
+    console.log('📡 开始加载学生列表...');
+    wx.showLoading({ title: '加载中...' });
+
+    try {
+      const students = await cloudDB.getStudents();
+      console.log('✅ 学生数量:', students.length);
+
+      this.setData({ students }, () => {
+        this.applyFilter();
+      });
+
+      wx.hideLoading();
+    } catch (e) {
+      console.error('❌ 加载学生列表失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '加载失败',
+        icon: 'error'
+      });
+    }
   },
 
   // 搜索关键词输入
@@ -140,17 +156,30 @@ Page({
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这个学生吗？这将同时删除该学生的所有档案记录。',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          const success = storage.deleteStudent(studentId);
-          
-          if (success) {
-            wx.showToast({
-              title: '删除成功',
-              icon: 'success'
-            });
-            this.loadStudents();
-          } else {
+          wx.showLoading({ title: '删除中...' });
+
+          try {
+            const success = await cloudDB.deleteStudent(studentId);
+
+            wx.hideLoading();
+
+            if (success) {
+              wx.showToast({
+                title: '删除成功',
+                icon: 'success'
+              });
+              this.loadStudents();
+            } else {
+              wx.showToast({
+                title: '删除失败',
+                icon: 'error'
+              });
+            }
+          } catch (e) {
+            console.error('❌ 删除学生失败:', e);
+            wx.hideLoading();
             wx.showToast({
               title: '删除失败',
               icon: 'error'

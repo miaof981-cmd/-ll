@@ -1,4 +1,6 @@
 // pages/my/my.js
+const cloudDB = require('../../utils/cloud-db.js');
+
 Page({
   data: {
     userInfo: null,
@@ -8,11 +10,27 @@ Page({
   },
 
   onShow() {
+    // 从持久化存储恢复登录状态
+    let userInfo = null;
+    let isAdmin = false;
+
+    try {
+      userInfo = wx.getStorageSync('userInfo');
+      isAdmin = wx.getStorageSync('isAdmin');
+    } catch (e) {
+      console.error('读取登录状态失败:', e);
+    }
+
+    // 同时更新 globalData
     const app = getApp();
-    const userInfo = app.globalData.userInfo || null;
-    const isAdmin = !!app.globalData.isAdmin;
-    this.setData({ userInfo, isAdmin });
     if (userInfo) {
+      app.globalData.userInfo = userInfo;
+      app.globalData.isAdmin = isAdmin;
+    }
+
+    this.setData({ userInfo, isAdmin });
+    
+    if (userInfo && !isAdmin) {
       this.loadWaterfall();
     }
   },
@@ -27,6 +45,11 @@ Page({
           const app = getApp();
           app.globalData.userInfo = null;
           app.globalData.isAdmin = false;
+
+          // 清除持久化存储
+          wx.removeStorageSync('userInfo');
+          wx.removeStorageSync('isAdmin');
+
           this.setData({ userInfo: null, isAdmin: false, leftColumn: [], rightColumn: [] });
           wx.showToast({ title: '已退出', icon: 'success' });
         }
@@ -43,21 +66,21 @@ Page({
   goStudents() { wx.navigateTo({ url: '/pages/admin/students/students' }); },
   goAnnouncements() { wx.navigateTo({ url: '/pages/admin/announcements/announcements' }); },
 
-  // 加载瀑布流档案（优先读取本地存储 records:<studentId>；不注入任何预设）
+  // 加载瀑布流档案（从云数据库读取）
   async loadWaterfall() {
+    console.log('📡 开始加载档案记录...');
+    wx.showLoading({ title: '加载中...' });
+
     try {
-      const app = getApp();
-      if (app.globalData.useCloud) {
-        // 预留云端：未来改为请求云端档案合并为统一流
-        this.setData({ leftColumn: [], rightColumn: [] });
-      } else {
-        const storage = require('../../utils/storage');
-        const key = `records:${this.data.userInfo.studentId}`;
-        const items = storage.getArray(key) || [];
-        this.buildColumns(items);
-      }
+      const records = await cloudDB.getRecords(this.data.userInfo.studentId);
+      console.log('✅ 档案记录数量:', records.length);
+
+      this.buildColumns(records);
+
+      wx.hideLoading();
     } catch (e) {
-      console.error(e);
+      console.error('❌ 加载档案失败:', e);
+      wx.hideLoading();
       this.setData({ leftColumn: [], rightColumn: [] });
     }
   },

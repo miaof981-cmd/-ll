@@ -5,7 +5,7 @@
   </view>
 
   <view class="photographers-list">
-    <view class="photographer-card" wx:for="{{photographers}}" wx:key="id">
+    <view class="photographer-card" wx:for="{{photographers}}" wx:key="_id">
       <view class="card-header">
         <image class="avatar" src="{{item.avatar}}" mode="aspectFill" wx:if="{{item.avatar}}"></image>
         <view class="avatar-placeholder" wx:else>{{item.name.substring(0,1)}}</view>
@@ -20,8 +20,8 @@
       <view class="card-footer">
         <text class="orders">订单数: {{item.orderCount || 0}}</text>
         <view class="actions">
-          <button class="btn-edit" size="mini" bindtap="editPhotographer" data-id="{{item.id}}">编辑</button>
-          <button class="btn-delete" size="mini" bindtap="deletePhotographer" data-id="{{item.id}}">删除</button>
+          <button class="btn-edit" size="mini" bindtap="editPhotographer" data-id="{{item._id}}">编辑</button>
+          <button class="btn-delete" size="mini" bindtap="deletePhotographer" data-id="{{item._id}}">删除</button>
         </view>
       </view>
     </view>

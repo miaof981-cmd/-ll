@@ -1,4 +1,6 @@
 // pages/records/records.js
+const cloudDB = require('../../utils/cloud-db.js');
+
 Page({
   data: {
     userInfo: null,
@@ -26,57 +28,81 @@ Page({
 
   // 检查登录状态
   checkLogin() {
-    const app = getApp();
-    if (!app.globalData.userInfo) {
+    // 从持久化存储读取登录状态
+    let userInfo = null;
+    try {
+      userInfo = wx.getStorageSync('userInfo');
+    } catch (e) {
+      console.error('读取登录状态失败:', e);
+    }
+
+    if (!userInfo) {
       wx.showModal({
         title: '提示',
         content: '请先登录',
         showCancel: false,
         success: () => {
           wx.switchTab({
-            url: '/pages/login/login'
+            url: '/pages/my/my'
           });
         }
       });
       return;
     }
 
-    const userInfo = app.globalData.userInfo;
+    const app = getApp();
+    app.globalData.userInfo = userInfo;
+
     this.setData({ userInfo });
     this.loadStudentRecords(userInfo.studentId);
   },
 
   // 加载指定学生的档案
-  loadStudentRecords(studentId) {
-    const storage = require('../../utils/storage.js');
-    const student = storage.getStudentById(studentId);
-    
-    if (!student) {
+  async loadStudentRecords(studentId) {
+    console.log('📡 加载学生档案:', studentId);
+    wx.showLoading({ title: '加载中...' });
+
+    try {
+      const student = await cloudDB.getStudentById(studentId);
+      
+      if (!student) {
+        wx.hideLoading();
+        wx.showToast({
+          title: '学生不存在',
+          icon: 'error'
+        });
+        return;
+      }
+
+      // 获取档案记录
+      const allRecords = await cloudDB.getRecords(studentId);
+      console.log('✅ 档案记录数量:', allRecords.length);
+      
+      // 分类档案
+      const records = {
+        reportCards: allRecords.filter(r => r.type === 'grade'),
+        punishments: allRecords.filter(r => r.type === 'punishment'),
+        images: allRecords.filter(r => r.type === 'image')
+      };
+
+      this.setData({
+        userInfo: {
+          studentId: student.studentId,
+          name: student.name
+        },
+        records,
+        loading: false
+      });
+
+      wx.hideLoading();
+    } catch (e) {
+      console.error('❌ 加载档案失败:', e);
+      wx.hideLoading();
       wx.showToast({
-        title: '学生不存在',
+        title: '加载失败',
         icon: 'error'
       });
-      return;
     }
-
-    // 获取档案记录
-    const allRecords = storage.getRecords(studentId);
-    
-    // 分类档案
-    const records = {
-      reportCards: allRecords.filter(r => r.type === 'grade'),
-      punishments: allRecords.filter(r => r.type === 'punishment'),
-      images: allRecords.filter(r => r.type === 'image')
-    };
-
-    this.setData({
-      userInfo: {
-        studentId: student.studentId,
-        name: student.name
-      },
-      records,
-      loading: false
-    });
   },
 
 
