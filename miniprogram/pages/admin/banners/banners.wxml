@@ -18,7 +18,7 @@
 
     <view 
       wx:for="{{banners}}" 
-      wx:key="id" 
+      wx:key="_id" 
       class="banner-item"
     >
       <image class="banner-preview" src="{{item.imageUrl}}" mode="widthFix" />
@@ -26,7 +26,7 @@
         <text class="banner-date">上传时间：{{item.createdAt}}</text>
       </view>
       <view class="banner-actions">
-        <button class="btn-delete" bindtap="deleteBanner" data-id="{{item.id}}">
+        <button class="btn-delete" bindtap="deleteBanner" data-id="{{item._id}}">
           删除
         </button>
       </view>
