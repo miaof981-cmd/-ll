@@ -1,7 +1,7 @@
 {
-  "name": "fix-history",
+  "name": "fixOrderHistory",
   "version": "1.0.0",
-  "description": "补充历史记录",
+  "description": "补充订单历史记录",
   "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "~2.6.3"
