@@ -86,12 +86,19 @@ Page({
     }
 
     try {
-      const { tempFilePaths } = await wx.chooseMedia({
+      const res = await wx.chooseMedia({
         count: 20 - uploadedPhotos.length,
         mediaType: ['image'],
         sizeType: ['compressed'],
         sourceType: ['album', 'camera']
       });
+
+      // 兼容不同的返回格式
+      const tempFilePaths = res.tempFiles ? res.tempFiles.map(f => f.tempFilePath) : res.tempFilePaths || [];
+
+      if (!tempFilePaths || tempFilePaths.length === 0) {
+        return;
+      }
 
       wx.showLoading({ title: '上传中...' });
       this.setData({ uploading: true });

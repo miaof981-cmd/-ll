@@ -67,8 +67,6 @@ Page({
         name: this.data.formData.childName,
         gender: this.data.formData.childGender,
         age: parseInt(this.data.formData.childAge) || 0,
-        grade: '待分配',
-        class: '待分配',
         parentOpenid: userOpenId,
         parentName: this.data.formData.parentName,
         parentPhone: this.data.formData.parentPhone,
