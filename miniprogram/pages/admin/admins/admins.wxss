@@ -10,16 +10,15 @@
   background: white;
   padding: 24rpx 32rpx;
   display: flex;
-  gap: 16rpx;
+  gap: 20rpx;
   align-items: center;
   border-bottom: 1rpx solid #eee;
-  flex-wrap: nowrap;
 }
 
 .search-box {
   flex: 1;
   position: relative;
-  min-width: 0;
+  overflow: visible;
 }
 
 .search-input {
@@ -29,14 +28,16 @@
   border-radius: 32rpx;
   padding: 0 48rpx 0 24rpx;
   font-size: 26rpx;
+  box-sizing: border-box;
 }
 
 .search-icon {
   position: absolute;
-  right: 24rpx;
+  right: 20rpx;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 32rpx;
+  font-size: 28rpx;
+  pointer-events: none;
 }
 
 .add-btn {
