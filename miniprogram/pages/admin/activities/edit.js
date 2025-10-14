@@ -287,7 +287,6 @@ Page({
       const activityData = {
         ...this.data.formData,
         price: parseFloat(this.data.formData.price),
-        originalPrice: parseFloat(this.data.formData.originalPrice) || parseFloat(this.data.formData.price),
         sortOrder: parseInt(this.data.formData.sortOrder) || 1
       };
 

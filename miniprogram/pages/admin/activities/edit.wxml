@@ -40,26 +40,14 @@
       <view class="section-title">💰 价格设置</view>
 
       <view class="form-item">
-        <text class="label">当前价格 *</text>
+        <text class="label">活动价格 *</text>
         <input 
           class="input" 
           type="digit"
-          placeholder="请输入价格" 
+          placeholder="请输入价格（元）" 
           value="{{formData.price}}"
           bindinput="onInputChange"
           data-field="price"
-        />
-      </view>
-
-      <view class="form-item">
-        <text class="label">原价</text>
-        <input 
-          class="input" 
-          type="digit"
-          placeholder="请输入原价（选填）" 
-          value="{{formData.originalPrice}}"
-          bindinput="onInputChange"
-          data-field="originalPrice"
         />
       </view>
     </view>

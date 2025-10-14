@@ -96,14 +96,13 @@
             {{item.status === 'active' ? '下架' : '上架'}}
           </button>
           <button 
-            class="btn-action {{item.isDefault ? 'btn-disabled' : 'btn-delete'}}" 
+            wx:if="{{!item.isDefault}}"
+            class="btn-action btn-delete" 
             bindtap="deleteActivity" 
             data-id="{{item._id}}"
             data-title="{{item.title}}"
-            data-isdefault="{{item.isDefault}}"
-            disabled="{{item.isDefault}}"
           >
-            {{item.isDefault ? '🔒' : '删除'}}
+            删除
           </button>
         </view>
       </view>
