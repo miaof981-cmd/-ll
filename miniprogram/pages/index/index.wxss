@@ -198,3 +198,11 @@
   border-radius: 40rpx;
   transition: all 0.3s ease;
   flex-shrink: 0;
+}
+
+.category-tab.active {
+  color: white;
+  background: linear-gradient(135deg, #1a56db 0%, #3b82f6 100%);
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(26, 86, 219, 0.3);
+}
