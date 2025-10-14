@@ -211,12 +211,16 @@
 
 .btn-action {
   flex: 1;
-  padding: 18rpx 16rpx;
-  font-size: 26rpx;
+  padding: 28rpx 16rpx;
+  font-size: 28rpx;
   border-radius: 8rpx;
   border: none;
   font-weight: 600;
   white-space: nowrap;
+  min-height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-edit {
