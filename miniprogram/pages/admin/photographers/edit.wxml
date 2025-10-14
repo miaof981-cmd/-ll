@@ -53,6 +53,24 @@
       </view>
     </view>
 
+    <view class="form-item">
+      <text class="label">参考作品（最多9张）</text>
+      <view class="reference-images">
+        <view 
+          wx:for="{{referenceImages}}" 
+          wx:key="index" 
+          class="ref-image-item"
+        >
+          <image class="ref-image" src="{{item}}" mode="aspectFill" bindtap="previewReferenceImage" data-index="{{index}}"></image>
+          <view class="delete-btn" bindtap="deleteReferenceImage" data-index="{{index}}">✕</view>
+        </view>
+        <view wx:if="{{referenceImages.length < 9}}" class="upload-btn-small" bindtap="uploadReferenceImage">
+          <text>+</text>
+        </view>
+      </view>
+      <view class="hint">💡 展示摄影师的作品风格，帮助家长选择</view>
+    </view>
+
     <view class="form-actions">
       <button class="btn-cancel" bindtap="cancel">取消</button>
       <button class="btn-save" bindtap="save">保存</button>

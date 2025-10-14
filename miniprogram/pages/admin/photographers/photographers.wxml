@@ -1,33 +1,84 @@
-<view class="container">
-  <view class="header">
-    <text class="title">摄影师管理</text>
-    <button class="btn-add" bindtap="addPhotographer">+ 添加摄影师</button>
-  </view>
-
-  <view class="photographers-list">
-    <view class="photographer-card" wx:for="{{photographers}}" wx:key="_id">
-      <view class="card-header">
-        <image class="avatar" src="{{item.avatar}}" mode="aspectFill" wx:if="{{item.avatar}}"></image>
-        <view class="avatar-placeholder" wx:else>{{item.name.substring(0,1)}}</view>
-        <view class="info">
-          <text class="name">{{item.name}}</text>
-          <text class="specialty">{{item.specialty}}</text>
-        </view>
-      </view>
-      <view class="card-body">
-        <text class="description">{{item.description}}</text>
-      </view>
-      <view class="card-footer">
-        <text class="orders">订单数: {{item.orderCount || 0}}</text>
-        <view class="actions">
-          <button class="btn-edit" size="mini" bindtap="editPhotographer" data-id="{{item._id}}">编辑</button>
-          <button class="btn-delete" size="mini" bindtap="deletePhotographer" data-id="{{item._id}}">删除</button>
-        </view>
-      </view>
+<view class="photographers-page">
+  <!-- 顶部栏 -->
+  <view class="top-bar">
+    <view class="page-title">摄影师管理</view>
+    <view class="add-btn" bindtap="addPhotographer">
+      <text>添加</text>
     </view>
   </view>
 
-  <view class="empty" wx:if="{{photographers.length === 0}}">
-    <text>暂无摄影师</text>
+  <!-- 摄影师列表 -->
+  <view class="photographers-list">
+    <view wx:if="{{photographers.length === 0}}" class="empty-tip">
+      <text class="empty-icon">📷</text>
+      <text class="empty-text">暂无摄影师</text>
+      <text class="empty-hint">点击右上角"添加"按钮添加摄影师</text>
+    </view>
+
+    <view 
+      wx:for="{{photographers}}" 
+      wx:key="_id"
+      class="photographer-card"
+    >
+      <view class="card-main">
+        <!-- 头像和基本信息 -->
+        <view class="photographer-info">
+          <image wx:if="{{item.avatar}}" class="avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+          <view wx:else class="avatar-placeholder">{{item.name.substring(0,1)}}</view>
+          
+          <view class="info-content">
+            <text class="photographer-name">{{item.name}}</text>
+            <text wx:if="{{item.specialty}}" class="specialty">{{item.specialty}}</text>
+            <text wx:else class="specialty-empty">暂无专长</text>
+          </view>
+        </view>
+
+        <!-- 简介 -->
+        <view wx:if="{{item.description}}" class="description">
+          <text>{{item.description}}</text>
+        </view>
+
+        <!-- 参考作品 -->
+        <view wx:if="{{item.referenceImages && item.referenceImages.length > 0}}" class="reference-preview">
+          <text class="ref-title">参考作品</text>
+          <scroll-view class="ref-scroll" scroll-x>
+            <view class="ref-images-list">
+              <image 
+                wx:for="{{item.referenceImages}}" 
+                wx:key="index" 
+                class="ref-thumb" 
+                src="{{item}}" 
+                mode="aspectFill"
+                bindtap="previewImages"
+                data-images="{{item.referenceImages}}"
+                data-current="{{item}}"
+              ></image>
+            </view>
+          </scroll-view>
+        </view>
+
+        <!-- 统计信息 -->
+        <view class="stats-row">
+          <view class="stat-item">
+            <text class="stat-label">订单数</text>
+            <text class="stat-value">{{item.orderCount || 0}}</text>
+          </view>
+          <view wx:if="{{item.wechatOpenid}}" class="stat-item">
+            <text class="stat-label">已绑定微信</text>
+            <text class="stat-value success">✓</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="action-buttons">
+        <button class="btn-action btn-edit" bindtap="editPhotographer" data-id="{{item._id}}">
+          编辑
+        </button>
+        <button class="btn-action btn-delete" bindtap="deletePhotographer" data-id="{{item._id}}">
+          删除
+        </button>
+      </view>
+    </view>
   </view>
 </view>

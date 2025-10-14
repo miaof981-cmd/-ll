@@ -1,128 +1,237 @@
-.container {
-  padding: var(--spacing-lg);
-  background: var(--bg-secondary);
+/* 页面容器 */
+.photographers-page {
   min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40rpx;
 }
 
-.header {
+/* 顶部栏 */
+.top-bar {
+  background: white;
+  padding: 24rpx 32rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  border-bottom: 1rpx solid #eee;
 }
 
-.title {
+.page-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #333;
 }
 
-.btn-add {
-  background: var(--primary-color);
-  color: white;
-  border-radius: var(--border-radius);
-  padding: 16rpx 32rpx;
-  font-size: 28rpx;
-}
-
-.photographers-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.photographer-card {
-  background: white;
-  border-radius: var(--border-radius);
-  padding: var(--spacing-md);
-  box-shadow: var(--box-shadow);
-}
-
-.card-header {
+.add-btn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  justify-content: center;
+  padding: 0 28rpx;
+  height: 64rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+}
+
+/* 摄影师列表 */
+.photographers-list {
+  padding: 24rpx 32rpx;
+}
+
+/* 空状态 */
+.empty-tip {
+  text-align: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  display: block;
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  display: block;
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  display: block;
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 摄影师卡片 */
+.photographer-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-main {
+  margin-bottom: 24rpx;
+}
+
+/* 摄影师信息 */
+.photographer-info {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 20rpx;
 }
 
 .avatar {
   width: 100rpx;
   height: 100rpx;
   border-radius: 50%;
+  border: 4rpx solid #f0f0f0;
 }
 
 .avatar-placeholder {
   width: 100rpx;
   height: 100rpx;
   border-radius: 50%;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40rpx;
+  font-size: 44rpx;
   font-weight: 600;
 }
 
-.info {
+.info-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8rpx;
 }
 
-.name {
+.photographer-name {
   font-size: 32rpx;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #333;
 }
 
 .specialty {
   font-size: 26rpx;
-  color: var(--text-secondary);
+  color: #667eea;
+  background: #f0f7ff;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  width: fit-content;
 }
 
-.card-body {
-  margin-bottom: var(--spacing-md);
+.specialty-empty {
+  font-size: 26rpx;
+  color: #999;
 }
 
+/* 简介 */
 .description {
-  font-size: 28rpx;
-  color: var(--text-secondary);
+  padding: 16rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.description text {
+  font-size: 26rpx;
+  color: #666;
   line-height: 1.6;
 }
 
-.card-footer {
+/* 统计信息 */
+.stats-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--spacing-sm);
-  border-top: 1px solid var(--border-color);
+  gap: 32rpx;
 }
 
-.orders {
-  font-size: 26rpx;
-  color: var(--text-tertiary);
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
 }
 
-.actions {
+.stat-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.stat-value {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-value.success {
+  color: #10b981;
+  font-size: 32rpx;
+}
+
+/* 操作按钮 */
+.action-buttons {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 16rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.btn-action {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+  padding: 0;
 }
 
 .btn-edit {
-  background: var(--secondary-color);
+  background: #3b82f6;
   color: white;
 }
 
 .btn-delete {
-  background: var(--danger-color);
+  background: #ef4444;
   color: white;
 }
 
-.empty {
-  text-align: center;
-  padding: 120rpx 0;
-  color: var(--text-tertiary);
-  font-size: 28rpx;
+/* 参考作品预览 */
+.reference-preview {
+  margin-bottom: 16rpx;
+}
+
+.ref-title {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.ref-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.ref-images-list {
+  display: inline-flex;
+  gap: 12rpx;
+}
+
+.ref-thumb {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+  border: 2rpx solid #f0f0f0;
+  flex-shrink: 0;
 }

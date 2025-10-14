@@ -329,3 +329,54 @@
   border: none;
 }
 
+/* 参考作品图片 */
+.reference-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.ref-image-item {
+  position: relative;
+  width: 200rpx;
+  height: 200rpx;
+}
+
+.ref-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+  object-fit: cover;
+}
+
+.ref-image-item .delete-btn {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.upload-btn-small {
+  width: 200rpx;
+  height: 200rpx;
+  border: 2rpx dashed var(--border-color);
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64rpx;
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+}
+

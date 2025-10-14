@@ -86,5 +86,13 @@ Page({
         }
       }
     });
+  },
+
+  previewImages(e) {
+    const { images, current } = e.currentTarget.dataset;
+    wx.previewImage({
+      urls: images,
+      current: current
+    });
   }
 });

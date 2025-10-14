@@ -8,6 +8,7 @@ Page({
     description: '',
     avatar: '',
     wechatOpenid: '',
+    referenceImages: [], // 参考作品图片
     showOpenidHelp: false,
     showBindQRCode: false,
     bindToken: ''
@@ -36,7 +37,8 @@ Page({
           specialty: photographer.specialty || '',
           description: photographer.description || '',
           avatar: photographer.avatar || '',
-          wechatOpenid: photographer.wechatOpenid || ''
+          wechatOpenid: photographer.wechatOpenid || '',
+          referenceImages: photographer.referenceImages || []
         });
       } else {
         wx.showToast({
@@ -105,7 +107,6 @@ Page({
   manualInputOpenid() {
     wx.showModal({
       title: '输入OpenID',
-      content: '让摄影师登录小程序后，在「我的」页面复制OpenID',
       editable: true,
       placeholderText: '请粘贴OpenID',
       success: (res) => {
@@ -183,12 +184,94 @@ Page({
     }
   },
 
+  // 上传参考图
+  uploadReferenceImage() {
+    const { referenceImages } = this.data;
+    
+    if (referenceImages.length >= 9) {
+      wx.showToast({
+        title: '最多上传9张图片',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.chooseMedia({
+      count: 9 - referenceImages.length,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: async (res) => {
+        wx.showLoading({ title: '上传中...' });
+
+        try {
+          const uploadPromises = res.tempFiles.map(async (file) => {
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).slice(2);
+            const cloudPath = `photographers/reference/${timestamp}_${random}.jpg`;
+
+            const uploadResult = await wx.cloud.uploadFile({
+              cloudPath: cloudPath,
+              filePath: file.tempFilePath
+            });
+
+            return uploadResult.fileID;
+          });
+
+          const fileIDs = await Promise.all(uploadPromises);
+
+          this.setData({
+            referenceImages: [...this.data.referenceImages, ...fileIDs]
+          });
+
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+        } catch (e) {
+          console.error('❌ 上传失败:', e);
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传失败',
+            icon: 'error'
+          });
+        }
+      }
+    });
+  },
+
+  // 预览参考图
+  previewReferenceImage(e) {
+    const { index } = e.currentTarget.dataset;
+    wx.previewImage({
+      urls: this.data.referenceImages,
+      current: this.data.referenceImages[index]
+    });
+  },
+
+  // 删除参考图
+  deleteReferenceImage(e) {
+    const { index } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这张参考图吗？',
+      success: (res) => {
+        if (res.confirm) {
+          const referenceImages = [...this.data.referenceImages];
+          referenceImages.splice(index, 1);
+          this.setData({ referenceImages });
+        }
+      }
+    });
+  },
+
   cancel() {
     wx.navigateBack();
   },
 
   async save() {
-    const { id, name, specialty, description, avatar, wechatOpenid } = this.data;
+    const { id, name, specialty, description, avatar, wechatOpenid, referenceImages } = this.data;
 
     if (!name) {
       wx.showToast({
@@ -208,6 +291,7 @@ Page({
         description,
         avatar,
         wechatOpenid: wechatOpenid || '',
+        referenceImages: referenceImages || [],
         status: 'available',
         orderCount: 0
       };
