@@ -59,11 +59,11 @@ Page({
       ]);
 
       const stats = {
-        totalStudents: students.length,
-        totalPhotographers: photographers.length,
-        totalAnnouncements: announcements.length,
-        totalBanners: banners.length,
-        totalActivities: activities.length
+        totalStudents: Array.isArray(students) ? students.length : 0,
+        totalPhotographers: Array.isArray(photographers) ? photographers.length : 0,
+        totalAnnouncements: Array.isArray(announcements) ? announcements.length : 0,
+        totalBanners: Array.isArray(banners) ? banners.length : 0,
+        totalActivities: Array.isArray(activities) ? activities.length : 0
       };
 
       console.log('✅ 统计数据:', stats);
@@ -71,6 +71,16 @@ Page({
       this.setData({ stats });
     } catch (e) {
       console.error('❌ 加载统计数据失败:', e);
+      // 设置默认值避免白屏
+      this.setData({ 
+        stats: {
+          totalStudents: 0,
+          totalPhotographers: 0,
+          totalAnnouncements: 0,
+          totalBanners: 0,
+          totalActivities: 0
+        }
+      });
     }
   },
 
