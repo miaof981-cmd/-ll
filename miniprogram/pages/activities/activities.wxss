@@ -18,7 +18,9 @@
 }
 
 .category-tab {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 12rpx 32rpx;
   margin-right: 24rpx;
   font-size: 28rpx;
@@ -27,6 +29,7 @@
   border-radius: 40rpx;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 .category-tab.active {

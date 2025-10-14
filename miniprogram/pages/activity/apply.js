@@ -6,21 +6,12 @@ Page({
     activityId: '',
     activity: null,
     photographers: [],
-    
-    // 表单数据
-    formData: {
-      childName: '',
-      childGender: '男',
-      childAge: '',
-      childPhoto: '',
-      parentName: '',
-      parentPhone: '',
-      parentWechat: '',
-      expectations: '',
-      photographerId: ''
-    },
-    
-    selectedPhotographer: null
+    children: [],
+    selectedChild: null,
+    selectedPhotographer: null,
+    lifePhotos: [],
+    remark: '',
+    showAddChildTip: false
   },
 
   onLoad(options) {
@@ -39,6 +30,7 @@ Page({
 
     this.setData({ activityId });
     this.loadActivityInfo(activityId);
+    this.loadChildren();
   },
 
   // 加载活动信息
@@ -86,43 +78,82 @@ Page({
     }
   },
 
-  // 输入框变化
-  onInputChange(e) {
-    const { field } = e.currentTarget.dataset;
-    const value = e.detail.value;
+  // 加载孩子列表
+  async loadChildren() {
+    try {
+      const db = wx.cloud.database();
+      
+      // 获取当前用户的 openid
+      const { result } = await wx.cloud.callFunction({
+        name: 'unifiedLogin'
+      });
+      
+      const userOpenId = result.userInfo._openid;
+      
+      // 查询用户的孩子列表
+      const res = await db.collection('students')
+        .where({
+          parentOpenid: userOpenId
+        })
+        .get();
+
+      if (res.data && res.data.length > 0) {
+        this.setData({
+          children: res.data,
+          showAddChildTip: false
+        });
+      } else {
+        this.setData({
+          children: [],
+          showAddChildTip: true
+        });
+      }
+    } catch (e) {
+      console.error('加载孩子列表失败:', e);
+    }
+  },
+
+  // 选择孩子
+  selectChild(e) {
+    const child = e.currentTarget.dataset.child;
+    
+    // 加载孩子的生活照
+    const lifePhotos = child.lifePhotos || [];
+    
     this.setData({
-      [`formData.${field}`]: value
+      selectedChild: child,
+      lifePhotos: lifePhotos,
+      showAddChildTip: false
     });
   },
 
-  // 性别选择
-  onGenderChange(e) {
-    this.setData({
-      'formData.childGender': e.detail.value
-    });
-  },
-
-  // 上传孩子照片
-  uploadChildPhoto() {
+  // 添加/编辑生活照
+  async addLifePhoto() {
     wx.chooseMedia({
-      count: 1,
+      count: 9 - this.data.lifePhotos.length,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
       success: async (res) => {
-        const tempFilePath = res.tempFiles[0].tempFilePath;
         wx.showLoading({ title: '上传中...' });
 
         try {
-          const timestamp = Date.now();
-          const cloudPath = `activity_orders/${timestamp}_${Math.random().toString(36).slice(2)}.jpg`;
+          const uploadPromises = res.tempFiles.map(async (file) => {
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).slice(2);
+            const cloudPath = `life_photos/${timestamp}_${random}.jpg`;
 
-          const uploadResult = await wx.cloud.uploadFile({
-            cloudPath: cloudPath,
-            filePath: tempFilePath
+            const uploadResult = await wx.cloud.uploadFile({
+              cloudPath: cloudPath,
+              filePath: file.tempFilePath
+            });
+
+            return uploadResult.fileID;
           });
 
+          const fileIDs = await Promise.all(uploadPromises);
+
           this.setData({
-            'formData.childPhoto': uploadResult.fileID
+            lifePhotos: [...this.data.lifePhotos, ...fileIDs]
           });
 
           wx.hideLoading();
@@ -142,25 +173,26 @@ Page({
     });
   },
 
-  // 预览照片
-  previewPhoto(e) {
-    const url = e.currentTarget.dataset.url;
+  // 预览生活照
+  previewLifePhoto(e) {
+    const { index } = e.currentTarget.dataset;
     wx.previewImage({
-      urls: [url],
-      current: url
+      urls: this.data.lifePhotos,
+      current: this.data.lifePhotos[index]
     });
   },
 
-  // 删除照片
-  deleteChildPhoto() {
+  // 删除生活照
+  deleteLifePhoto(e) {
+    const { index } = e.currentTarget.dataset;
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这张照片吗？',
       success: (res) => {
         if (res.confirm) {
-          this.setData({
-            'formData.childPhoto': ''
-          });
+          const lifePhotos = [...this.data.lifePhotos];
+          lifePhotos.splice(index, 1);
+          this.setData({ lifePhotos });
         }
       }
     });
@@ -170,65 +202,43 @@ Page({
   selectPhotographer(e) {
     const photographer = e.currentTarget.dataset.photographer;
     this.setData({
-      selectedPhotographer: photographer,
-      'formData.photographerId': photographer._id
+      selectedPhotographer: photographer
+    });
+  },
+
+  // 备注输入
+  onRemarkInput(e) {
+    this.setData({
+      remark: e.detail.value
+    });
+  },
+
+  // 前往申请入学
+  goToApply() {
+    wx.navigateTo({
+      url: '/pages/apply/apply'
     });
   },
 
   // 表单验证
   validateForm() {
-    const { childName, childPhoto, parentName, parentPhone, parentWechat, photographerId } = this.data.formData;
-
-    if (!childName.trim()) {
+    if (!this.data.selectedChild) {
       wx.showToast({
-        title: '请输入孩子姓名',
+        title: '请选择孩子',
         icon: 'none'
       });
       return false;
     }
 
-    if (!childPhoto) {
+    if (this.data.lifePhotos.length === 0) {
       wx.showToast({
-        title: '请上传孩子的生活照',
+        title: '请至少上传一张生活照',
         icon: 'none'
       });
       return false;
     }
 
-    if (!parentName.trim()) {
-      wx.showToast({
-        title: '请输入家长姓名',
-        icon: 'none'
-      });
-      return false;
-    }
-
-    if (!parentPhone.trim()) {
-      wx.showToast({
-        title: '请输入联系电话',
-        icon: 'none'
-      });
-      return false;
-    }
-
-    // 简单的手机号验证
-    if (!/^1[3-9]\d{9}$/.test(parentPhone)) {
-      wx.showToast({
-        title: '请输入正确的手机号',
-        icon: 'none'
-      });
-      return false;
-    }
-
-    if (!parentWechat.trim()) {
-      wx.showToast({
-        title: '请输入联系微信',
-        icon: 'none'
-      });
-      return false;
-    }
-
-    if (!photographerId) {
+    if (!this.data.selectedPhotographer) {
       wx.showToast({
         title: '请选择摄影师',
         icon: 'none'
@@ -248,9 +258,27 @@ Page({
     wx.showLoading({ title: '提交中...' });
 
     try {
+      const db = wx.cloud.database();
+      
+      // 更新孩子的生活照
+      if (this.data.lifePhotos.length > 0) {
+        await db.collection('students').doc(this.data.selectedChild._id).update({
+          data: {
+            lifePhotos: this.data.lifePhotos
+          }
+        });
+      }
+
+      // 创建订单
       const orderData = {
         activityId: this.data.activityId,
-        ...this.data.formData
+        studentId: this.data.selectedChild.studentId,
+        studentName: this.data.selectedChild.name,
+        photographerId: this.data.selectedPhotographer._id,
+        lifePhotos: this.data.lifePhotos,
+        remark: this.data.remark,
+        totalPrice: this.data.activity.price,
+        status: 'pending_payment'
       };
 
       const result = await cloudDB.createActivityOrder(orderData);
@@ -264,8 +292,9 @@ Page({
         });
 
         setTimeout(() => {
-          // 跳转到订单状态页（后续开发）
-          wx.navigateBack();
+          wx.navigateTo({
+            url: '/pages/user/orders/orders'
+          });
         }, 1500);
       } else {
         wx.showToast({
@@ -283,4 +312,3 @@ Page({
     }
   }
 });
-
