@@ -267,7 +267,6 @@ Page({
     const textMap = {
       'pay': '立即支付',
       'cancel': '取消订单',
-      'contact': '联系摄影师',
       'after_sale': '申请售后',
       'evaluate': '去评价'
     };

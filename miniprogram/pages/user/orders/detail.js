@@ -116,20 +116,6 @@ Page({
     });
   },
 
-  // 联系摄影师
-  async contactPhotographer() {
-    const { photographerInfo } = this.data;
-    if (photographerInfo && photographerInfo.phone) {
-      wx.makePhoneCall({
-        phoneNumber: photographerInfo.phone
-      });
-    } else {
-      wx.showToast({
-        title: '摄影师未留联系方式',
-        icon: 'none'
-      });
-    }
-  },
 
   // 申请售后
   async applyAfterSale() {
@@ -376,7 +362,6 @@ Page({
     const textMap = {
       'pay': '立即支付',
       'cancel': '取消订单',
-      'contact': '联系摄影师',
       'after_sale': '申请售后',
       'evaluate': '去评价',
       'confirm': '确认收货',

@@ -49,11 +49,11 @@ const STATUS_ICON = {
 // 用户端可用操作
 const USER_ACTIONS = {
   [ORDER_STATUS.PENDING_PAYMENT]: ['pay', 'cancel'],           // 支付、取消
-  [ORDER_STATUS.PAID]: ['contact'],                            // 联系摄影师
-  [ORDER_STATUS.IN_PROGRESS]: ['contact', 'after_sale'],       // 联系摄影师、申请售后
+  [ORDER_STATUS.PAID]: [],                                     // 无操作
+  [ORDER_STATUS.IN_PROGRESS]: ['after_sale'],                  // 申请售后
   [ORDER_STATUS.PENDING_CONFIRM]: ['confirm', 'reject'],       // 确认收货、拒绝
   [ORDER_STATUS.COMPLETED]: ['evaluate', 'after_sale'],        // 评价、申请售后
-  [ORDER_STATUS.AFTER_SALE]: ['contact'],                      // 联系客服
+  [ORDER_STATUS.AFTER_SALE]: [],                               // 无操作
   [ORDER_STATUS.REFUNDED]: [],                                 // 无操作
   [ORDER_STATUS.CANCELLED]: []                                 // 无操作
 };
