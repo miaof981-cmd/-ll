@@ -205,19 +205,19 @@
 /* ==================== 操作按钮 ==================== */
 .action-buttons {
   display: flex;
-  gap: 12rpx;
+  gap: 8rpx;
   width: 100%;
 }
 
 .btn-action {
   flex: 1;
-  padding: 28rpx 16rpx;
-  font-size: 28rpx;
-  border-radius: 8rpx;
+  padding: 12rpx 20rpx;
+  font-size: 26rpx;
+  border-radius: 6rpx;
   border: none;
   font-weight: 600;
   white-space: nowrap;
-  min-height: 80rpx;
+  height: 64rpx;
   display: flex;
   align-items: center;
   justify-content: center;
