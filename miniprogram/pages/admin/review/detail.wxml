@@ -9,21 +9,26 @@
       <view class="section-header">
         <text class="section-icon">🎯</text>
         <text class="section-title">活动参考</text>
-        <text class="section-subtitle">对比查看作品是否符合要求</text>
+        <text class="section-subtitle">点击查看完整活动信息</text>
       </view>
       
-      <view class="activity-reference">
+      <view class="activity-card" bindtap="viewActivityDetail">
         <image 
           wx:if="{{activity.image}}"
-          class="activity-cover" 
+          class="activity-image" 
           src="{{activity.image}}" 
           mode="aspectFill"
-          bindtap="previewActivityCover"
         />
-        <view class="activity-details">
-          <text class="activity-name">{{activity.name}}</text>
-          <text class="activity-desc" wx:if="{{activity.description}}">{{activity.description}}</text>
-          <text class="activity-price">参考价格：¥{{activity.price}}</text>
+        <view class="activity-info">
+          <view class="activity-header">
+            <text class="activity-title">{{activity.name}}</text>
+            <text class="activity-tag">参考标准</text>
+          </view>
+          <text class="activity-description" wx:if="{{activity.description}}">{{activity.description}}</text>
+          <view class="activity-footer">
+            <text class="activity-price">¥{{activity.price}}</text>
+            <text class="view-detail-hint">查看详情 →</text>
+          </view>
         </view>
       </view>
     </view>

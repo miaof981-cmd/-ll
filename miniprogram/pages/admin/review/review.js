@@ -118,7 +118,7 @@ Page({
 
     const res = await wx.showModal({
       title: '审核拒绝',
-      content: '请输入拒绝原因（必填）',
+      content: '', // 留空，不填充默认文字
       editable: true,
       placeholderText: '例如：光线不足、构图不佳、画面模糊等',
       confirmText: '确认拒绝',

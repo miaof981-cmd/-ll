@@ -73,16 +73,22 @@ Page({
       
       // 尝试从数据库查询该订单的历史记录
       try {
+        console.log('🔍 查询历史记录，订单ID:', orderId);
         const historyRes = await db.collection('order_photo_history')
           .where({ orderId: orderId })
           .orderBy('createdAt', 'desc')
           .get();
         
+        console.log('📋 历史记录查询结果:', historyRes.data);
+        
         if (historyRes.data && historyRes.data.length > 0) {
           historyPhotos = historyRes.data;
+          console.log('✅ 找到历史记录', historyPhotos.length, '条');
+        } else {
+          console.log('⚠️ 没有找到历史记录');
         }
       } catch (e) {
-        console.log('查询历史记录失败（可能是集合不存在）:', e);
+        console.error('❌ 查询历史记录失败:', e);
       }
 
       this.setData({
@@ -107,6 +113,15 @@ Page({
       urls: this.data.order.photos,
       current: this.data.order.photos[index]
     });
+  },
+
+  // 查看活动详情
+  viewActivityDetail() {
+    if (this.data.order && this.data.order.activityId) {
+      wx.navigateTo({
+        url: `/pages/activity/detail?id=${this.data.order.activityId}`
+      });
+    }
   },
 
   // 预览活动封面
@@ -176,7 +191,7 @@ Page({
     // 使用自定义弹窗或者系统弹窗
     const res = await wx.showModal({
       title: '审核拒绝',
-      content: '请输入拒绝原因（必填）',
+      content: '', // 留空，不填充默认文字
       editable: true,
       placeholderText: '例如：光线不足、构图不佳、画面模糊等'
     });
