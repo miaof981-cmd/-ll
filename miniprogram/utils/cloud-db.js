@@ -942,6 +942,30 @@ async function deleteActivity(activityId) {
 }
 
 /**
+ * 增加活动浏览量
+ */
+async function incrementActivityViewCount(activityId) {
+  if (!isCloudEnabled()) {
+    console.warn('云开发未启用');
+    return false;
+  }
+  
+  try {
+    const db = getDB();
+    await db.collection('activities').doc(activityId).update({
+      data: {
+        viewCount: db.command.inc(1)
+      }
+    });
+    console.log('✅ 活动浏览量+1');
+    return true;
+  } catch (e) {
+    console.error('❌ 增加浏览量失败:', e);
+    return false;
+  }
+}
+
+/**
  * 初始化证件照默认活动
  */
 async function initDefaultIDPhotoActivity() {
@@ -1134,6 +1158,7 @@ module.exports = {
   saveActivity,
   deleteActivity,
   initDefaultIDPhotoActivity,
+  incrementActivityViewCount,
   
   // 活动订单
   getActivityOrders,

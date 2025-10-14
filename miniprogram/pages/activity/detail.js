@@ -45,6 +45,9 @@ Page({
           loading: false
         });
 
+        // 增加浏览量
+        this.incrementViewCount(activityId);
+
         wx.hideLoading();
       } else {
         wx.hideLoading();
@@ -63,6 +66,16 @@ Page({
         title: '加载失败',
         icon: 'error'
       });
+    }
+  },
+
+  // 增加浏览量
+  async incrementViewCount(activityId) {
+    try {
+      await cloudDB.incrementActivityViewCount(activityId);
+      console.log('✅ 浏览量+1');
+    } catch (e) {
+      console.error('❌ 增加浏览量失败:', e);
     }
   },
 
