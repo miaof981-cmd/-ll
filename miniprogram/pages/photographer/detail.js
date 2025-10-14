@@ -2,13 +2,32 @@ Page({
   data: {
     photographerId: '',
     photographer: null,
-    loading: true
+    loading: true,
+    canGoBack: true
   },
 
   onLoad(options) {
     if (options.id) {
       this.setData({ photographerId: options.id });
       this.loadPhotographerDetail(options.id);
+    }
+    
+    // 检查页面栈
+    const pages = getCurrentPages();
+    this.setData({
+      canGoBack: pages.length > 1
+    });
+  },
+  
+  // 返回上一页
+  goBack() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack();
+    } else {
+      wx.reLaunch({
+        url: '/pages/index/index'
+      });
     }
   },
 

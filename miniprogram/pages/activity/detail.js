@@ -7,7 +7,8 @@ Page({
     activity: null,
     photographers: [],
     loading: true,
-    currentImageIndex: 0
+    currentImageIndex: 0,
+    canGoBack: true
   },
 
   onLoad(options) {
@@ -23,6 +24,24 @@ Page({
       setTimeout(() => {
         wx.navigateBack();
       }, 1500);
+    }
+    
+    // 检查页面栈
+    const pages = getCurrentPages();
+    this.setData({
+      canGoBack: pages.length > 1
+    });
+  },
+  
+  // 返回上一页
+  goBack() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack();
+    } else {
+      wx.switchTab({
+        url: '/pages/activities/activities'
+      });
     }
   },
 

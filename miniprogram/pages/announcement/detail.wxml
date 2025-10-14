@@ -1,5 +1,10 @@
 <!--pages/announcement/detail.wxml-->
 <view class="detail-container">
+  <!-- 浮动返回按钮 -->
+  <view wx:if="{{!canGoBack}}" class="float-back-btn" bindtap="goBack">
+    <text class="back-icon">←</text>
+  </view>
+
   <!-- 公告封面图 -->
   <image 
     wx:if="{{announcement.coverImage}}" 

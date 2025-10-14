@@ -1,5 +1,10 @@
 <!--pages/activity/detail.wxml-->
 <view class="activity-detail-page">
+  <!-- 浮动返回按钮 -->
+  <view wx:if="{{!canGoBack}}" class="float-back-btn" bindtap="goBack">
+    <text class="back-icon">←</text>
+  </view>
+
   <view wx:if="{{!loading && activity}}">
     <!-- 图片轮播 -->
     <view class="image-gallery">

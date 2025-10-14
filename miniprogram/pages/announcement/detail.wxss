@@ -3,6 +3,30 @@
 .detail-container {
   min-height: 100vh;
   background: var(--bg-secondary);
+  position: relative;
+}
+
+/* 浮动返回按钮 */
+.float-back-btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 10rpx);
+  left: 24rpx;
+  width: 64rpx;
+  height: 64rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  backdrop-filter: blur(10rpx);
+}
+
+.back-icon {
+  font-size: 40rpx;
+  color: #1a56db;
+  font-weight: bold;
 }
 
 /* 封面图片 */

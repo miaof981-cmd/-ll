@@ -1,7 +1,8 @@
 // pages/announcement/detail.js
 Page({
   data: {
-    announcement: {}
+    announcement: {},
+    canGoBack: true
   },
 
   onLoad(options) {
@@ -17,6 +18,24 @@ Page({
       wx.showToast({
         title: '加载失败',
         icon: 'error'
+      });
+    }
+    
+    // 检查页面栈
+    const pages = getCurrentPages();
+    this.setData({
+      canGoBack: pages.length > 1
+    });
+  },
+  
+  // 返回上一页
+  goBack() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack();
+    } else {
+      wx.switchTab({
+        url: '/pages/index/index'
       });
     }
   },
