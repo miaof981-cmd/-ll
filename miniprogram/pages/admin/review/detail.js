@@ -91,6 +91,14 @@ Page({
         console.error('❌ 查询历史记录失败:', e);
       }
 
+      console.log('=== 页面数据设置 ===');
+      console.log('订单信息:', order);
+      console.log('活动信息:', activity);
+      console.log('活动图片URL:', activity?.image);
+      console.log('摄影师信息:', photographer);
+      console.log('学生信息:', student);
+      console.log('历史记录数量:', historyPhotos.length);
+
       this.setData({
         order,
         activity,
@@ -98,6 +106,9 @@ Page({
         student,
         historyPhotos,
         loading: false
+      }, () => {
+        console.log('✅ setData 完成');
+        console.log('当前 activity.image:', this.data.activity?.image);
       });
     } catch (e) {
       console.error('加载订单详情失败:', e);
@@ -113,6 +124,12 @@ Page({
       urls: this.data.order.photos,
       current: this.data.order.photos[index]
     });
+  },
+
+  // 图片加载错误
+  onImageError(e) {
+    console.error('❌ 活动图片加载失败:', e);
+    console.log('📷 图片URL:', this.data.activity?.image);
   },
 
   // 查看活动详情
