@@ -57,7 +57,9 @@ Page({
         const { user, roles } = res.result;
         
         console.log('✅ 登录成功');
+        console.log('👤 用户信息:', user);
         console.log('👤 用户角色:', roles);
+        console.log('📋 云函数完整返回:', res.result);
         
         // 3. 保存用户信息和所有角色
         wx.setStorageSync('unifiedUserInfo', user);
@@ -71,6 +73,10 @@ Page({
           currentRole = 'photographer';
         }
         wx.setStorageSync('currentRole', currentRole);
+        
+        console.log('💾 已保存到本地存储:');
+        console.log('  currentRole:', currentRole);
+        console.log('  userRoles:', roles);
         
         // 更新全局数据
         const app = getApp();

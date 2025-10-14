@@ -39,11 +39,20 @@ Page({
       const currentRole = wx.getStorageSync('currentRole') || 'parent';
       const userRoles = wx.getStorageSync('userRoles') || [];
       
+      console.log('🔍 调试信息 - 我的页面加载:');
+      console.log('  userInfo:', userInfo);
+      console.log('  currentRole:', currentRole);
+      console.log('  userRoles:', userRoles);
+      
       if (userInfo) {
         // 判断用户拥有的角色
         const isAdmin = userRoles.includes('admin');
         const isPhotographer = userRoles.includes('photographer');
         const isParent = userRoles.includes('parent') || userRoles.length === 0; // 没有角色时默认为家长
+        
+        console.log('  isAdmin:', isAdmin);
+        console.log('  isPhotographer:', isPhotographer);
+        console.log('  isParent:', isParent);
         
         this.setData({
           userInfo,
@@ -62,6 +71,7 @@ Page({
         app.globalData.userRoles = userRoles;
         app.globalData.isAdmin = isAdmin;
       } else {
+        console.log('  未登录');
         this.setData({
           isLoggedIn: false,
           isAdmin: false,
