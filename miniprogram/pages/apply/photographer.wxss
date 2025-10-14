@@ -142,6 +142,19 @@
   border: 4rpx solid #e2e8f0;
 }
 
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 48rpx;
+  font-weight: 600;
+}
+
 .avatar-badge {
   position: absolute;
   bottom: -8rpx;

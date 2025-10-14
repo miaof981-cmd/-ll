@@ -141,6 +141,16 @@ Page({
     });
   },
 
+  // 头像加载成功
+  onAvatarLoad() {
+    // 可选：记录成功加载
+  },
+
+  // 头像加载失败
+  onAvatarError(e) {
+    console.warn('头像加载失败，使用占位符');
+  },
+
   // 返回上一步
   goBack() {
     wx.navigateBack();

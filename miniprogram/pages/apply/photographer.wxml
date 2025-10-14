@@ -50,7 +50,8 @@
 
       <!-- 摄影师头像 -->
       <view class="photographer-avatar">
-        <image class="avatar-img" src="{{item.avatar}}" mode="aspectFill"/>
+        <image wx:if="{{item.avatar}}" class="avatar-img" src="{{item.avatar}}" mode="aspectFill" bindload="onAvatarLoad" binderror="onAvatarError"/>
+        <view wx:else class="avatar-placeholder">{{item.name.substr(0,1)}}</view>
         <view class="avatar-badge">{{item.level}}</view>
       </view>
 
