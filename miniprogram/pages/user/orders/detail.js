@@ -33,6 +33,24 @@ Page({
     };
   },
 
+  // 查看活动详情
+  viewActivity() {
+    if (this.data.order && this.data.order.activityId) {
+      wx.navigateTo({
+        url: `/pages/activity/detail?id=${this.data.order.activityId}`
+      });
+    }
+  },
+
+  // 查看摄影师详情
+  viewPhotographer() {
+    if (this.data.order && this.data.order.photographerId) {
+      wx.navigateTo({
+        url: `/pages/photographer/detail?id=${this.data.order.photographerId}`
+      });
+    }
+  },
+
   async loadOrderDetail(orderId) {
     wx.showLoading({ title: '加载中...' });
 
@@ -225,11 +243,11 @@ Page({
           ctx.drawImage(imageUrl, 0, 0, imgWidth, imgHeight);
           
           // 绘制水印
-          const watermarkText = '待确认预览';
-          const fontSize = Math.min(imgWidth, imgHeight) * 0.1; // 根据图片大小调整字体
+          const watermarkText = '确认收图后水印自动消除';
+          const fontSize = Math.min(imgWidth, imgHeight) * 0.06; // 根据图片大小调整字体
           
           ctx.setFontSize(fontSize);
-          ctx.setGlobalAlpha(0.3);
+          ctx.setGlobalAlpha(0.5);
           ctx.setTextAlign('center');
           ctx.setTextBaseline('middle');
           
@@ -237,11 +255,20 @@ Page({
           ctx.translate(imgWidth / 2, imgHeight / 2);
           ctx.rotate(-45 * Math.PI / 180);
           
-          // 绘制多个水印
+          // 绘制多个水印（覆盖整个图片）
           ctx.setFillStyle('#ffffff');
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 2;
+          
+          // 中心水印
+          ctx.strokeText(watermarkText, 0, 0);
           ctx.fillText(watermarkText, 0, 0);
-          ctx.fillText(watermarkText, 0, -imgHeight * 0.3);
-          ctx.fillText(watermarkText, 0, imgHeight * 0.3);
+          
+          // 上下水印
+          ctx.strokeText(watermarkText, 0, -imgHeight * 0.35);
+          ctx.fillText(watermarkText, 0, -imgHeight * 0.35);
+          ctx.strokeText(watermarkText, 0, imgHeight * 0.35);
+          ctx.fillText(watermarkText, 0, imgHeight * 0.35);
           
           ctx.draw(false, () => {
             setTimeout(() => {
