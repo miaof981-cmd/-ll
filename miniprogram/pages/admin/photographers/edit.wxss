@@ -163,17 +163,19 @@
   border-radius: var(--border-radius);
   font-size: 28rpx;
   box-sizing: border-box;
-  line-height: 1.5;
-  display: flex;
-  align-items: center;
 }
 
 .input {
   height: 80rpx;
+  line-height: 80rpx;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .textarea {
   min-height: 200rpx;
+  line-height: 1.8;
+  padding-top: var(--spacing-md);
 }
 
 .image-upload {
