@@ -296,16 +296,22 @@ async function saveAnnouncement(announcement) {
     const db = getDB();
     
     if (announcement._id) {
-      // 更新
+      // 更新 - 需要排除 _id 字段
+      const updateData = { ...announcement };
+      delete updateData._id;
+      
       await db.collection('announcements').doc(announcement._id).update({
-        data: announcement
+        data: updateData
       });
       console.log('✅ 云端更新公告成功');
     } else {
       // 新增
+      const addData = { ...announcement };
+      delete addData._id; // 确保没有 _id 字段
+      
       const res = await db.collection('announcements').add({
         data: {
-          ...announcement,
+          ...addData,
           createdAt: new Date().toISOString()
         }
       });
@@ -316,8 +322,8 @@ async function saveAnnouncement(announcement) {
     return announcement;
   } catch (e) {
     console.error('❌ 保存公告失败:', e);
-    const storage = require('./storage.js');
-    return storage.saveAnnouncement(announcement);
+    // 如果云端失败，不要回退到 localStorage
+    throw e;
   }
 }
 
