@@ -1,0 +1,127 @@
+<!--pages/photographer/tasks.wxml-->
+<view class="container">
+  <!-- 摄影师信息卡片 -->
+  <view wx:if="{{photographerInfo}}" class="photographer-card">
+    <image class="avatar" src="{{photographerInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+    <view class="info">
+      <text class="name">{{photographerInfo.name}}</text>
+      <text class="specialty">{{photographerInfo.specialty || '专业摄影师'}}</text>
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-container">
+    <view class="stat-item">
+      <text class="stat-value">{{stats.pending}}</text>
+      <text class="stat-label">待接单</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value processing">{{stats.inProgress}}</text>
+      <text class="stat-label">进行中</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value completed">{{stats.completed}}</text>
+      <text class="stat-label">已完成</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.total}}</text>
+      <text class="stat-label">总订单</text>
+    </view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="filter-tabs">
+    <view 
+      class="filter-tab {{statusFilter === 'all' ? 'active' : ''}}" 
+      bindtap="onStatusFilterChange" 
+      data-status="all"
+    >
+      全部
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'pending_payment' ? 'active' : ''}}" 
+      bindtap="onStatusFilterChange" 
+      data-status="pending_payment"
+    >
+      待支付
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'in_progress' ? 'active' : ''}}" 
+      bindtap="onStatusFilterChange" 
+      data-status="in_progress"
+    >
+      进行中
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'completed' ? 'active' : ''}}" 
+      bindtap="onStatusFilterChange" 
+      data-status="completed"
+    >
+      已完成
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="orders-container">
+    <view wx:if="{{loading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+
+    <view wx:elif="{{orders.length === 0}}" class="empty">
+      <text class="empty-icon">📦</text>
+      <text class="empty-text">暂无订单</text>
+    </view>
+
+    <view wx:else class="orders-list">
+      <view 
+        wx:for="{{orders}}" 
+        wx:key="_id" 
+        class="order-card"
+        bindtap="viewOrderDetail"
+        data-id="{{item._id}}"
+      >
+        <!-- 订单头部 -->
+        <view class="order-header">
+          <text class="order-id">订单 #{{item._id.slice(-8)}}</text>
+          <view class="status-badge {{getStatusClass(item.status)}}">
+            {{getStatusText(item.status)}}
+          </view>
+        </view>
+
+        <!-- 学生信息 -->
+        <view class="order-body">
+          <view class="student-info">
+            <text class="label">学生：</text>
+            <text class="value">{{item.studentName}}</text>
+          </view>
+          <view class="activity-info">
+            <text class="label">活动：</text>
+            <text class="value">{{item.activityName || '证件照拍摄'}}</text>
+          </view>
+          <view class="time-info">
+            <text class="label">时间：</text>
+            <text class="value">{{item.createdAt}}</text>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="order-actions" wx:if="{{item.status === 'in_progress'}}">
+          <button 
+            class="action-btn primary" 
+            bindtap="uploadWork" 
+            data-id="{{item._id}}"
+            catchtap="uploadWork"
+          >
+            上传作品
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 刷新按钮 -->
+  <view class="refresh-btn" bindtap="onRefresh">
+    <text>🔄 刷新</text>
+  </view>
+</view>
+

@@ -1,0 +1,285 @@
+/* pages/photographer/tasks.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 120rpx;
+}
+
+/* 摄影师信息卡片 */
+.photographer-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40rpx;
+  margin: 24rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+}
+
+.photographer-card .avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  margin-right: 24rpx;
+}
+
+.photographer-card .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.photographer-card .name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+
+.photographer-card .specialty {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 统计卡片 */
+.stats-container {
+  display: flex;
+  background: #fff;
+  margin: 24rpx;
+  padding: 32rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.stat-value.processing {
+  color: #3b82f6;
+}
+
+.stat-value.completed {
+  color: #10b981;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 筛选标签 */
+.filter-tabs {
+  display: flex;
+  padding: 24rpx;
+  background: #fff;
+  margin: 24rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  gap: 16rpx;
+}
+
+.filter-tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  background: #f5f5f5;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.filter-tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-weight: bold;
+}
+
+/* 订单容器 */
+.orders-container {
+  padding: 0 24rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 80rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 订单列表 */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.order-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 订单头部 */
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 24rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+  margin-bottom: 24rpx;
+}
+
+.order-id {
+  font-size: 28rpx;
+  color: #666;
+  font-family: monospace;
+}
+
+.status-badge {
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.status-badge.processing {
+  background: #dbeafe;
+  color: #3b82f6;
+}
+
+.status-badge.completed {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.status-badge.aftersale {
+  background: #fce7f3;
+  color: #ec4899;
+}
+
+.status-badge.refunded,
+.status-badge.cancelled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* 订单内容 */
+.order-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.student-info,
+.activity-info,
+.time-info {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+}
+
+.student-info .label,
+.activity-info .label,
+.time-info .label {
+  color: #999;
+  width: 120rpx;
+}
+
+.student-info .value,
+.activity-info .value,
+.time-info .value {
+  flex: 1;
+  color: #333;
+}
+
+/* 操作按钮 */
+.order-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 20rpx 0;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  border: none;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.action-btn.secondary {
+  background: #f5f5f5;
+  color: #666;
+}
+
+/* 刷新按钮 */
+.refresh-btn {
+  position: fixed;
+  bottom: 40rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 24rpx 48rpx;
+  border-radius: 60rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:active {
+  transform: translateX(-50%) scale(0.95);
+}
+

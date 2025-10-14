@@ -30,7 +30,8 @@
     "pages/admin/orders/orders",
     "pages/admin/orders/detail",
     "pages/user/orders/orders",
-    "pages/user/orders/detail"
+    "pages/user/orders/detail",
+    "pages/photographer/tasks"
   ],
   "window": {
     "backgroundTextStyle": "light",
