@@ -59,43 +59,37 @@ Page({
         console.log('✅ 登录成功');
         console.log('👤 用户角色:', roles);
         
-        // 3. 保存用户信息
+        // 3. 保存用户信息和所有角色
         wx.setStorageSync('unifiedUserInfo', user);
         wx.setStorageSync('userRoles', roles);
         
-        // 4. 处理角色跳转
-        if (roles.length === 1) {
-          // 单一角色
-          const role = roles[0];
-          wx.setStorageSync('currentRole', role);
-          
-          // 更新全局数据
-          const app = getApp();
-          app.globalData.userInfo = user;
-          app.globalData.currentRole = role;
-          app.globalData.isAdmin = role === 'admin';
-          
-          wx.showToast({
-            title: '登录成功',
-            icon: 'success'
-          });
-          
-          setTimeout(() => {
-            // 家长角色检查是否有孩子
-            if (role === 'parent' && (!user.children || user.children.length === 0)) {
-              // 未入学，引导申请
-              this.showEnrollmentGuide();
-            } else {
-              // 已入学或其他角色，正常跳转
-              this.navigateToHomePage(role);
-            }
-          }, 1500);
-        } else {
-          // 多角色，跳转到角色选择页
-          wx.navigateTo({
-            url: '/pages/role-select/role-select'
-          });
+        // 4. 设置默认当前角色（优先级：admin > photographer > parent）
+        let currentRole = 'parent'; // 默认为家长
+        if (roles.includes('admin')) {
+          currentRole = 'admin';
+        } else if (roles.includes('photographer')) {
+          currentRole = 'photographer';
         }
+        wx.setStorageSync('currentRole', currentRole);
+        
+        // 更新全局数据
+        const app = getApp();
+        app.globalData.userInfo = user;
+        app.globalData.currentRole = currentRole;
+        app.globalData.userRoles = roles;
+        app.globalData.isAdmin = roles.includes('admin');
+        
+        wx.showToast({
+          title: '登录成功',
+          icon: 'success'
+        });
+        
+        // 5. 所有人都跳转到"我的"页面
+        setTimeout(() => {
+          wx.switchTab({
+            url: '/pages/my/my'
+          });
+        }, 1500);
       } else {
         wx.showToast({
           title: res.result.error || '登录失败',

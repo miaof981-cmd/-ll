@@ -119,6 +119,13 @@ Page({
     });
   },
 
+  // 管理管理员
+  manageAdmins() {
+    wx.navigateTo({
+      url: '/pages/admin/admins/admins'
+    });
+  },
+
   // 退出登录
   logout() {
     wx.showModal({

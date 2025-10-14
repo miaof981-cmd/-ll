@@ -8,6 +8,9 @@ Page({
     userRoles: [],
     isLoggedIn: false,
     children: [],
+    isAdmin: false,
+    isPhotographer: false,
+    isParent: false,
     roleConfig: {
       'parent': { name: '家长', icon: '👨‍👩‍👧‍👦', color: '#3b82f6' },
       'admin': { name: '管理员', icon: '⚙️', color: '#ef4444' },
@@ -21,8 +24,11 @@ Page({
 
   onShow() {
     this.checkLoginStatus();
-    if (this.data.isLoggedIn && this.data.currentRole === 'parent') {
-      this.loadChildren();
+    if (this.data.isLoggedIn) {
+      // 加载孩子列表（如果是家长角色）
+      if (this.data.userRoles.includes('parent')) {
+        this.loadChildren();
+      }
     }
   },
 
@@ -30,29 +36,47 @@ Page({
   checkLoginStatus() {
     try {
       const userInfo = wx.getStorageSync('unifiedUserInfo');
-      const currentRole = wx.getStorageSync('currentRole');
+      const currentRole = wx.getStorageSync('currentRole') || 'parent';
       const userRoles = wx.getStorageSync('userRoles') || [];
       
-      if (userInfo && currentRole) {
+      if (userInfo) {
+        // 判断用户拥有的角色
+        const isAdmin = userRoles.includes('admin');
+        const isPhotographer = userRoles.includes('photographer');
+        const isParent = userRoles.includes('parent') || userRoles.length === 0; // 没有角色时默认为家长
+        
         this.setData({
           userInfo,
           currentRole,
           userRoles,
-          isLoggedIn: true
+          isLoggedIn: true,
+          isAdmin,
+          isPhotographer,
+          isParent
         });
         
         // 更新全局数据
         const app = getApp();
         app.globalData.userInfo = userInfo;
         app.globalData.currentRole = currentRole;
-        app.globalData.isAdmin = currentRole === 'admin';
+        app.globalData.userRoles = userRoles;
+        app.globalData.isAdmin = isAdmin;
       } else {
         this.setData({
-          isLoggedIn: false
+          isLoggedIn: false,
+          isAdmin: false,
+          isPhotographer: false,
+          isParent: false
         });
       }
     } catch (e) {
       console.error('检查登录状态失败:', e);
+      this.setData({
+        isLoggedIn: false,
+        isAdmin: false,
+        isPhotographer: false,
+        isParent: false
+      });
     }
   },
 
@@ -111,29 +135,18 @@ Page({
     });
   },
 
+  // 添加孩子（跳转到入学申请）
+  addChild() {
+    wx.navigateTo({
+      url: '/pages/apply/apply'
+    });
+  },
+
   // 查看孩子档案
   viewChildRecord(e) {
     const { studentid } = e.currentTarget.dataset;
     wx.navigateTo({
       url: `/pages/records/records?studentId=${studentid}`
-    });
-  },
-
-  // 添加孩子
-  addChild() {
-    wx.showModal({
-      title: '添加孩子',
-      content: '请先完成入学申请，审核通过后会自动关联到您的账号',
-      showCancel: true,
-      cancelText: '知道了',
-      confirmText: '去申请',
-      success: (res) => {
-        if (res.confirm) {
-          wx.navigateTo({
-            url: '/pages/apply/apply'
-          });
-        }
-      }
     });
   },
 

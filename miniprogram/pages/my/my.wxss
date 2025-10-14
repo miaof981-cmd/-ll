@@ -34,6 +34,12 @@
   color: white;
 }
 
+.roles-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
 .role-badge {
   display: inline-flex;
   align-items: center;
@@ -41,8 +47,19 @@
   padding: 8rpx 20rpx;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 32rpx;
-  width: fit-content;
   backdrop-filter: blur(10px);
+}
+
+.role-badge.admin {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.role-badge.photographer {
+  background: rgba(16, 185, 129, 0.3);
+}
+
+.role-badge.parent {
+  background: rgba(59, 130, 246, 0.3);
 }
 
 .role-icon {
@@ -53,12 +70,6 @@
   font-size: 24rpx;
   color: white;
   font-weight: 500;
-}
-
-.switch-icon {
-  font-size: 28rpx;
-  color: white;
-  margin-left: 8rpx;
 }
 
 /* OpenID 显示区域 */
@@ -249,7 +260,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 32rpx;
+  gap: 24rpx;
+  padding: 60rpx;
 }
 
 .login-icon {
@@ -258,19 +270,43 @@
 }
 
 .login-tip {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.login-subtitle {
   font-size: 28rpx;
   color: #999;
+  margin-bottom: 24rpx;
 }
 
 .login-btn {
-  width: 400rpx;
+  width: 500rpx;
   height: 88rpx;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 44rpx;
-  font-size: 28rpx;
+  font-size: 32rpx;
   font-weight: 600;
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
+}
+
+.enroll-btn {
+  width: 500rpx;
+  height: 88rpx;
+  background: white;
+  color: #667eea;
+  border: 2rpx solid #667eea;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-btn::after {

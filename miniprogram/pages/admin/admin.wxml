@@ -105,6 +105,13 @@
         <text class="function-desc">管理活动和订单</text>
         <view class="function-arrow">→</view>
       </view>
+
+      <view class="function-card" bindtap="manageAdmins">
+        <view class="function-icon admins">👨‍💼</view>
+        <text class="function-title">管理员管理</text>
+        <text class="function-desc">添加和管理系统管理员</text>
+        <view class="function-arrow">→</view>
+      </view>
     </view>
   </view>
 </view>

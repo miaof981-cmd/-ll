@@ -1,0 +1,98 @@
+<!--pages/admin/admins/admins.wxml-->
+<view class="admins-page">
+  <!-- 顶部栏 -->
+  <view class="top-bar">
+    <!-- 搜索框 -->
+    <view class="search-box">
+      <input 
+        class="search-input"
+        type="text" 
+        placeholder="搜索管理员姓名"
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+      />
+      <text class="search-icon">🔍</text>
+    </view>
+
+    <!-- 添加按钮 -->
+    <view class="add-btn" bindtap="addAdmin">
+      <text class="add-icon">+</text>
+      <text>添加</text>
+    </view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="filter-tabs">
+    <view 
+      wx:for="{{statusTabs}}" 
+      wx:key="key"
+      class="tab-item {{filterStatus === item.key ? 'active' : ''}}"
+      bindtap="switchStatus"
+      data-status="{{item.key}}"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 管理员列表 -->
+  <view class="admin-list">
+    <view wx:if="{{admins.length === 0}}" class="empty-tip">
+      <text class="empty-icon">👥</text>
+      <text class="empty-text">暂无管理员</text>
+    </view>
+
+    <view 
+      wx:for="{{admins}}" 
+      wx:key="_id"
+      class="admin-card"
+    >
+      <view class="admin-header">
+        <view class="admin-info">
+          <view class="admin-name">
+            {{item.name}}
+            <view class="status-badge {{item.isActive ? 'active' : 'inactive'}}">
+              {{item.isActive ? '启用中' : '已禁用'}}
+            </view>
+          </view>
+          <view class="admin-contact">
+            <text class="contact-item">📱 {{item.phone || '未填写'}}</text>
+          </view>
+          <view class="admin-openid">OpenID: {{item.openid}}</view>
+        </view>
+      </view>
+
+      <view class="admin-meta">
+        <text class="meta-item">权限: {{item.permissions.join(', ')}}</text>
+        <text class="meta-item">创建: {{item.createdAt}}</text>
+      </view>
+
+      <view class="action-buttons">
+        <button 
+          class="btn-action btn-edit"
+          bindtap="editAdmin"
+          data-id="{{item._id}}"
+        >
+          编辑
+        </button>
+        <button 
+          class="btn-action {{item.isActive ? 'btn-disable' : 'btn-enable'}}"
+          bindtap="toggleStatus"
+          data-id="{{item._id}}"
+          data-active="{{item.isActive}}"
+        >
+          {{item.isActive ? '禁用' : '启用'}}
+        </button>
+        <button 
+          class="btn-action btn-delete"
+          bindtap="deleteAdmin"
+          data-id="{{item._id}}"
+          data-name="{{item.name}}"
+        >
+          删除
+        </button>
+      </view>
+    </view>
+  </view>
+</view>
+

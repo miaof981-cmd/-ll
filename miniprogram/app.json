@@ -2,6 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/activities/activities",
+    "pages/my/my",
     "pages/login/login",
     "pages/role-select/role-select",
     "pages/records/records",
@@ -22,7 +23,9 @@
     "pages/apply/status",
     "pages/admin/applications/applications",
     "pages/admin/photographers/photographers",
-    "pages/admin/photographers/edit"
+    "pages/admin/photographers/edit",
+    "pages/admin/admins/admins",
+    "pages/admin/admins/edit"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -46,7 +49,7 @@
         "text": "活动"
       },
       {
-        "pagePath": "pages/login/login",
+        "pagePath": "pages/my/my",
         "text": "我的"
       }
     ]

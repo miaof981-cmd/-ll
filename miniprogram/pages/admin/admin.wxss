@@ -276,6 +276,10 @@
   background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
 }
 
+.function-icon.admins {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+}
+
 .stat-icon.activities {
   background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
 }

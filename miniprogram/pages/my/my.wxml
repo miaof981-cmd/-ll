@@ -7,10 +7,20 @@
       <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
       <view class="user-info">
         <text class="nickname">{{userInfo.nickName}}</text>
-        <view class="role-badge" bindtap="switchRole" style="background: {{roleConfig[currentRole].color}};">
-          <text class="role-icon">{{roleConfig[currentRole].icon}}</text>
-          <text class="role-name">{{roleConfig[currentRole].name}}</text>
-          <text wx:if="{{userRoles.length > 1}}" class="switch-icon">⇄</text>
+        <!-- 显示所有拥有的角色标签 -->
+        <view class="roles-badges">
+          <view wx:if="{{isAdmin}}" class="role-badge admin">
+            <text class="role-icon">⚙️</text>
+            <text class="role-name">管理员</text>
+          </view>
+          <view wx:if="{{isPhotographer}}" class="role-badge photographer">
+            <text class="role-icon">📷</text>
+            <text class="role-name">摄影师</text>
+          </view>
+          <view wx:if="{{isParent}}" class="role-badge parent">
+            <text class="role-icon">👨‍👩‍👧‍👦</text>
+            <text class="role-name">家长</text>
+          </view>
         </view>
         <!-- OpenID 显示区域（用于添加管理员） -->
         <view class="openid-box" wx:if="{{userInfo.openid}}" bindtap="copyOpenId">
@@ -21,8 +31,8 @@
       </view>
     </view>
 
-    <!-- 家长视图：孩子列表 -->
-    <view wx:if="{{currentRole === 'parent'}}" class="children-section">
+    <!-- 家长功能：孩子列表 -->
+    <view wx:if="{{isParent}}" class="children-section">
       <view class="section-header">
         <text class="section-title">我的孩子</text>
         <view class="add-btn" bindtap="addChild">+ 添加</view>
@@ -30,7 +40,7 @@
       
       <view wx:if="{{children.length === 0}}" class="empty-tip">
         <text class="empty-text">还没有关联孩子</text>
-        <text class="empty-hint">点击右上角"添加"按钮添加孩子</text>
+        <text class="empty-hint">点击右上角"添加"按钮或"申请入学"</text>
       </view>
       
       <view 
@@ -50,8 +60,8 @@
       </view>
     </view>
 
-    <!-- 管理员视图：快捷入口 -->
-    <view wx:if="{{currentRole === 'admin'}}" class="admin-section">
+    <!-- 管理员功能：快捷入口 -->
+    <view wx:if="{{isAdmin}}" class="admin-section">
       <text class="section-title">管理功能</text>
       <navigator class="menu-item" url="/pages/admin/admin">
         <text class="menu-icon">⚙️</text>
@@ -60,12 +70,12 @@
       </navigator>
     </view>
 
-    <!-- 摄影师视图：快捷入口 -->
-    <view wx:if="{{currentRole === 'photographer'}}" class="photographer-section">
+    <!-- 摄影师功能：快捷入口 -->
+    <view wx:if="{{isPhotographer}}" class="photographer-section">
       <text class="section-title">摄影功能</text>
       <navigator class="menu-item" url="/pages/photographer/tasks">
         <text class="menu-icon">📷</text>
-        <text class="menu-text">接单中心</text>
+        <text class="menu-text">工作台</text>
         <text class="arrow">→</text>
       </navigator>
     </view>
@@ -99,7 +109,13 @@
   <!-- 未登录状态 -->
   <view wx:else class="not-login">
     <view class="login-icon">👤</view>
-    <text class="login-tip">您还未登录</text>
-    <button class="login-btn" bindtap="goToLogin">立即登录</button>
+    <text class="login-tip">欢迎来到学校小程序</text>
+    <text class="login-subtitle">请先登录查看更多功能</text>
+    <navigator class="login-btn" url="/pages/login/login">
+      <text>微信登录</text>
+    </navigator>
+    <navigator class="enroll-btn" url="/pages/apply/apply">
+      <text>申请入学</text>
+    </navigator>
   </view>
 </view>
