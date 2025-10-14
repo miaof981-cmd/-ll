@@ -8,7 +8,8 @@ Page({
       totalStudents: 0,
       totalPhotographers: 0,
       totalAnnouncements: 0,
-      totalBanners: 0
+      totalBanners: 0,
+      totalActivities: 0
     }
   },
 
@@ -49,18 +50,20 @@ Page({
     
     try {
       // 从云数据库获取实时统计
-      const [students, photographers, announcements, banners] = await Promise.all([
+      const [students, photographers, announcements, banners, activities] = await Promise.all([
         cloudDB.getStudents(),
         cloudDB.getPhotographers(),
         cloudDB.getAnnouncements(),
-        cloudDB.getBanners()
+        cloudDB.getBanners(),
+        cloudDB.getActivities()
       ]);
 
       const stats = {
         totalStudents: students.length,
         totalPhotographers: photographers.length,
         totalAnnouncements: announcements.length,
-        totalBanners: banners.length
+        totalBanners: banners.length,
+        totalActivities: activities.length
       };
 
       console.log('✅ 统计数据:', stats);

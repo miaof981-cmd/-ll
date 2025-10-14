@@ -55,6 +55,15 @@
         </view>
         <view class="stat-arrow">→</view>
       </view>
+      
+      <view class="stat-card clickable" bindtap="manageActivities">
+        <view class="stat-icon activities">🎯</view>
+        <view class="stat-info">
+          <text class="stat-value">{{stats.totalActivities}}</text>
+          <text class="stat-label">活动数量</text>
+        </view>
+        <view class="stat-arrow">→</view>
+      </view>
     </view>
   </view>
 

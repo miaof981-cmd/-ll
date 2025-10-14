@@ -78,6 +78,7 @@
         <view class="info-tags">
           <view wx:if="{{item.isHot}}" class="tag tag-hot">🔥 热门</view>
           <view wx:if="{{item.isNew}}" class="tag tag-new">🆕 新品</view>
+          <view wx:if="{{item.isDefault}}" class="tag tag-default">⭐ 默认活动</view>
           <view wx:if="{{item.category === '证件照'}}" class="tag tag-special">📸 证件照</view>
         </view>
 
@@ -95,12 +96,14 @@
             {{item.status === 'active' ? '下架' : '上架'}}
           </button>
           <button 
-            class="btn-action btn-delete" 
+            class="btn-action {{item.isDefault ? 'btn-disabled' : 'btn-delete'}}" 
             bindtap="deleteActivity" 
             data-id="{{item._id}}"
             data-title="{{item.title}}"
+            data-isdefault="{{item.isDefault}}"
+            disabled="{{item.isDefault}}"
           >
-            删除
+            {{item.isDefault ? '不可删除' : '删除'}}
           </button>
         </view>
       </view>

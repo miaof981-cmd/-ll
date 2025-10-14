@@ -8,7 +8,9 @@ Page({
     statusFilter: 'all' // all, active, inactive
   },
 
-  onLoad() {
+  async onLoad() {
+    // 初始化证件照默认活动
+    await cloudDB.initDefaultIDPhotoActivity();
     this.loadActivities();
   },
 
@@ -70,7 +72,17 @@ Page({
 
   // 删除活动
   deleteActivity(e) {
-    const { id, title } = e.currentTarget.dataset;
+    const { id, title, isdefault } = e.currentTarget.dataset;
+    
+    // 检查是否为默认活动
+    if (isdefault === 'true' || isdefault === true) {
+      wx.showModal({
+        title: '无法删除',
+        content: '证件照是默认活动，不可删除。您可以编辑其价格和摄影师。',
+        showCancel: false
+      });
+      return;
+    }
     
     wx.showModal({
       title: '确认删除',
@@ -80,15 +92,22 @@ Page({
           wx.showLoading({ title: '删除中...' });
           
           try {
-            await cloudDB.deleteActivity(id);
+            const result = await cloudDB.deleteActivity(id);
             
             wx.hideLoading();
-            wx.showToast({
-              title: '删除成功',
-              icon: 'success'
-            });
             
-            this.loadActivities();
+            if (result.success) {
+              wx.showToast({
+                title: '删除成功',
+                icon: 'success'
+              });
+              this.loadActivities();
+            } else {
+              wx.showToast({
+                title: result.error || '删除失败',
+                icon: 'none'
+              });
+            }
           } catch (e) {
             console.error('删除失败:', e);
             wx.hideLoading();

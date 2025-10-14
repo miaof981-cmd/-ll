@@ -36,8 +36,8 @@ Page({
 
       let activities = await cloudDB.getActivities(options);
       
-      // 前端再次过滤，确保不显示证件照
-      activities = activities.filter(item => item.category !== '证件照');
+      // 前端过滤，不显示默认活动（如证件照）
+      activities = activities.filter(item => !item.isDefault);
 
       this.setData({
         activities: activities || [],

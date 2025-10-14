@@ -924,12 +924,79 @@ async function deleteActivity(activityId) {
   
   try {
     const db = getDB();
+    // 检查是否为证件照活动
+    const activity = await db.collection('activities').doc(activityId).get();
+    if (activity.data && activity.data.category === '证件照' && activity.data.isDefault) {
+      console.warn('⚠️ 证件照默认活动不可删除');
+      return { success: false, error: '证件照默认活动不可删除' };
+    }
+    
     await db.collection('activities').doc(activityId).remove();
     console.log('✅ 云端删除活动成功');
-    return true;
+    return { success: true };
   } catch (e) {
     console.error('❌ 删除活动失败:', e);
-    return false;
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * 初始化证件照默认活动
+ */
+async function initDefaultIDPhotoActivity() {
+  if (!isCloudEnabled()) {
+    return null;
+  }
+  
+  try {
+    const db = getDB();
+    
+    // 检查是否已存在证件照活动
+    const existing = await db.collection('activities')
+      .where({
+        category: '证件照',
+        isDefault: true
+      })
+      .get();
+    
+    if (existing.data && existing.data.length > 0) {
+      console.log('✅ 证件照活动已存在');
+      return existing.data[0];
+    }
+    
+    // 创建默认证件照活动
+    const defaultActivity = {
+      title: '校园证件照拍摄',
+      subtitle: '专业证件照，一寸/两寸可选',
+      coverImage: '',  // 需要管理员上传
+      images: [],
+      description: '专业摄影师为您拍摄标准证件照，包含精修、底片等服务。',
+      details: '【服务内容】\n✅ 专业摄影师拍摄\n✅ 5张精修照片\n✅ 电子底片\n✅ 一寸/两寸可选',
+      price: 20,
+      originalPrice: 30,
+      photographerIds: [],
+      tags: ['证件照', '必备'],
+      category: '证件照',
+      status: 'active',
+      isHot: true,
+      isNew: false,
+      isDefault: true,  // 标记为默认活动
+      sortOrder: 0,
+      viewCount: 0,
+      orderCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const res = await db.collection('activities').add({
+      data: defaultActivity
+    });
+    
+    console.log('✅ 创建默认证件照活动成功');
+    return { ...defaultActivity, _id: res._id };
+  } catch (e) {
+    console.error('❌ 初始化证件照活动失败:', e);
+    return null;
   }
 }
 
@@ -1065,6 +1132,7 @@ module.exports = {
   createActivityOrder,
   saveActivity,
   deleteActivity,
+  initDefaultIDPhotoActivity,
   
   // 活动订单
   getActivityOrders,
