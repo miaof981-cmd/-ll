@@ -258,3 +258,185 @@
   display: block;
   background: var(--bg-tertiary);
 }
+
+/* ==================== 编辑模式样式 ==================== */
+.section-title-bar {
+  justify-content: space-between;
+}
+
+.title-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.title-right {
+  display: flex;
+  gap: 16rpx;
+}
+
+.btn-edit, .btn-add {
+  padding: 12rpx 24rpx;
+  font-size: 26rpx;
+  border-radius: var(--radius-md);
+  border: none;
+}
+
+.btn-edit {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn-add {
+  background: var(--success-color);
+  color: white;
+}
+
+.archive-card.editing {
+  position: relative;
+}
+
+.card-delete {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background: var(--error-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.card-delete:active {
+  transform: scale(0.9);
+}
+
+/* ==================== 添加档案弹窗 ==================== */
+.add-dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.add-dialog {
+  width: 90%;
+  max-width: 600rpx;
+  background: white;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dialog-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dialog-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: var(--text-secondary);
+}
+
+.dialog-body {
+  padding: 32rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.form-item {
+  margin-bottom: 24rpx;
+}
+
+.form-item .label {
+  display: block;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  margin-bottom: 12rpx;
+}
+
+.form-item .input,
+.form-item .textarea {
+  width: 100%;
+  padding: 20rpx;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 28rpx;
+}
+
+.form-item .textarea {
+  min-height: 120rpx;
+}
+
+.image-upload {
+  width: 200rpx;
+  height: 200rpx;
+}
+
+.image-upload .preview {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-md);
+}
+
+.image-upload .upload-btn {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64rpx;
+  color: var(--text-secondary);
+}
+
+.dialog-footer {
+  display: flex;
+  gap: 16rpx;
+  padding: 24rpx 32rpx;
+  border-top: 1px solid var(--border-light);
+}
+
+.dialog-footer button {
+  flex: 1;
+  padding: 24rpx;
+  border-radius: var(--radius-md);
+  font-size: 28rpx;
+  border: none;
+}
+
+.btn-cancel {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.btn-save {
+  background: var(--primary-color);
+  color: white;
+}

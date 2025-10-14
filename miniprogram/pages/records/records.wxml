@@ -16,8 +16,18 @@
 
   <!-- 档案标题 -->
   <view class="section-title-bar">
-    <text class="section-icon">📚</text>
-    <text class="section-title">学生档案</text>
+    <view class="title-left">
+      <text class="section-icon">📚</text>
+      <text class="section-title">学生档案</text>
+    </view>
+    <view class="title-right" wx:if="{{isAdmin}}">
+      <button class="btn-edit" bindtap="toggleEdit">
+        {{isEditing ? '完成' : '编辑'}}
+      </button>
+      <button class="btn-add" wx:if="{{isEditing}}" bindtap="showAddRecordDialog">
+        + 添加
+      </button>
+    </view>
   </view>
 
   <!-- 瀑布流档案卡片 -->
@@ -25,12 +35,15 @@
     <!-- 成绩卡片 -->
     <view 
       wx:for="{{records.reportCards}}" 
-      wx:key="term" 
-      class="archive-card grade-card"
+      wx:key="_id" 
+      class="archive-card grade-card {{isEditing ? 'editing' : ''}}"
     >
       <view class="card-header">
         <view class="card-icon">📊</view>
         <text class="card-type">成绩报告</text>
+        <view class="card-delete" wx:if="{{isEditing}}" bindtap="deleteRecord" data-id="{{item._id}}" data-type="grade">
+          <text>×</text>
+        </view>
       </view>
       <view class="card-body">
         <text class="card-title">{{item.term}}</text>
@@ -47,19 +60,11 @@
             <text class="subject">英语</text>
             <text class="score">{{item.english}}</text>
           </view>
-          <view class="grade-item">
-            <text class="subject">物理</text>
-            <text class="score">{{item.physics}}</text>
-          </view>
-          <view class="grade-item">
-            <text class="subject">化学</text>
-            <text class="score">{{item.chemistry}}</text>
-          </view>
         </view>
       </view>
       <view class="card-footer">
         <view class="average-badge">
-          <text>平均分：{{item.average}}</text>
+          <text>平均分：{{((item.chinese + item.math + item.english) / 3).toFixed(1)}}</text>
         </view>
       </view>
     </view>
@@ -67,12 +72,15 @@
     <!-- 处罚记录卡片 -->
     <view 
       wx:for="{{records.punishments}}" 
-      wx:key="date" 
-      class="archive-card punishment-card"
+      wx:key="_id" 
+      class="archive-card punishment-card {{isEditing ? 'editing' : ''}}"
     >
       <view class="card-header">
         <view class="card-icon warning">⚠️</view>
         <text class="card-type">处罚记录</text>
+        <view class="card-delete" wx:if="{{isEditing}}" bindtap="deleteRecord" data-id="{{item._id}}" data-type="punishment">
+          <text>×</text>
+        </view>
       </view>
       <view class="card-body">
         <view class="punishment-type">
@@ -82,29 +90,32 @@
         <text class="punishment-reason">{{item.reason}}</text>
       </view>
       <view class="card-footer">
-        <text class="card-date">📅 {{item.date}}</text>
+        <text class="card-date">📅 {{item.createdAt}}</text>
       </view>
     </view>
 
     <!-- 图片档案卡片 -->
     <view 
       wx:for="{{records.images}}" 
-      wx:key="id" 
-      class="archive-card image-card"
-      bindtap="previewImage"
-      data-url="{{item.url}}"
+      wx:key="_id" 
+      class="archive-card image-card {{isEditing ? 'editing' : ''}}"
+      bindtap="{{isEditing ? '' : 'previewImage'}}"
+      data-url="{{item.imageUrl}}"
     >
       <view class="card-header">
         <view class="card-icon">🖼️</view>
         <text class="card-type">图片档案</text>
+        <view class="card-delete" wx:if="{{isEditing}}" bindtap="deleteRecord" data-id="{{item._id}}" data-type="image">
+          <text>×</text>
+        </view>
       </view>
-      <image class="card-image" src="{{item.url}}" mode="widthFix" />
+      <image class="card-image" src="{{item.imageUrl}}" mode="widthFix" />
       <view class="card-body">
         <text class="card-title">{{item.title}}</text>
         <text class="card-desc">{{item.description}}</text>
       </view>
       <view class="card-footer">
-        <text class="card-date">📅 {{item.uploadedAt}}</text>
+        <text class="card-date">📅 {{item.createdAt}}</text>
       </view>
     </view>
 
@@ -118,5 +129,77 @@
   <!-- 加载状态 -->
   <view wx:if="{{loading}}" class="loading-wrapper">
     <text class="loading-text">加载中...</text>
+  </view>
+</view>
+
+<!-- 添加档案弹窗 -->
+<view class="add-dialog-mask" wx:if="{{showAddDialog}}" bindtap="closeAddDialog">
+  <view class="add-dialog" catchtap="">
+    <view class="dialog-header">
+      <text class="dialog-title">
+        {{addRecordType === 'grade' ? '添加成绩' : addRecordType === 'punishment' ? '添加处分' : '添加图片档案'}}
+      </text>
+      <view class="dialog-close" bindtap="closeAddDialog">×</view>
+    </view>
+
+    <view class="dialog-body">
+      <!-- 添加成绩 -->
+      <view wx:if="{{addRecordType === 'grade'}}">
+        <view class="form-item">
+          <text class="label">学期 *</text>
+          <input class="input" placeholder="如：2024-2025上学期" bindinput="onRecordInput" data-field="term" />
+        </view>
+        <view class="form-item">
+          <text class="label">语文 *</text>
+          <input class="input" type="digit" placeholder="请输入分数" bindinput="onRecordInput" data-field="chinese" />
+        </view>
+        <view class="form-item">
+          <text class="label">数学</text>
+          <input class="input" type="digit" placeholder="请输入分数" bindinput="onRecordInput" data-field="math" />
+        </view>
+        <view class="form-item">
+          <text class="label">英语</text>
+          <input class="input" type="digit" placeholder="请输入分数" bindinput="onRecordInput" data-field="english" />
+        </view>
+      </view>
+
+      <!-- 添加处分 -->
+      <view wx:if="{{addRecordType === 'punishment'}}">
+        <view class="form-item">
+          <text class="label">处分类型 *</text>
+          <input class="input" placeholder="如：警告、记过" bindinput="onRecordInput" data-field="type" />
+        </view>
+        <view class="form-item">
+          <text class="label">原因 *</text>
+          <textarea class="textarea" placeholder="请输入处分原因" bindinput="onRecordInput" data-field="reason" maxlength="200"></textarea>
+        </view>
+      </view>
+
+      <!-- 添加图片档案 -->
+      <view wx:if="{{addRecordType === 'image'}}">
+        <view class="form-item">
+          <text class="label">标题 *</text>
+          <input class="input" placeholder="请输入标题" bindinput="onRecordInput" data-field="title" />
+        </view>
+        <view class="form-item">
+          <text class="label">描述</text>
+          <textarea class="textarea" placeholder="请输入描述" bindinput="onRecordInput" data-field="description" maxlength="200"></textarea>
+        </view>
+        <view class="form-item">
+          <text class="label">图片 *</text>
+          <view class="image-upload">
+            <image wx:if="{{newRecord.imageUrl}}" class="preview" src="{{newRecord.imageUrl}}" mode="aspectFill" />
+            <view wx:else class="upload-btn" bindtap="uploadRecordImage">
+              <text>+</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="dialog-footer">
+      <button class="btn-cancel" bindtap="closeAddDialog">取消</button>
+      <button class="btn-save" bindtap="saveNewRecord">保存</button>
+    </view>
   </view>
 </view>
