@@ -57,16 +57,22 @@ async function savePhotographer(photographer) {
     const db = getDB();
     
     if (photographer._id) {
-      // 更新
+      // 更新 - 需要排除 _id 字段
+      const updateData = { ...photographer };
+      delete updateData._id;
+      
       await db.collection('photographers').doc(photographer._id).update({
-        data: photographer
+        data: updateData
       });
       console.log('✅ 云端更新摄影师成功');
     } else {
       // 新增
+      const addData = { ...photographer };
+      delete addData._id; // 确保没有 _id 字段
+      
       const res = await db.collection('photographers').add({
         data: {
-          ...photographer,
+          ...addData,
           createdAt: new Date().toISOString()
         }
       });
@@ -77,8 +83,7 @@ async function savePhotographer(photographer) {
     return photographer;
   } catch (e) {
     console.error('❌ 保存摄影师失败:', e);
-    const storage = require('./storage.js');
-    return storage.savePhotographer(photographer);
+    throw e;
   }
 }
 
@@ -99,6 +104,31 @@ async function deletePhotographer(photographerId) {
   } catch (e) {
     console.error('❌ 删除摄影师失败:', e);
     return false;
+  }
+}
+
+/**
+ * 根据ID获取摄影师信息
+ */
+async function getPhotographerById(id) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    const photographers = storage.getPhotographers();
+    return photographers.find(p => p.id === id || p._id === id);
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection('photographers').doc(id).get();
+    
+    if (res.data) {
+      console.log('✅ 云端获取摄影师信息成功');
+      return res.data;
+    }
+    return null;
+  } catch (e) {
+    console.error('❌ 获取摄影师信息失败:', e);
+    return null;
   }
 }
 
