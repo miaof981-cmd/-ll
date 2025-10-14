@@ -183,7 +183,7 @@ Page({
     }
   },
 
-  // 提交作品（等待用户确认）
+  // 提交作品（等待管理员审核）
   async submitWork() {
     if (!this.data.uploadedPhotos || this.data.uploadedPhotos.length === 0) {
       wx.showToast({ title: '请先上传照片', icon: 'none' });
@@ -192,7 +192,7 @@ Page({
 
     const res = await wx.showModal({
       title: '提交作品',
-      content: `确认提交 ${this.data.uploadedPhotos.length} 张照片？提交后将等待用户确认。`
+      content: `确认提交 ${this.data.uploadedPhotos.length} 张照片？提交后将由管理员审核。`
     });
 
     if (!res.confirm) return;
@@ -203,7 +203,7 @@ Page({
       const db = wx.cloud.database();
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
-          status: 'pending_confirm', // 待用户确认
+          status: 'pending_review', // 待管理员审核
           photos: this.data.uploadedPhotos,
           submittedAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
@@ -213,7 +213,7 @@ Page({
       wx.hideLoading();
       wx.showModal({
         title: '提交成功',
-        content: '作品已提交，等待用户确认',
+        content: '作品已提交，等待管理员审核通过后将展示给用户',
         showCancel: false,
         success: () => {
           wx.navigateBack();

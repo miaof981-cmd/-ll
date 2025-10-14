@@ -105,6 +105,12 @@ Page({
     const { action } = e.currentTarget.dataset;
     
     switch (action) {
+      case 'approve':
+        await this.approveWork();
+        break;
+      case 'reject_review':
+        await this.rejectWork();
+        break;
       case 'start':
         await this.startShooting();
         break;
@@ -121,6 +127,69 @@ Page({
         await this.cancelOrder();
         break;
     }
+  },
+
+  // 审核通过
+  async approveWork() {
+    wx.showModal({
+      title: '审核通过',
+      content: '确认摄影师作品已达标？审核通过后将展示给用户确认。',
+      success: async (res) => {
+        if (res.confirm) {
+          await this.updateOrderStatus(orderStatus.ORDER_STATUS.PENDING_CONFIRM);
+          wx.showToast({
+            title: '审核通过，等待用户确认',
+            icon: 'success',
+            duration: 2000
+          });
+        }
+      }
+    });
+  },
+
+  // 审核拒绝
+  async rejectWork() {
+    wx.showModal({
+      title: '审核拒绝',
+      content: '确认拒绝此作品？摄影师需要重新拍摄。',
+      editable: true,
+      placeholderText: '请输入拒绝原因...',
+      success: async (res) => {
+        if (res.confirm) {
+          const rejectReason = res.content || '作品不符合要求，请重新拍摄';
+          
+          wx.showLoading({ title: '处理中...' });
+          try {
+            const db = wx.cloud.database();
+            await db.collection('activity_orders').doc(this.data.orderId).update({
+              data: {
+                status: orderStatus.ORDER_STATUS.IN_PROGRESS,
+                adminRejectReason: rejectReason,
+                adminRejectedAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+            });
+
+            wx.hideLoading();
+            wx.showToast({
+              title: '已拒绝，通知摄影师重拍',
+              icon: 'success',
+              duration: 2000
+            });
+
+            // 重新加载订单详情
+            this.loadOrderDetail(this.data.orderId);
+          } catch (e) {
+            console.error('操作失败:', e);
+            wx.hideLoading();
+            wx.showToast({
+              title: '操作失败',
+              icon: 'error'
+            });
+          }
+        }
+      }
+    });
   },
 
   // 开始拍摄

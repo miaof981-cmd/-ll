@@ -7,9 +7,11 @@ Page({
     activeStatus: 'all',
     statusFilters: [
       { id: 'all', name: '全部' },
+      { id: orderStatus.ORDER_STATUS.PENDING_REVIEW, name: '待审核' },
       { id: orderStatus.ORDER_STATUS.PENDING_PAYMENT, name: '待支付' },
       { id: orderStatus.ORDER_STATUS.PAID, name: '已支付' },
       { id: orderStatus.ORDER_STATUS.IN_PROGRESS, name: '进行中' },
+      { id: orderStatus.ORDER_STATUS.PENDING_CONFIRM, name: '待确认' },
       { id: orderStatus.ORDER_STATUS.COMPLETED, name: '已完成' },
       { id: orderStatus.ORDER_STATUS.AFTER_SALE, name: '售后中' },
       { id: orderStatus.ORDER_STATUS.REFUNDED, name: '已退款' },

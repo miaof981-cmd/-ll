@@ -199,7 +199,7 @@ Page({
     console.log('当前订单状态:', this.data.order.status);
     
     // 只有订单已完成(completed)、已退款(refunded)或已取消(cancelled)时才显示无水印原图
-    // 其他所有状态（pending_confirm、in_progress等）都需要水印，防止白嫖
+    // 其他所有状态（pending_review、pending_confirm、in_progress等）都需要水印，防止白嫖
     const needWatermark = !['completed', 'refunded', 'cancelled'].includes(this.data.order.status);
     
     console.log('是否需要水印:', needWatermark);
