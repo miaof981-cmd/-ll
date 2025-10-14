@@ -1,5 +1,5 @@
 // pages/admin/admin.js
-const storage = require('../../utils/storage.js');
+const cloudDB = require('../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -43,10 +43,32 @@ Page({
     });
   },
 
-  // 加载统计数据 - 使用真实数据
-  loadStats() {
-    const stats = storage.getStats();
-    this.setData({ stats });
+  // 加载统计数据 - 从云数据库获取
+  async loadStats() {
+    console.log('📊 开始加载统计数据...');
+    
+    try {
+      // 从云数据库获取实时统计
+      const [students, photographers, announcements, banners] = await Promise.all([
+        cloudDB.getStudents(),
+        cloudDB.getPhotographers(),
+        cloudDB.getAnnouncements(),
+        cloudDB.getBanners()
+      ]);
+
+      const stats = {
+        totalStudents: students.length,
+        totalPhotographers: photographers.length,
+        totalAnnouncements: announcements.length,
+        totalBanners: banners.length
+      };
+
+      console.log('✅ 统计数据:', stats);
+      
+      this.setData({ stats });
+    } catch (e) {
+      console.error('❌ 加载统计数据失败:', e);
+    }
   },
 
   // 管理轮播图
