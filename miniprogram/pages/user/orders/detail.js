@@ -8,13 +8,33 @@ Page({
     photographerInfo: null,
     loading: true,
     showRejectModal: false,
-    rejectReason: ''
+    rejectReason: '',
+    canGoBack: true // 是否可以返回
   },
 
   onLoad(options) {
     if (options.id) {
       this.setData({ orderId: options.id });
       this.loadOrderDetail(options.id);
+    }
+    
+    // 检查页面栈，判断是否可以返回
+    const pages = getCurrentPages();
+    this.setData({
+      canGoBack: pages.length > 1
+    });
+  },
+  
+  // 返回上一页
+  goBack() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack();
+    } else {
+      // 如果没有上一页，跳转到订单列表
+      wx.redirectTo({
+        url: '/pages/user/orders/orders'
+      });
     }
   },
 
@@ -275,7 +295,7 @@ Page({
                 
                 // 绘制水印
                 const watermarkText = '确认收图后水印自动消除';
-                const fontSize = Math.min(imgWidth, imgHeight) * 0.08; // 增大字体，提高安全性
+                const fontSize = Math.min(imgWidth, imgHeight) * 0.06; // 适中字体大小
                 
                 ctx.font = `bold ${fontSize}px sans-serif`; // 加粗字体
                 ctx.globalAlpha = 0.65; // 略微提高透明度
@@ -290,13 +310,13 @@ Page({
                 ctx.translate(imgWidth / 2, imgHeight / 2);
                 ctx.rotate(-45 * Math.PI / 180);
                 
-                // 计算水印间距（根据字体大小调整）
-                const spacingX = Math.min(imgWidth, imgHeight) * 0.75; // 横向间距
-                const spacingY = Math.min(imgWidth, imgHeight) * 0.55; // 纵向间距
+                // 计算水印间距（密集覆盖）
+                const spacingX = Math.min(imgWidth, imgHeight) * 0.5; // 横向间距
+                const spacingY = Math.min(imgWidth, imgHeight) * 0.3; // 纵向间距（更密集）
                 
-                // 规律覆盖整个画面
-                for (let x = -imgWidth; x <= imgWidth; x += spacingX) {
-                  for (let y = -imgHeight; y <= imgHeight; y += spacingY) {
+                // 密集覆盖整个画面
+                for (let x = -imgWidth * 1.5; x <= imgWidth * 1.5; x += spacingX) {
+                  for (let y = -imgHeight * 1.5; y <= imgHeight * 1.5; y += spacingY) {
                     ctx.fillText(watermarkText, x, y);
                   }
                 }
