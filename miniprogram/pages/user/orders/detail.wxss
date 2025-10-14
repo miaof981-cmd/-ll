@@ -557,13 +557,8 @@
 }
 
 /* 水印画布 */
-.watermark-overlay {
-  position: fixed;
-  top: -9999rpx;
-  left: -9999rpx;
-}
-
 .watermark-canvas {
-  width: 750rpx;
-  height: 1000rpx;
+  position: fixed;
+  left: -9999rpx;
+  top: -9999rpx;
 }

@@ -133,9 +133,6 @@
 
       <!-- 订单信息 -->
       <view class="detail-section">
-        <view class="detail-section-header">
-          <text class="detail-section-title">📄 订单信息</text>
-        </view>
         <view class="info-row">
           <text class="label">订单号</text>
           <text class="value code">{{order.orderNo || order._id.slice(-12)}}</text>
@@ -193,8 +190,11 @@
     </view>
   </view>
 
-  <!-- 水印预览遮罩层（未确认时） -->
-  <view wx:if="{{order.status === 'pending_confirm'}}" class="watermark-overlay" hidden>
-    <canvas canvas-id="watermarkCanvas" class="watermark-canvas"></canvas>
-  </view>
+  <!-- 水印Canvas（隐藏） -->
+  <canvas 
+    type="2d" 
+    id="watermarkCanvas" 
+    class="watermark-canvas"
+    style="position: fixed; left: -9999px; top: -9999px; width: 300px; height: 300px;"
+  ></canvas>
 </view>

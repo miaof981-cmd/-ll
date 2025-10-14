@@ -226,60 +226,98 @@ Page({
   // 为单张图片添加水印
   addWatermark(imageUrl) {
     return new Promise((resolve, reject) => {
-      const ctx = wx.createCanvasContext('watermarkCanvas', this);
-      
-      // 下载图片
-      wx.getImageInfo({
-        src: imageUrl,
-        success: (res) => {
-          const imgWidth = res.width;
-          const imgHeight = res.height;
-          
-          // 设置画布大小
-          ctx.canvas.width = imgWidth;
-          ctx.canvas.height = imgHeight;
-          
-          // 绘制原图
-          ctx.drawImage(imageUrl, 0, 0, imgWidth, imgHeight);
-          
-          // 绘制水印
-          const watermarkText = '确认收图后水印自动消除';
-          const fontSize = Math.min(imgWidth, imgHeight) * 0.05; // 根据图片大小调整字体
-          
-          ctx.setFontSize(fontSize);
-          ctx.setGlobalAlpha(0.6);
-          ctx.setTextAlign('center');
-          ctx.setTextBaseline('middle');
-          ctx.setFillStyle('#FF0000'); // 大红色
-          
-          // 旋转45度
-          ctx.translate(imgWidth / 2, imgHeight / 2);
-          ctx.rotate(-45 * Math.PI / 180);
-          
-          // 计算水印间距
-          const spacing = Math.min(imgWidth, imgHeight) * 0.4;
-          
-          // 规律覆盖整个画面（9宫格布局）
-          for (let x = -imgWidth; x <= imgWidth; x += spacing) {
-            for (let y = -imgHeight; y <= imgHeight; y += spacing) {
-              ctx.fillText(watermarkText, x, y);
-            }
+      // 使用新版Canvas 2D
+      const query = wx.createSelectorQuery().in(this);
+      query.select('#watermarkCanvas')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (!res || !res[0]) {
+            console.error('Canvas节点未找到');
+            reject(new Error('Canvas节点未找到'));
+            return;
           }
-          
-          ctx.draw(false, () => {
-            setTimeout(() => {
-              wx.canvasToTempFilePath({
-                canvasId: 'watermarkCanvas',
-                success: (result) => {
-                  resolve(result.tempFilePath);
-                },
-                fail: reject
-              }, this);
-            }, 500);
+
+          const canvas = res[0].node;
+          const ctx = canvas.getContext('2d');
+
+          // 下载图片
+          wx.getImageInfo({
+            src: imageUrl,
+            success: (imgInfo) => {
+              const imgWidth = imgInfo.width;
+              const imgHeight = imgInfo.height;
+              
+              // 设置画布大小
+              const dpr = wx.getSystemInfoSync().pixelRatio;
+              canvas.width = imgWidth * dpr;
+              canvas.height = imgHeight * dpr;
+              ctx.scale(dpr, dpr);
+              
+              // 创建图片对象
+              const img = canvas.createImage();
+              img.onload = () => {
+                // 绘制原图
+                ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+                
+                // 绘制水印
+                const watermarkText = '确认收图后水印自动消除';
+                const fontSize = Math.min(imgWidth, imgHeight) * 0.05;
+                
+                ctx.font = `${fontSize}px sans-serif`;
+                ctx.globalAlpha = 0.6;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#FF0000'; // 大红色
+                
+                // 保存当前状态
+                ctx.save();
+                
+                // 旋转45度
+                ctx.translate(imgWidth / 2, imgHeight / 2);
+                ctx.rotate(-45 * Math.PI / 180);
+                
+                // 计算水印间距
+                const spacing = Math.min(imgWidth, imgHeight) * 0.4;
+                
+                // 规律覆盖整个画面
+                for (let x = -imgWidth; x <= imgWidth; x += spacing) {
+                  for (let y = -imgHeight; y <= imgHeight; y += spacing) {
+                    ctx.fillText(watermarkText, x, y);
+                  }
+                }
+                
+                // 恢复状态
+                ctx.restore();
+                
+                // 导出图片
+                setTimeout(() => {
+                  wx.canvasToTempFilePath({
+                    canvas: canvas,
+                    success: (result) => {
+                      console.log('水印添加成功:', result.tempFilePath);
+                      resolve(result.tempFilePath);
+                    },
+                    fail: (err) => {
+                      console.error('导出图片失败:', err);
+                      reject(err);
+                    }
+                  }, this);
+                }, 300);
+              };
+              
+              img.onerror = (err) => {
+                console.error('图片加载失败:', err);
+                reject(err);
+              };
+              
+              img.src = imgInfo.path;
+            },
+            fail: (err) => {
+              console.error('获取图片信息失败:', err);
+              reject(err);
+            }
           });
-        },
-        fail: reject
-      });
+        });
     });
   },
 
