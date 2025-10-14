@@ -884,6 +884,7 @@ async function saveActivity(activity) {
       // 更新
       const updateData = { ...activity };
       delete updateData._id;
+      delete updateData._openid;  // 删除 _openid 字段
       updateData.updatedAt = new Date().toISOString();
       
       await db.collection('activities').doc(activity._id).update({
