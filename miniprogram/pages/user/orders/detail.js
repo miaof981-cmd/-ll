@@ -176,12 +176,17 @@ Page({
   async previewPhoto(e) {
     const { index } = e.currentTarget.dataset;
     
+    console.log('当前订单状态:', this.data.order.status);
+    console.log('是否需要水印:', this.data.order.status === 'pending_confirm');
+    
     // 如果订单状态是待确认，添加水印后再预览
     if (this.data.order.status === 'pending_confirm') {
-      wx.showLoading({ title: '加载中...' });
+      console.log('开始添加水印...');
+      wx.showLoading({ title: '添加水印中...' });
       
       try {
         const watermarkedImages = await this.addWatermarkToImages(this.data.order.photos);
+        console.log('水印添加完成，图片数量:', watermarkedImages.length);
         wx.hideLoading();
         
         wx.previewImage({
@@ -191,6 +196,10 @@ Page({
       } catch (e) {
         console.error('添加水印失败:', e);
         wx.hideLoading();
+        wx.showToast({
+          title: '水印添加失败，显示原图',
+          icon: 'none'
+        });
         // 失败则直接预览原图
         wx.previewImage({
           urls: this.data.order.photos,
@@ -198,6 +207,7 @@ Page({
         });
       }
     } else {
+      console.log('订单状态不是pending_confirm，直接预览原图');
       // 已确认，直接预览
       wx.previewImage({
         urls: this.data.order.photos,
