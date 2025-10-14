@@ -1,5 +1,5 @@
 // pages/index/index.js
-const storage = require('../../utils/storage.js');
+const cloudDB = require('../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -21,10 +21,15 @@ Page({
   },
 
   // 加载数据
-  loadData() {
-    // 从本地存储获取真实数据
-    const banners = storage.getBanners();
-    const announcements = storage.getAnnouncements();
+  async loadData() {
+    console.log('📡 开始加载首页数据...');
+    
+    // 从云数据库获取数据
+    const banners = await cloudDB.getBanners();
+    const announcements = await cloudDB.getAnnouncements();
+
+    console.log('✅ 轮播图数量:', banners.length);
+    console.log('✅ 公告数量:', announcements.length);
 
     this.setData({
       banners,

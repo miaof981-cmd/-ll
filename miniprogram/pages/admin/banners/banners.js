@@ -1,5 +1,5 @@
 // pages/admin/banners/banners.js
-const storage = require('../../../utils/storage.js');
+const cloudDB = require('../../../utils/cloud-db.js');
 
 Page({
   data: {
@@ -15,8 +15,10 @@ Page({
   },
 
   // 加载轮播图列表
-  loadBanners() {
-    const banners = storage.getBanners();
+  async loadBanners() {
+    wx.showLoading({ title: '加载中...' });
+    const banners = await cloudDB.getBanners();
+    wx.hideLoading();
     this.setData({ banners });
   },
 
@@ -26,14 +28,13 @@ Page({
       count: 1,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
-      success: (res) => {
+      success: async (res) => {
         const tempFilePath = res.tempFiles[0].tempFilePath;
         
         wx.showLoading({ title: '上传中...' });
         
-        // 这里使用本地路径，实际项目中应该上传到服务器
-        // 为了演示，直接使用临时路径
-        const success = storage.addBanner(tempFilePath);
+        // 使用云数据库保存
+        const success = await cloudDB.addBanner(tempFilePath);
         
         wx.hideLoading();
         
@@ -60,9 +61,11 @@ Page({
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这张轮播图吗？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          const success = storage.deleteBanner(id);
+          wx.showLoading({ title: '删除中...' });
+          const success = await cloudDB.deleteBanner(id);
+          wx.hideLoading();
           
           if (success) {
             wx.showToast({
