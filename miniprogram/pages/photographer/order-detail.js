@@ -7,6 +7,7 @@ Page({
     student: null,
     uploadedPhotos: [], // 当前编辑区的照片
     historyPhotos: [], // 历史提交的照片（被拒绝的）
+    photographerNote: '', // 摄影师给用户的备注
     uploading: false,
     loading: true
   },
@@ -75,6 +76,7 @@ Page({
         student,
         uploadedPhotos,
         historyPhotos,
+        photographerNote: order.photographerNote || '',
         loading: false
       });
     } catch (e) {
@@ -201,15 +203,26 @@ Page({
   },
 
   // 提交作品（等待管理员审核）
+  // 备注输入
+  onPhotographerNoteInput(e) {
+    this.setData({
+      photographerNote: e.detail.value
+    });
+  },
+
   async submitWork() {
     if (!this.data.uploadedPhotos || this.data.uploadedPhotos.length === 0) {
       wx.showToast({ title: '请先上传照片', icon: 'none' });
       return;
     }
 
+    const noteText = this.data.photographerNote.trim() 
+      ? `\n\n摄影师说明：${this.data.photographerNote.trim()}`
+      : '';
+
     const res = await wx.showModal({
       title: '提交作品',
-      content: `确认提交 ${this.data.uploadedPhotos.length} 张照片？提交后将由管理员审核。`
+      content: `确认提交 ${this.data.uploadedPhotos.length} 张照片？提交后将由管理员审核。${noteText}`
     });
 
     if (!res.confirm) return;
@@ -222,6 +235,7 @@ Page({
         data: {
           status: 'pending_review', // 待管理员审核
           photos: this.data.uploadedPhotos,
+          photographerNote: this.data.photographerNote.trim() || '',
           submittedAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }

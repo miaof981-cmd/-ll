@@ -138,12 +138,12 @@
             class="upload-item"
           >
             <image
-              class="upload-photo"
+              class="photo"
               src="{{item}}"
               mode="aspectFill"
               bindtap="previewUploadedPhoto"
               data-index="{{index}}"
-            ></image>
+            />
             <view class="delete-btn" bindtap="deletePhoto" data-index="{{index}}">
               <text>✕</text>
             </view>
@@ -165,6 +165,22 @@
           <text class="empty-text">还没有上传作品</text>
           <text class="empty-hint">点击上方"+"上传照片</text>
         </view>
+      </view>
+
+      <!-- 摄影师备注给用户 -->
+      <view wx:if="{{order.status === 'in_progress' && uploadedPhotos.length > 0}}" class="photographer-note-section">
+        <view class="note-header">
+          <text class="note-title">💬 给用户的说明</text>
+          <text class="note-hint">（选填）</text>
+        </view>
+        <textarea
+          class="note-textarea"
+          placeholder="可以在这里写一些拍摄说明、注意事项等，用户查看作品时会看到"
+          value="{{photographerNote}}"
+          bindinput="onPhotographerNoteInput"
+          maxlength="200"
+        />
+        <view class="note-counter">{{photographerNote.length || 0}}/200</view>
       </view>
     </view>
 

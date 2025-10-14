@@ -56,6 +56,12 @@
             </view>
             <view class="timeline-desc">摄影师已提交 {{order.photos.length}} 张照片</view>
             
+            <!-- 摄影师备注 -->
+            <view wx:if="{{order.photographerNote}}" class="photographer-note">
+              <view class="note-label">💬 摄影师说：</view>
+              <view class="note-content">{{order.photographerNote}}</view>
+            </view>
+
             <!-- 待确认状态提示 -->
             <view wx:if="{{order.status === 'pending_confirm'}}" class="timeline-tip">
               💡 请仔细查看作品，满意请点击下方"确认满意"
