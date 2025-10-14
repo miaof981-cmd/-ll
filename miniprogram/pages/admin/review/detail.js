@@ -42,6 +42,26 @@ Page({
             .get();
           activity = activityRes.data;
           console.log('✅ 活动信息:', activity);
+          console.log('📷 活动图片字段:', {
+            image: activity.image,
+            coverImage: activity.coverImage,
+            images: activity.images
+          });
+          
+          // 尝试多个可能的图片字段
+          if (!activity.image && activity.coverImage) {
+            activity.image = activity.coverImage;
+            console.log('使用 coverImage 字段');
+          } else if (!activity.image && activity.images && activity.images.length > 0) {
+            activity.image = activity.images[0];
+            console.log('使用 images[0] 字段');
+          }
+          
+          if (activity.image) {
+            console.log('✅ 最终使用的图片URL:', activity.image);
+          } else {
+            console.warn('⚠️ 活动没有图片');
+          }
         } catch (e) {
           console.error('获取活动信息失败:', e);
         }
