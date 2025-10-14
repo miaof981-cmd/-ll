@@ -65,6 +65,15 @@
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
+.card-main {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.card-main:active {
+  background: #fafafa;
+}
+
 /* 订单信息 */
 .order-info {
   padding: 24rpx;
@@ -110,6 +119,9 @@
 }
 
 .photos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16rpx;
 }
 
@@ -117,6 +129,14 @@
   font-size: 28rpx;
   font-weight: 600;
   color: #333;
+}
+
+.tap-hint {
+  font-size: 22rpx;
+  color: #1890ff;
+  background: #e6f7ff;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
 }
 
 .photos-grid {
@@ -142,6 +162,69 @@
   height: 100%;
 }
 
+/* 时间线区域 */
+.timeline-section {
+  padding: 0 24rpx 24rpx;
+  border-top: 1rpx dashed #e0e0e0;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+}
+
+.timeline-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.timeline-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.timeline-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #d9d9d9;
+  margin-top: 6rpx;
+  flex-shrink: 0;
+}
+
+.timeline-dot.active {
+  background: #1890ff;
+  box-shadow: 0 0 0 4rpx rgba(24, 144, 255, 0.2);
+}
+
+.timeline-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timeline-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.timeline-item.current .timeline-label {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.timeline-time {
+  font-size: 22rpx;
+  color: #999;
+}
+
 /* 快速操作按钮 */
 .actions {
   display: flex;
@@ -149,6 +232,7 @@
   padding: 20rpx;
   border-top: 1rpx solid #f0f0f0;
   background: white;
+  position: relative;
 }
 
 .action-btn {
@@ -193,15 +277,18 @@
   opacity: 0.8;
 }
 
-/* 详情按钮 */
-.action-btn.detail {
-  flex: 0.6;
-  background: #f0f0f0;
-  color: #666;
-}
-
-.action-btn.detail:active {
-  background: #e0e0e0;
+/* 详情提示 */
+.detail-hint {
+  position: absolute;
+  top: -32rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22rpx;
+  color: #999;
+  background: white;
+  padding: 4rpx 16rpx;
+  border-radius: 12rpx;
+  white-space: nowrap;
 }
 
 .btn-text {

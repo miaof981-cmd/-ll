@@ -22,64 +22,99 @@
   <!-- 订单列表 -->
   <view wx:else class="orders-list">
     <view wx:for="{{orders}}" wx:key="_id" class="order-card">
-      <!-- 订单基础信息 -->
-      <view class="order-info">
-        <view class="info-row">
-          <text class="activity-name">{{item.activityInfo.name || '活动'}}</text>
-          <text class="order-no">订单号：{{item.orderNo}}</text>
+      <!-- 点击卡片主体区域查看详情 -->
+      <view class="card-main" bindtap="viewDetail" data-id="{{item._id}}">
+        <!-- 订单基础信息 -->
+        <view class="order-info">
+          <view class="info-row">
+            <text class="activity-name">{{item.activityInfo.name || '活动'}}</text>
+            <text class="order-no">订单号：{{item.orderNo}}</text>
+          </view>
+          <view class="info-row">
+            <text class="photographer">📷 {{item.photographerInfo.name || '摄影师'}}</text>
+            <text class="submit-time">{{item.submittedAt}}</text>
+          </view>
         </view>
-        <view class="info-row">
-          <text class="photographer">📷 {{item.photographerInfo.name || '摄影师'}}</text>
-          <text class="submit-time">提交时间：{{item.submittedAt}}</text>
-        </view>
-      </view>
 
-      <!-- 作品图片展示（核心） -->
-      <view class="photos-section">
-        <view class="photos-header">
-          <text class="section-title">提交作品（{{item.photos.length}}张）</text>
+        <!-- 作品图片展示（核心） -->
+        <view class="photos-section">
+          <view class="photos-header">
+            <text class="section-title">📸 提交作品（{{item.photos.length}}张）</text>
+            <text class="tap-hint">👆 点击查看详情</text>
+          </view>
+          <view class="photos-grid">
+            <view 
+              wx:for="{{item.photos}}" 
+              wx:for-item="photo"
+              wx:for-index="photoIndex"
+              wx:key="photoIndex"
+              class="photo-item"
+              catchtap="previewImage"
+              data-images="{{item.photos}}"
+              data-current="{{photo}}"
+            >
+              <image src="{{photo}}" mode="aspectFill" class="photo" />
+            </view>
+          </view>
         </view>
-        <view class="photos-grid">
-          <view 
-            wx:for="{{item.photos}}" 
-            wx:for-item="photo"
-            wx:for-index="photoIndex"
-            wx:key="photoIndex"
-            class="photo-item"
-            bindtap="previewImage"
-            data-images="{{item.photos}}"
-            data-current="{{photo}}"
-          >
-            <image src="{{photo}}" mode="aspectFill" class="photo" />
+
+        <!-- 订单时间线 -->
+        <view class="timeline-section">
+          <view class="timeline-title">📋 最新进展</view>
+          <view class="timeline-compact">
+            <!-- 创建订单 -->
+            <view class="timeline-item">
+              <view class="timeline-dot"></view>
+              <view class="timeline-content">
+                <text class="timeline-label">创建订单</text>
+                <text class="timeline-time">{{item.createdAt}}</text>
+              </view>
+            </view>
+            
+            <!-- 摄影师接单 -->
+            <view wx:if="{{item.acceptedAt}}" class="timeline-item">
+              <view class="timeline-dot"></view>
+              <view class="timeline-content">
+                <text class="timeline-label">摄影师接单</text>
+                <text class="timeline-time">{{item.acceptedAt}}</text>
+              </view>
+            </view>
+            
+            <!-- 提交作品（当前状态） -->
+            <view class="timeline-item current">
+              <view class="timeline-dot active"></view>
+              <view class="timeline-content">
+                <text class="timeline-label">📸 提交作品（待审核）</text>
+                <text class="timeline-time">{{item.submittedAt}}</text>
+              </view>
+            </view>
           </view>
         </view>
       </view>
 
-      <!-- 快速操作按钮 -->
+      <!-- 快速操作按钮（独立区域，不触发详情） -->
       <view class="actions">
         <button 
           class="action-btn approve" 
           bindtap="quickApprove"
           data-id="{{item._id}}"
+          catchtap="stopPropagation"
         >
           <text class="btn-icon">✓</text>
-          <text class="btn-text">审核通过</text>
+          <text class="btn-text">通过</text>
         </button>
         <button 
           class="action-btn reject" 
           bindtap="quickReject"
           data-id="{{item._id}}"
+          catchtap="stopPropagation"
         >
           <text class="btn-icon">✕</text>
           <text class="btn-text">拒绝</text>
         </button>
-        <button 
-          class="action-btn detail" 
-          bindtap="viewDetail"
-          data-id="{{item._id}}"
-        >
-          <text class="btn-text">查看详情</text>
-        </button>
+        <view class="detail-hint">
+          <text>👆 点击卡片查看完整详情</text>
+        </view>
       </view>
     </view>
   </view>

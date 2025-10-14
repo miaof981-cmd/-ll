@@ -63,13 +63,18 @@ Page({
     }
   },
 
-  // 预览图片
+  // 预览图片（阻止冒泡，不触发卡片点击）
   previewImage(e) {
     const { images, current } = e.currentTarget.dataset;
     wx.previewImage({
       urls: images,
       current: current
     });
+  },
+
+  // 阻止事件冒泡
+  stopPropagation() {
+    // 空函数，用于阻止事件冒泡
   },
 
   // 快速审核通过
