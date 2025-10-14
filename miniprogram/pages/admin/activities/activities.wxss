@@ -87,18 +87,19 @@
 
 .activity-info {
   flex: 1;
-  padding: 16rpx 12rpx;
+  padding: 20rpx 16rpx;
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  gap: 8rpx;
   min-width: 0;
+  justify-content: space-between;
 }
 
 /* ==================== 信息区域 ==================== */
 .info-header {
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 4rpx;
 }
 
 .title-row {
@@ -169,7 +170,7 @@
 /* ==================== 标签 ==================== */
 .info-tags {
   display: flex;
-  gap: 12rpx;
+  gap: 8rpx;
   flex-wrap: wrap;
 }
 
@@ -205,17 +206,16 @@
 .action-buttons {
   display: flex;
   gap: 12rpx;
-  margin-top: auto;
   width: 100%;
 }
 
 .btn-action {
   flex: 1;
-  padding: 14rpx 12rpx;
-  font-size: 24rpx;
+  padding: 18rpx 16rpx;
+  font-size: 26rpx;
   border-radius: 8rpx;
   border: none;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 
