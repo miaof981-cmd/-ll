@@ -38,6 +38,32 @@
       </view>
     </view>
 
+    <!-- 摄影师作品 -->
+    <view wx:if="{{order.photos && order.photos.length > 0}}" class="section-card">
+      <view class="section-title">
+        <text>📸 摄影师作品</text>
+        <text class="photo-count">共{{order.photos.length}}张</text>
+      </view>
+      
+      <view class="photos-grid">
+        <image
+          wx:for="{{order.photos}}"
+          wx:key="index"
+          class="photo-item"
+          src="{{item}}"
+          mode="aspectFill"
+          bindtap="previewPhoto"
+          data-index="{{index}}"
+        ></image>
+      </view>
+
+      <!-- 待确认状态提示 -->
+      <view wx:if="{{order.status === 'pending_confirm'}}" class="confirm-tip">
+        <text class="tip-icon">💡</text>
+        <text class="tip-text">请仔细查看摄影师的作品，如满意请确认，如不满意可以拒绝并提出修改意见</text>
+      </view>
+    </view>
+
     <!-- 订单信息 -->
     <view class="section-card">
       <view class="section-title">订单信息</view>
@@ -46,35 +72,60 @@
         <text class="value code">{{order.orderNo || order._id.slice(-12)}}</text>
       </view>
       <view class="info-row">
-        <text class="label">创建时间</text>
+        <text class="label">下单时间</text>
         <text class="value">{{order.createdAt}}</text>
+      </view>
+      <view wx:if="{{order.submittedAt}}" class="info-row">
+        <text class="label">提交时间</text>
+        <text class="value">{{order.submittedAt}}</text>
       </view>
       <view class="info-row">
         <text class="label">订单金额</text>
         <text class="value price">¥{{order.totalPrice}}</text>
       </view>
       <view wx:if="{{order.remark}}" class="info-row">
-        <text class="label">备注</text>
+        <text class="label">我的备注</text>
         <text class="value">{{order.remark}}</text>
       </view>
-      <view wx:if="{{order.afterSaleReason}}" class="info-row">
-        <text class="label">售后原因</text>
-        <text class="value">{{order.afterSaleReason}}</text>
+      <view wx:if="{{order.rejectReason}}" class="info-row reject-reason">
+        <text class="label">拒绝原因</text>
+        <text class="value">{{order.rejectReason}}</text>
       </view>
     </view>
 
     <!-- 操作按钮 -->
-    <view wx:if="{{order.userActions && order.userActions.length > 0}}" class="action-bar">
-      <view
-        wx:for="{{order.userActions}}"
-        wx:key="index"
-        wx:for-item="action"
-        class="action-button action-{{action}}"
-        bindtap="handleAction"
-        data-action="{{action}}"
-      >
-        {{action === 'pay' ? '立即支付' : action === 'cancel' ? '取消订单' : action === 'contact' ? '联系摄影师' : action === 'after_sale' ? '申请售后' : action === 'evaluate' ? '评价' : action}}
+    <view class="action-bar">
+      <!-- 待确认状态：显示确认和拒绝按钮 -->
+      <view wx:if="{{order.status === 'pending_confirm'}}" class="confirm-actions">
+        <button class="action-btn reject-btn" bindtap="rejectWork">
+          <text>❌ 拒绝作品</text>
+        </button>
+        <button class="action-btn confirm-btn" bindtap="confirmWork">
+          <text>✅ 确认满意</text>
+        </button>
       </view>
+
+      <!-- 其他状态：显示原有操作按钮 -->
+      <view wx:elif="{{order.userActions && order.userActions.length > 0}}" class="other-actions">
+        <button
+          wx:for="{{order.userActions}}"
+          wx:key="index"
+          wx:for-item="action"
+          class="action-btn {{action === 'after_sale' ? 'secondary-btn' : 'primary-btn'}}"
+          bindtap="handleAction"
+          data-action="{{action}}"
+        >
+          {{getActionText(action)}}
+        </button>
+      </view>
+
+      <!-- 联系摄影师按钮（始终显示，如果有摄影师信息） -->
+      <button wx:if="{{photographerInfo && order.status !== 'completed' && order.status !== 'cancelled'}}" 
+        class="action-btn contact-btn" 
+        bindtap="contactPhotographer"
+      >
+        💬 联系摄影师
+      </button>
     </view>
   </view>
 </view>

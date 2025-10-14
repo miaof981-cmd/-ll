@@ -147,7 +147,7 @@
 
 .photographer-name {
   font-size: 24rpx;
-  color: #666;
+  color: #667eea;
 }
 
 .order-price {
@@ -156,12 +156,77 @@
   color: #f59e0b;
 }
 
+/* 摄影师作品预览 */
+.order-photos {
+  margin-top: 16rpx;
+  padding: 16rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+}
+
+.photos-preview {
+  display: flex;
+  gap: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.photo-thumb {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  background: #e5e7eb;
+}
+
+.more-photos {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.photos-count {
+  font-size: 24rpx;
+  color: #667eea;
+}
+
+/* 待确认提示 */
+.pending-confirm-tip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 16rpx;
+  background: #fef3c7;
+  border-radius: 8rpx;
+  margin-top: 16rpx;
+}
+
+.pending-confirm-tip .tip-icon {
+  font-size: 28rpx;
+}
+
+.pending-confirm-tip .tip-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: #92400e;
+}
+
 /* 订单操作 */
 .order-actions {
-  display: flex;
-  gap: 12rpx;
   padding-top: 20rpx;
   border-top: 1rpx solid #f0f0f0;
+  margin-top: 16rpx;
+}
+
+.confirm-actions-inline,
+.normal-actions {
+  display: flex;
+  gap: 12rpx;
   justify-content: flex-end;
 }
 
@@ -170,6 +235,16 @@
   border-radius: 24rpx;
   font-size: 26rpx;
   font-weight: 500;
+}
+
+.reject-action {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.confirm-action {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
 }
 
 .action-pay {

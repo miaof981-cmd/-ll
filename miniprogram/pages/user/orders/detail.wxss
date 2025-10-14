@@ -58,6 +58,15 @@
   margin-bottom: 24rpx;
   padding-bottom: 16rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.photo-count {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 400;
 }
 
 /* 活动信息 */
@@ -189,52 +198,119 @@
   color: #999;
 }
 
+/* 照片网格 */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.photo-item {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+  background: #f5f5f5;
+}
+
+/* 确认提示 */
+.confirm-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  padding: 20rpx;
+  background: #fef3c7;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #f59e0b;
+}
+
+.tip-icon {
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+.tip-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: #92400e;
+  line-height: 1.6;
+}
+
+/* 拒绝原因 */
+.reject-reason {
+  background: #fef2f2;
+  border-radius: 8rpx;
+  padding: 20rpx !important;
+  margin-top: 8rpx;
+}
+
+.reject-reason .label {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.reject-reason .value {
+  color: #dc2626;
+  max-width: 100%;
+  text-align: left;
+  margin-top: 8rpx;
+  line-height: 1.6;
+}
+
 /* 操作栏 */
 .action-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 24rpx 32rpx;
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   background: white;
   border-top: 1rpx solid #eee;
-  display: flex;
-  gap: 16rpx;
   box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.05);
 }
 
-.action-button {
+.confirm-actions,
+.other-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.action-btn {
   flex: 1;
-  height: 80rpx;
-  line-height: 80rpx;
-  text-align: center;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-  font-weight: 500;
+  height: 88rpx;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.action-pay {
-  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-  color: white;
+.reject-btn {
+  background: #f5f5f5;
+  color: #666;
 }
 
-.action-cancel {
-  background: #f3f4f6;
-  color: #6b7280;
-}
-
-.action-contact {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.action-after_sale {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-}
-
-.action-evaluate {
+.confirm-btn {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.secondary-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.contact-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  margin-top: 16rpx;
 }
 

@@ -210,6 +210,70 @@ Page({
     });
   },
 
+  // 确认订单（从列表快速确认）
+  async confirmOrder(e) {
+    const { id } = e.currentTarget.dataset;
+    
+    const res = await wx.showModal({
+      title: '确认收货',
+      content: '确认对摄影师的作品满意吗？',
+      confirmText: '确认满意',
+      cancelText: '查看详情'
+    });
+
+    if (res.cancel) {
+      // 跳转到详情页查看
+      wx.navigateTo({
+        url: `/pages/user/orders/detail?id=${id}`
+      });
+      return;
+    }
+
+    if (res.confirm) {
+      wx.showLoading({ title: '处理中...' });
+      try {
+        const db = wx.cloud.database();
+        await db.collection('activity_orders').doc(id).update({
+          data: {
+            status: 'completed',
+            confirmedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        });
+
+        wx.hideLoading();
+        wx.showToast({ title: '确认成功', icon: 'success' });
+        this.loadOrders(); // 重新加载订单列表
+      } catch (e) {
+        console.error('确认失败:', e);
+        wx.hideLoading();
+        wx.showToast({ title: '操作失败', icon: 'none' });
+      }
+    }
+  },
+
+  // 拒绝订单（从列表快速拒绝）
+  async rejectOrder(e) {
+    const { id } = e.currentTarget.dataset;
+    
+    // 跳转到详情页进行拒绝（需要填写原因）
+    wx.navigateTo({
+      url: `/pages/user/orders/detail?id=${id}`
+    });
+  },
+
+  // 获取操作文本
+  getActionText(action) {
+    const textMap = {
+      'pay': '立即支付',
+      'cancel': '取消订单',
+      'contact': '联系摄影师',
+      'after_sale': '申请售后',
+      'evaluate': '去评价'
+    };
+    return textMap[action] || action;
+  },
+
   // 更新订单状态
   async updateOrderStatus(orderId, newStatus, remark = '') {
     wx.showLoading({ title: '处理中...' });

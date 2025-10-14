@@ -151,6 +151,116 @@ Page({
     });
   },
 
+  // 预览照片
+  previewPhoto(e) {
+    const { index } = e.currentTarget.dataset;
+    wx.previewImage({
+      urls: this.data.order.photos,
+      current: this.data.order.photos[index]
+    });
+  },
+
+  // 确认作品满意
+  async confirmWork() {
+    const res = await wx.showModal({
+      title: '确认收货',
+      content: '确认对摄影师的作品满意吗？确认后订单将完成。',
+      confirmText: '确认满意',
+      cancelText: '再看看'
+    });
+
+    if (!res.confirm) return;
+
+    wx.showLoading({ title: '处理中...' });
+
+    try {
+      const db = wx.cloud.database();
+      await db.collection('activity_orders').doc(this.data.orderId).update({
+        data: {
+          status: 'completed',
+          confirmedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      });
+
+      wx.hideLoading();
+      wx.showModal({
+        title: '确认成功',
+        content: '感谢您的确认！订单已完成，期待您的评价。',
+        showCancel: false,
+        success: () => {
+          this.loadOrderDetail(this.data.orderId);
+        }
+      });
+    } catch (e) {
+      console.error('确认失败:', e);
+      wx.hideLoading();
+      wx.showToast({ title: '操作失败', icon: 'none' });
+    }
+  },
+
+  // 拒绝作品
+  async rejectWork() {
+    const res = await wx.showModal({
+      title: '拒绝作品',
+      content: '请说明拒绝原因，摄影师将根据您的意见重新拍摄',
+      editable: true,
+      placeholderText: '例如：光线不够、角度不好等',
+      confirmText: '提交',
+      cancelText: '取消'
+    });
+
+    if (!res.confirm) return;
+
+    const reason = res.content?.trim();
+    if (!reason) {
+      wx.showToast({ title: '请输入拒绝原因', icon: 'none' });
+      return;
+    }
+
+    wx.showLoading({ title: '提交中...' });
+
+    try {
+      const db = wx.cloud.database();
+      await db.collection('activity_orders').doc(this.data.orderId).update({
+        data: {
+          status: 'in_progress', // 返回拍摄中状态
+          rejectReason: reason,
+          rejectedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      });
+
+      wx.hideLoading();
+      wx.showModal({
+        title: '已提交',
+        content: '已将您的意见反馈给摄影师，摄影师将重新拍摄。',
+        showCancel: false,
+        success: () => {
+          this.loadOrderDetail(this.data.orderId);
+        }
+      });
+    } catch (e) {
+      console.error('提交失败:', e);
+      wx.hideLoading();
+      wx.showToast({ title: '操作失败', icon: 'none' });
+    }
+  },
+
+  // 获取操作文本
+  getActionText(action) {
+    const textMap = {
+      'pay': '立即支付',
+      'cancel': '取消订单',
+      'contact': '联系摄影师',
+      'after_sale': '申请售后',
+      'evaluate': '去评价',
+      'confirm': '确认收货',
+      'reject': '拒绝作品'
+    };
+    return textMap[action] || action;
+  },
+
   // 更新订单状态
   async updateOrderStatus(newStatus, remark = '') {
     wx.showLoading({ title: '处理中...' });

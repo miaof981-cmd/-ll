@@ -57,25 +57,62 @@
         <view class="order-info">
           <text class="activity-title">{{item.activityInfo ? item.activityInfo.title : '活动已删除'}}</text>
           <text wx:if="{{item.photographerInfo}}" class="photographer-name">
-            摄影师: {{item.photographerInfo.name}}
+            📷 {{item.photographerInfo.name}}
           </text>
           <text class="order-price">¥{{item.totalPrice}}</text>
         </view>
       </view>
 
+      <!-- 摄影师作品预览 -->
+      <view wx:if="{{item.photos && item.photos.length > 0}}" class="order-photos">
+        <view class="photos-preview">
+          <image
+            wx:for="{{item.photos}}"
+            wx:key="index"
+            wx:if="{{index < 3}}"
+            class="photo-thumb"
+            src="{{item}}"
+            mode="aspectFill"
+          ></image>
+          <view wx:if="{{item.photos.length > 3}}" class="more-photos">
+            <text>+{{item.photos.length - 3}}</text>
+          </view>
+        </view>
+        <text class="photos-count">共{{item.photos.length}}张作品</text>
+      </view>
+
+      <!-- 待确认提示 -->
+      <view wx:if="{{item.status === 'pending_confirm'}}" class="pending-confirm-tip">
+        <text class="tip-icon">💡</text>
+        <text class="tip-text">摄影师已提交作品，请查看并确认</text>
+      </view>
+
       <!-- 订单操作 -->
-      <view wx:if="{{item.userActions && item.userActions.length > 0}}" class="order-actions" catchtap>
-        <view
-          wx:for="{{item.userActions}}"
-          wx:key="index"
-          wx:for-item="action"
-          class="action-btn action-{{action}}"
-          bindtap="handleAction"
-          data-id="{{item._id}}"
-          data-action="{{action}}"
-          catchtap
-        >
-          {{action === 'pay' ? '立即支付' : action === 'cancel' ? '取消订单' : action === 'contact' ? '联系摄影师' : action === 'after_sale' ? '申请售后' : action === 'evaluate' ? '评价' : action}}
+      <view class="order-actions" catchtap>
+        <!-- 待确认状态：显示特殊按钮 -->
+        <view wx:if="{{item.status === 'pending_confirm'}}" class="confirm-actions-inline">
+          <view class="action-btn reject-action" bindtap="rejectOrder" data-id="{{item._id}}" catchtap>
+            ❌ 拒绝
+          </view>
+          <view class="action-btn confirm-action" bindtap="confirmOrder" data-id="{{item._id}}" catchtap>
+            ✅ 确认
+          </view>
+        </view>
+        
+        <!-- 其他状态：显示原有按钮 -->
+        <view wx:elif="{{item.userActions && item.userActions.length > 0}}" class="normal-actions">
+          <view
+            wx:for="{{item.userActions}}"
+            wx:key="index"
+            wx:for-item="action"
+            class="action-btn action-{{action}}"
+            bindtap="handleAction"
+            data-id="{{item._id}}"
+            data-action="{{action}}"
+            catchtap
+          >
+            {{getActionText(action)}}
+          </view>
         </view>
       </view>
     </view>
