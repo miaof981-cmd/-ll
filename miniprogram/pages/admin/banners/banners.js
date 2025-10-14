@@ -33,21 +33,41 @@ Page({
         
         wx.showLoading({ title: '上传中...' });
         
-        // 使用云数据库保存
-        const success = await cloudDB.addBanner(tempFilePath);
-        
-        wx.hideLoading();
-        
-        if (success) {
-          wx.showToast({
-            title: '添加成功',
-            icon: 'success'
+        try {
+          // 上传到云存储
+          const timestamp = Date.now();
+          const cloudPath = `banners/${timestamp}_${Math.random().toString(36).slice(2)}.jpg`;
+          
+          const uploadResult = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: tempFilePath
           });
-          this.loadBanners();
-        } else {
+          
+          console.log('✅ 图片上传成功:', uploadResult.fileID);
+          
+          // 保存到云数据库（使用云存储的fileID）
+          const success = await cloudDB.addBanner(uploadResult.fileID);
+          
+          wx.hideLoading();
+          
+          if (success) {
+            wx.showToast({
+              title: '添加成功',
+              icon: 'success'
+            });
+            this.loadBanners();
+          } else {
+            wx.showToast({
+              title: '添加失败',
+              icon: 'error'
+            });
+          }
+        } catch (e) {
+          console.error('❌ 上传失败:', e);
+          wx.hideLoading();
           wx.showToast({
-            title: '添加失败',
-            icon: 'error'
+            title: '上传失败: ' + e.message,
+            icon: 'none'
           });
         }
       }
