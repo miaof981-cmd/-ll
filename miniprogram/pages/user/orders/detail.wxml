@@ -103,9 +103,6 @@
       
       <!-- 活动信息 -->
       <view class="detail-section">
-        <view class="detail-section-header">
-          <text class="detail-section-title">📸 活动信息</text>
-        </view>
         <view wx:if="{{activityInfo}}" class="activity-info-compact" bindtap="viewActivity">
           <image class="activity-thumb" src="{{activityInfo.coverImage}}" mode="aspectFill"></image>
           <view class="activity-text">
@@ -121,9 +118,6 @@
 
       <!-- 摄影师信息 -->
       <view wx:if="{{photographerInfo}}" class="detail-section">
-        <view class="detail-section-header">
-          <text class="detail-section-title">📷 摄影师</text>
-        </view>
         <view class="photographer-info-compact" bindtap="viewPhotographer">
           <image wx:if="{{photographerInfo.avatar}}" class="photographer-avatar-small" src="{{photographerInfo.avatar}}" mode="aspectFill"></image>
           <view wx:else class="photographer-avatar-small placeholder">{{photographerInfo.name.substring(0,1)}}</view>
