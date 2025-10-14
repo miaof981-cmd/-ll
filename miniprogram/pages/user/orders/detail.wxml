@@ -128,5 +128,39 @@
       </button>
     </view>
   </view>
+
+  <!-- 拒绝原因弹窗 -->
+  <view wx:if="{{showRejectModal}}" class="reject-modal">
+    <view class="modal-mask" bindtap="closeRejectModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">拒绝作品</text>
+        <view class="close-btn" bindtap="closeRejectModal">✕</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="input-label">请详细说明拒绝原因，摄影师将根据您的意见重新拍摄</view>
+        <textarea 
+          class="reject-textarea"
+          placeholder="例如：光线不够明亮、拍摄角度不太好、背景不够干净等，请尽量详细说明您的要求"
+          value="{{rejectReason}}"
+          bindinput="onRejectReasonInput"
+          maxlength="200"
+          auto-height
+        ></textarea>
+        <view class="char-count">{{rejectReason.length}}/200</view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="closeRejectModal">取消</button>
+        <button class="modal-btn submit-btn" bindtap="submitReject">提交</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 水印预览遮罩层（未确认时） -->
+  <view wx:if="{{order.status === 'pending_confirm'}}" class="watermark-overlay" hidden>
+    <canvas canvas-id="watermarkCanvas" class="watermark-canvas"></canvas>
+  </view>
 </view>
 

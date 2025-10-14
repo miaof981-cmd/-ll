@@ -6,7 +6,9 @@ Page({
     order: null,
     activityInfo: null,
     photographerInfo: null,
-    loading: true
+    loading: true,
+    showRejectModal: false,
+    rejectReason: ''
   },
 
   onLoad(options) {
@@ -152,11 +154,108 @@ Page({
   },
 
   // 预览照片
-  previewPhoto(e) {
+  async previewPhoto(e) {
     const { index } = e.currentTarget.dataset;
-    wx.previewImage({
-      urls: this.data.order.photos,
-      current: this.data.order.photos[index]
+    
+    // 如果订单状态是待确认，添加水印后再预览
+    if (this.data.order.status === 'pending_confirm') {
+      wx.showLoading({ title: '加载中...' });
+      
+      try {
+        const watermarkedImages = await this.addWatermarkToImages(this.data.order.photos);
+        wx.hideLoading();
+        
+        wx.previewImage({
+          urls: watermarkedImages,
+          current: watermarkedImages[index]
+        });
+      } catch (e) {
+        console.error('添加水印失败:', e);
+        wx.hideLoading();
+        // 失败则直接预览原图
+        wx.previewImage({
+          urls: this.data.order.photos,
+          current: this.data.order.photos[index]
+        });
+      }
+    } else {
+      // 已确认，直接预览
+      wx.previewImage({
+        urls: this.data.order.photos,
+        current: this.data.order.photos[index]
+      });
+    }
+  },
+
+  // 为图片添加水印
+  async addWatermarkToImages(images) {
+    const watermarkedImages = [];
+    
+    for (let i = 0; i < images.length; i++) {
+      try {
+        const watermarked = await this.addWatermark(images[i]);
+        watermarkedImages.push(watermarked);
+      } catch (e) {
+        console.error('添加水印失败:', e);
+        watermarkedImages.push(images[i]); // 失败则使用原图
+      }
+    }
+    
+    return watermarkedImages;
+  },
+
+  // 为单张图片添加水印
+  addWatermark(imageUrl) {
+    return new Promise((resolve, reject) => {
+      const ctx = wx.createCanvasContext('watermarkCanvas', this);
+      
+      // 下载图片
+      wx.getImageInfo({
+        src: imageUrl,
+        success: (res) => {
+          const imgWidth = res.width;
+          const imgHeight = res.height;
+          
+          // 设置画布大小
+          ctx.canvas.width = imgWidth;
+          ctx.canvas.height = imgHeight;
+          
+          // 绘制原图
+          ctx.drawImage(imageUrl, 0, 0, imgWidth, imgHeight);
+          
+          // 绘制水印
+          const watermarkText = '待确认预览';
+          const fontSize = Math.min(imgWidth, imgHeight) * 0.1; // 根据图片大小调整字体
+          
+          ctx.setFontSize(fontSize);
+          ctx.setGlobalAlpha(0.3);
+          ctx.setTextAlign('center');
+          ctx.setTextBaseline('middle');
+          
+          // 旋转45度
+          ctx.translate(imgWidth / 2, imgHeight / 2);
+          ctx.rotate(-45 * Math.PI / 180);
+          
+          // 绘制多个水印
+          ctx.setFillStyle('#ffffff');
+          ctx.fillText(watermarkText, 0, 0);
+          ctx.fillText(watermarkText, 0, -imgHeight * 0.3);
+          ctx.fillText(watermarkText, 0, imgHeight * 0.3);
+          
+          ctx.draw(false, () => {
+            setTimeout(() => {
+              wx.canvasToTempFilePath({
+                canvasId: 'watermarkCanvas',
+                success: (result) => {
+                  resolve(result.tempFilePath);
+                },
+                fail: reject
+              }, this);
+            }, 500);
+          });
+        },
+        fail: reject
+      });
     });
   },
 
@@ -201,20 +300,39 @@ Page({
 
   // 拒绝作品
   async rejectWork() {
-    const res = await wx.showModal({
-      title: '拒绝作品',
-      content: '请说明拒绝原因，摄影师将根据您的意见重新拍摄',
-      editable: true,
-      placeholderText: '例如：光线不够、角度不好等',
-      confirmText: '提交',
-      cancelText: '取消'
+    // 跳转到拒绝原因填写页面（使用页面路由传递数据）
+    this.setData({
+      showRejectModal: true,
+      rejectReason: ''
     });
+  },
 
-    if (!res.confirm) return;
+  // 关闭拒绝弹窗
+  closeRejectModal() {
+    this.setData({
+      showRejectModal: false,
+      rejectReason: ''
+    });
+  },
 
-    const reason = res.content?.trim();
+  // 输入拒绝原因
+  onRejectReasonInput(e) {
+    this.setData({
+      rejectReason: e.detail.value
+    });
+  },
+
+  // 提交拒绝
+  async submitReject() {
+    const reason = this.data.rejectReason?.trim();
+    
     if (!reason) {
       wx.showToast({ title: '请输入拒绝原因', icon: 'none' });
+      return;
+    }
+
+    if (reason.length < 5) {
+      wx.showToast({ title: '请详细说明原因（至少5个字）', icon: 'none' });
       return;
     }
 
@@ -232,6 +350,12 @@ Page({
       });
 
       wx.hideLoading();
+      
+      this.setData({
+        showRejectModal: false,
+        rejectReason: ''
+      });
+
       wx.showModal({
         title: '已提交',
         content: '已将您的意见反馈给摄影师，摄影师将重新拍摄。',
