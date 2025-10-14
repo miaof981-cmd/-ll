@@ -283,6 +283,64 @@ async function getAnnouncements() {
   }
 }
 
+/**
+ * 添加公告
+ */
+async function saveAnnouncement(announcement) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.saveAnnouncement(announcement);
+  }
+  
+  try {
+    const db = getDB();
+    
+    if (announcement._id) {
+      // 更新
+      await db.collection('announcements').doc(announcement._id).update({
+        data: announcement
+      });
+      console.log('✅ 云端更新公告成功');
+    } else {
+      // 新增
+      const res = await db.collection('announcements').add({
+        data: {
+          ...announcement,
+          createdAt: new Date().toISOString()
+        }
+      });
+      announcement._id = res._id;
+      console.log('✅ 云端添加公告成功');
+    }
+    
+    return announcement;
+  } catch (e) {
+    console.error('❌ 保存公告失败:', e);
+    const storage = require('./storage.js');
+    return storage.saveAnnouncement(announcement);
+  }
+}
+
+/**
+ * 删除公告
+ */
+async function deleteAnnouncement(id) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.deleteAnnouncement(id);
+  }
+  
+  try {
+    const db = getDB();
+    await db.collection('announcements').doc(id).remove();
+    console.log('✅ 云端删除公告成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 删除公告失败:', e);
+    return false;
+  }
+}
+
 // ==================== 轮播图管理 ====================
 
 /**
@@ -308,6 +366,53 @@ async function getBanners() {
   }
 }
 
+/**
+ * 添加轮播图
+ */
+async function addBanner(imageUrl) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.addBanner(imageUrl);
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection('banners').add({
+      data: {
+        imageUrl: imageUrl,
+        order: Date.now(),
+        createdAt: new Date().toISOString()
+      }
+    });
+    console.log('✅ 云端添加轮播图成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 添加轮播图失败:', e);
+    const storage = require('./storage.js');
+    return storage.addBanner(imageUrl);
+  }
+}
+
+/**
+ * 删除轮播图
+ */
+async function deleteBanner(id) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.deleteBanner(id);
+  }
+  
+  try {
+    const db = getDB();
+    await db.collection('banners').doc(id).remove();
+    console.log('✅ 云端删除轮播图成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 删除轮播图失败:', e);
+    return false;
+  }
+}
+
 // ==================== 导出接口 ====================
 
 module.exports = {
@@ -330,8 +435,12 @@ module.exports = {
   
   // 公告
   getAnnouncements,
+  saveAnnouncement,
+  deleteAnnouncement,
   
   // 轮播图
-  getBanners
+  getBanners,
+  addBanner,
+  deleteBanner
 };
 
