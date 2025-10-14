@@ -7,7 +7,7 @@
       <input 
         class="search-input"
         type="text" 
-        placeholder="搜索管理员姓名"
+        placeholder="搜索管理员"
         value="{{searchKeyword}}"
         bindinput="onSearchInput"
         bindconfirm="onSearch"
@@ -18,7 +18,6 @@
     <!-- 添加按钮 -->
     <view class="add-btn" bindtap="addAdmin">
       <text class="add-icon">+</text>
-      <text>添加</text>
     </view>
   </view>
 
