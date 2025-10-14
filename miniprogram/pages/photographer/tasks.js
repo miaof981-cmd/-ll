@@ -4,12 +4,12 @@ Page({
     photographerInfo: null,
     orders: [],
     stats: {
-      pending: 0,
-      inProgress: 0,
-      completed: 0,
+      notUploaded: 0,      // 未上传作品
+      uploaded: 0,          // 已上传待确认
+      confirmed: 0,         // 已确认完成
       total: 0
     },
-    statusFilter: 'all',
+    statusFilter: 'all',  // all, not_uploaded, uploaded, confirmed
     loading: false
   },
 
@@ -87,30 +87,62 @@ Page({
       const db = wx.cloud.database();
       const _ = db.command;
 
-      // 构建查询条件
-      let where = {
-        photographerId: this.data.photographerInfo._id
-      };
-
-      if (this.data.statusFilter !== 'all') {
-        where.status = this.data.statusFilter;
-      }
-
-      const { data: orders } = await db.collection('activity_orders')
-        .where(where)
+      // 查询所有订单（排除已取消和已退款的）
+      const { data: allOrders } = await db.collection('activity_orders')
+        .where({
+          photographerId: this.data.photographerInfo._id,
+          status: _.nin(['cancelled', 'refunded'])
+        })
         .orderBy('createdAt', 'desc')
         .get();
 
+      // 根据筛选条件过滤订单
+      let orders = allOrders;
+      if (this.data.statusFilter === 'not_uploaded') {
+        // 未上传作品：进行中且没有照片
+        orders = allOrders.filter(o => 
+          o.status === 'in_progress' && (!o.photos || o.photos.length === 0)
+        );
+      } else if (this.data.statusFilter === 'uploaded') {
+        // 已上传待确认：有照片但还未完成
+        orders = allOrders.filter(o => 
+          o.status === 'pending_confirm' || (o.status === 'in_progress' && o.photos && o.photos.length > 0)
+        );
+      } else if (this.data.statusFilter === 'confirmed') {
+        // 已确认完成
+        orders = allOrders.filter(o => o.status === 'completed');
+      }
+
       // 计算统计数据
       const stats = {
-        pending: orders.filter(o => o.status === 'pending_payment').length,
-        inProgress: orders.filter(o => o.status === 'in_progress').length,
-        completed: orders.filter(o => o.status === 'completed').length,
-        total: orders.length
+        notUploaded: allOrders.filter(o => 
+          o.status === 'in_progress' && (!o.photos || o.photos.length === 0)
+        ).length,
+        uploaded: allOrders.filter(o => 
+          o.status === 'pending_confirm' || (o.status === 'in_progress' && o.photos && o.photos.length > 0)
+        ).length,
+        confirmed: allOrders.filter(o => o.status === 'completed').length,
+        total: allOrders.length
       };
 
+      // 添加订单的时间信息
+      const ordersWithTime = orders.map(order => {
+        const daysAgo = this.getDaysAgo(order.createdAt);
+        const isUrgent = daysAgo >= 2; // 2天以上算紧急
+        const hasPhotos = order.photos && order.photos.length > 0;
+        
+        return {
+          ...order,
+          daysAgo,
+          isUrgent,
+          hasPhotos,
+          photoCount: order.photos ? order.photos.length : 0,
+          timeText: this.getTimeText(order.createdAt)
+        };
+      });
+
       this.setData({
-        orders,
+        orders: ordersWithTime,
         stats,
         loading: false
       });
@@ -140,43 +172,31 @@ Page({
     });
   },
 
-  // 上传作品
-  uploadWork(e) {
-    const orderId = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/photographer/upload?orderId=${orderId}`
-    });
-  },
-
   // 刷新
   onRefresh() {
     this.loadOrders();
   },
 
-  // 获取状态显示文本
-  getStatusText(status) {
-    const statusMap = {
-      'pending_payment': '待支付',
-      'in_progress': '进行中',
-      'completed': '已完成',
-      'after_sale': '售后中',
-      'refunded': '已退款',
-      'cancelled': '已取消'
-    };
-    return statusMap[status] || status;
+  // 计算距离现在多少天
+  getDaysAgo(dateStr) {
+    if (!dateStr) return 0;
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
   },
 
-  // 获取状态样式类
-  getStatusClass(status) {
-    const classMap = {
-      'pending_payment': 'pending',
-      'in_progress': 'processing',
-      'completed': 'completed',
-      'after_sale': 'aftersale',
-      'refunded': 'refunded',
-      'cancelled': 'cancelled'
-    };
-    return classMap[status] || '';
+  // 获取时间显示文本
+  getTimeText(dateStr) {
+    if (!dateStr) return '';
+    const daysAgo = this.getDaysAgo(dateStr);
+    
+    if (daysAgo === 0) return '今天下单';
+    if (daysAgo === 1) return '昨天下单';
+    if (daysAgo < 7) return `${daysAgo}天前下单`;
+    
+    const date = new Date(dateStr);
+    return `${date.getMonth() + 1}月${date.getDate()}日下单`;
   }
 });
 

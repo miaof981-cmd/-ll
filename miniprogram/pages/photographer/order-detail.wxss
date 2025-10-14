@@ -1,0 +1,288 @@
+/* pages/photographer/order-detail.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 120rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 120rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.content {
+  padding: 24rpx;
+}
+
+/* 卡片通用样式 */
+.order-info-card,
+.student-card,
+.reference-card,
+.remark-card,
+.uploaded-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.card-header .title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.card-header .subtitle {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 订单状态 */
+.order-status {
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.order-status.in_progress {
+  background: #dbeafe;
+  color: #3b82f6;
+}
+
+.order-status.pending_confirm {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.order-status.completed {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+/* 信息行 */
+.info-row {
+  display: flex;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+}
+
+.info-row .label {
+  color: #999;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+
+.info-row .value {
+  flex: 1;
+  color: #333;
+  word-break: break-all;
+}
+
+/* 学生信息 */
+.student-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24rpx;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  width: calc(50% - 12rpx);
+  font-size: 28rpx;
+}
+
+.detail-item .label {
+  color: #999;
+  margin-right: 8rpx;
+}
+
+.detail-item .value {
+  color: #333;
+  font-weight: 500;
+}
+
+/* 照片网格 */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.photo-item {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+  background: #f5f5f5;
+}
+
+/* 备注信息 */
+.remark-text {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* 上传区域 */
+.upload-area {
+  min-height: 200rpx;
+}
+
+.upload-item {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+}
+
+.upload-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+}
+
+.delete-btn {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background: #ef4444;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 8rpx rgba(239, 68, 68, 0.3);
+}
+
+.upload-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200rpx;
+  background: #f5f5f5;
+  border: 2rpx dashed #d1d5db;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.upload-btn:active {
+  background: #e5e7eb;
+}
+
+.upload-icon {
+  font-size: 64rpx;
+  color: #9ca3af;
+  margin-bottom: 8rpx;
+}
+
+.upload-text {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.empty-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+/* 操作栏 */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 24rpx;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 24rpx;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 28rpx 0;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.action-btn.primary[disabled] {
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+.action-btn.secondary {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.status-tip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 0;
+  background: #fef3c7;
+  border-radius: 16rpx;
+}
+
+.status-tip.success {
+  background: #d1fae5;
+}
+
+.tip-icon {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+}
+
+.tip-text {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #666;
+}
+

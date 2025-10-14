@@ -31,7 +31,8 @@
     "pages/admin/orders/detail",
     "pages/user/orders/orders",
     "pages/user/orders/detail",
-    "pages/photographer/tasks"
+    "pages/photographer/tasks",
+    "pages/photographer/order-detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

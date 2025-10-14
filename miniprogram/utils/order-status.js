@@ -3,6 +3,7 @@ const ORDER_STATUS = {
   PENDING_PAYMENT: 'pending_payment',      // 待支付
   PAID: 'paid',                            // 已支付
   IN_PROGRESS: 'in_progress',              // 进行中（拍摄中）
+  PENDING_CONFIRM: 'pending_confirm',      // 待用户确认
   COMPLETED: 'completed',                  // 已完成
   AFTER_SALE: 'after_sale',                // 售后中
   REFUNDED: 'refunded',                    // 已退款
@@ -14,6 +15,7 @@ const STATUS_TEXT = {
   [ORDER_STATUS.PENDING_PAYMENT]: '待支付',
   [ORDER_STATUS.PAID]: '已支付',
   [ORDER_STATUS.IN_PROGRESS]: '进行中',
+  [ORDER_STATUS.PENDING_CONFIRM]: '待确认',
   [ORDER_STATUS.COMPLETED]: '已完成',
   [ORDER_STATUS.AFTER_SALE]: '售后中',
   [ORDER_STATUS.REFUNDED]: '已退款',
@@ -25,6 +27,7 @@ const STATUS_COLOR = {
   [ORDER_STATUS.PENDING_PAYMENT]: '#f59e0b',   // 橙色
   [ORDER_STATUS.PAID]: '#3b82f6',              // 蓝色
   [ORDER_STATUS.IN_PROGRESS]: '#8b5cf6',       // 紫色
+  [ORDER_STATUS.PENDING_CONFIRM]: '#f59e0b',   // 橙色
   [ORDER_STATUS.COMPLETED]: '#10b981',         // 绿色
   [ORDER_STATUS.AFTER_SALE]: '#ef4444',        // 红色
   [ORDER_STATUS.REFUNDED]: '#6b7280',          // 灰色
@@ -36,6 +39,7 @@ const STATUS_ICON = {
   [ORDER_STATUS.PENDING_PAYMENT]: '💰',
   [ORDER_STATUS.PAID]: '✅',
   [ORDER_STATUS.IN_PROGRESS]: '📸',
+  [ORDER_STATUS.PENDING_CONFIRM]: '⏳',
   [ORDER_STATUS.COMPLETED]: '🎉',
   [ORDER_STATUS.AFTER_SALE]: '🔧',
   [ORDER_STATUS.REFUNDED]: '💸',
@@ -47,6 +51,7 @@ const USER_ACTIONS = {
   [ORDER_STATUS.PENDING_PAYMENT]: ['pay', 'cancel'],           // 支付、取消
   [ORDER_STATUS.PAID]: ['contact'],                            // 联系摄影师
   [ORDER_STATUS.IN_PROGRESS]: ['contact', 'after_sale'],       // 联系摄影师、申请售后
+  [ORDER_STATUS.PENDING_CONFIRM]: ['confirm', 'reject'],       // 确认收货、拒绝
   [ORDER_STATUS.COMPLETED]: ['evaluate', 'after_sale'],        // 评价、申请售后
   [ORDER_STATUS.AFTER_SALE]: ['contact'],                      // 联系客服
   [ORDER_STATUS.REFUNDED]: [],                                 // 无操作
@@ -58,6 +63,7 @@ const ADMIN_ACTIONS = {
   [ORDER_STATUS.PENDING_PAYMENT]: ['cancel'],                  // 取消订单
   [ORDER_STATUS.PAID]: ['start', 'refund'],                    // 开始拍摄、退款
   [ORDER_STATUS.IN_PROGRESS]: ['complete', 'refund'],          // 标记完成、退款
+  [ORDER_STATUS.PENDING_CONFIRM]: ['force_complete'],          // 强制完成
   [ORDER_STATUS.COMPLETED]: ['refund'],                        // 退款
   [ORDER_STATUS.AFTER_SALE]: ['refund', 'reject'],             // 同意退款、拒绝售后
   [ORDER_STATUS.REFUNDED]: [],                                 // 无操作
@@ -96,10 +102,12 @@ const ACTION_TEXT = {
   contact: '联系摄影师',
   after_sale: '申请售后',
   evaluate: '评价',
+  confirm: '确认收货',
+  reject: '拒绝作品',
   start: '开始拍摄',
   complete: '标记完成',
-  refund: '同意退款',
-  reject: '拒绝售后'
+  force_complete: '强制完成',
+  refund: '同意退款'
 };
 
 function getActionText(action) {

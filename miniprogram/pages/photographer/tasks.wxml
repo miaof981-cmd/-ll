@@ -11,16 +11,16 @@
 
   <!-- 统计卡片 -->
   <view class="stats-container">
-    <view class="stat-item">
-      <text class="stat-value">{{stats.pending}}</text>
-      <text class="stat-label">待接单</text>
+    <view class="stat-item urgent">
+      <text class="stat-value">{{stats.notUploaded}}</text>
+      <text class="stat-label">待上传</text>
     </view>
     <view class="stat-item">
-      <text class="stat-value processing">{{stats.inProgress}}</text>
-      <text class="stat-label">进行中</text>
+      <text class="stat-value processing">{{stats.uploaded}}</text>
+      <text class="stat-label">待确认</text>
     </view>
     <view class="stat-item">
-      <text class="stat-value completed">{{stats.completed}}</text>
+      <text class="stat-value completed">{{stats.confirmed}}</text>
       <text class="stat-label">已完成</text>
     </view>
     <view class="stat-item">
@@ -36,28 +36,28 @@
       bindtap="onStatusFilterChange" 
       data-status="all"
     >
-      全部
+      全部订单
     </view>
     <view 
-      class="filter-tab {{statusFilter === 'pending_payment' ? 'active' : ''}}" 
+      class="filter-tab {{statusFilter === 'not_uploaded' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
-      data-status="pending_payment"
+      data-status="not_uploaded"
     >
-      待支付
+      🔥 待上传
     </view>
     <view 
-      class="filter-tab {{statusFilter === 'in_progress' ? 'active' : ''}}" 
+      class="filter-tab {{statusFilter === 'uploaded' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
-      data-status="in_progress"
+      data-status="uploaded"
     >
-      进行中
+      ⏳ 待确认
     </view>
     <view 
-      class="filter-tab {{statusFilter === 'completed' ? 'active' : ''}}" 
+      class="filter-tab {{statusFilter === 'confirmed' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
-      data-status="completed"
+      data-status="confirmed"
     >
-      已完成
+      ✅ 已完成
     </view>
   </view>
 
@@ -76,44 +76,51 @@
       <view 
         wx:for="{{orders}}" 
         wx:key="_id" 
-        class="order-card"
+        class="order-card {{item.isUrgent ? 'urgent' : ''}}"
         bindtap="viewOrderDetail"
         data-id="{{item._id}}"
       >
+        <!-- 紧急标签 -->
+        <view wx:if="{{item.isUrgent && !item.hasPhotos}}" class="urgent-tag">
+          <text>🔥 紧急</text>
+        </view>
+
         <!-- 订单头部 -->
         <view class="order-header">
-          <text class="order-id">订单 #{{item._id.slice(-8)}}</text>
-          <view class="status-badge {{getStatusClass(item.status)}}">
-            {{getStatusText(item.status)}}
+          <view class="header-left">
+            <text class="student-name">{{item.studentName}}</text>
+            <text class="activity-name">{{item.activityName || '证件照拍摄'}}</text>
+          </view>
+          <view class="header-right">
+            <text class="time-text">{{item.timeText}}</text>
           </view>
         </view>
 
-        <!-- 学生信息 -->
-        <view class="order-body">
-          <view class="student-info">
-            <text class="label">学生：</text>
-            <text class="value">{{item.studentName}}</text>
+        <!-- 订单状态 -->
+        <view class="order-status-row">
+          <view class="status-item">
+            <text class="status-icon">📷</text>
+            <text class="status-text">
+              {{item.hasPhotos ? '已上传 ' + item.photoCount + ' 张' : '未上传作品'}}
+            </text>
           </view>
-          <view class="activity-info">
-            <text class="label">活动：</text>
-            <text class="value">{{item.activityName || '证件照拍摄'}}</text>
+          <view class="status-item" wx:if="{{item.status === 'pending_confirm'}}">
+            <text class="status-icon">⏳</text>
+            <text class="status-text">等待确认</text>
           </view>
-          <view class="time-info">
-            <text class="label">时间：</text>
-            <text class="value">{{item.createdAt}}</text>
+          <view class="status-item success" wx:if="{{item.status === 'completed'}}">
+            <text class="status-icon">✅</text>
+            <text class="status-text">已完成</text>
           </view>
         </view>
 
-        <!-- 操作按钮 -->
-        <view class="order-actions" wx:if="{{item.status === 'in_progress'}}">
-          <button 
-            class="action-btn primary" 
-            bindtap="uploadWork" 
-            data-id="{{item._id}}"
-            catchtap="uploadWork"
-          >
-            上传作品
-          </button>
+        <!-- 快捷操作 -->
+        <view class="quick-actions">
+          <view class="action-hint">
+            <text wx:if="{{!item.hasPhotos}}">点击进入上传作品 →</text>
+            <text wx:elif="{{item.status === 'pending_confirm'}}">点击查看详情 →</text>
+            <text wx:else>点击查看订单 →</text>
+          </view>
         </view>
       </view>
     </view>

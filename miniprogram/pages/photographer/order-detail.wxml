@@ -1,0 +1,173 @@
+<!--pages/photographer/order-detail.wxml-->
+<view class="container">
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:else class="content">
+    <!-- 订单基本信息 -->
+    <view class="order-info-card">
+      <view class="card-header">
+        <text class="title">订单信息</text>
+        <view class="order-status {{order.status}}">
+          <text wx:if="{{order.status === 'in_progress'}}">📸 拍摄中</text>
+          <text wx:elif="{{order.status === 'pending_confirm'}}">⏳ 待确认</text>
+          <text wx:elif="{{order.status === 'completed'}}">✅ 已完成</text>
+          <text wx:else>{{order.status}}</text>
+        </view>
+      </view>
+
+      <view class="info-row">
+        <text class="label">订单号：</text>
+        <text class="value">{{order._id}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="label">下单时间：</text>
+        <text class="value">{{order.createdAt}}</text>
+      </view>
+
+      <view class="info-row" wx:if="{{order.submittedAt}}">
+        <text class="label">提交时间：</text>
+        <text class="value">{{order.submittedAt}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="label">活动名称：</text>
+        <text class="value">{{activity.name || '证件照拍摄'}}</text>
+      </view>
+    </view>
+
+    <!-- 学生信息 -->
+    <view class="student-card">
+      <view class="card-header">
+        <text class="title">学生信息</text>
+      </view>
+
+      <view class="student-details">
+        <view class="detail-item">
+          <text class="label">姓名：</text>
+          <text class="value">{{order.studentName}}</text>
+        </view>
+
+        <view class="detail-item" wx:if="{{student}}">
+          <text class="label">性别：</text>
+          <text class="value">{{student.gender === 'male' ? '男' : '女'}}</text>
+        </view>
+
+        <view class="detail-item" wx:if="{{student}}">
+          <text class="label">年龄：</text>
+          <text class="value">{{student.age}}岁</text>
+        </view>
+
+        <view class="detail-item" wx:if="{{student}}">
+          <text class="label">班级：</text>
+          <text class="value">{{student.grade}} {{student.class}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 参考照片（生活照） -->
+    <view class="reference-card" wx:if="{{order.lifePhotos && order.lifePhotos.length > 0}}">
+      <view class="card-header">
+        <text class="title">📷 参考照片（生活照）</text>
+        <text class="subtitle">共{{order.lifePhotos.length}}张</text>
+      </view>
+
+      <view class="photo-grid">
+        <image
+          wx:for="{{order.lifePhotos}}"
+          wx:key="index"
+          class="photo-item"
+          src="{{item}}"
+          mode="aspectFill"
+          bindtap="previewLifePhoto"
+          data-index="{{index}}"
+        ></image>
+      </view>
+    </view>
+
+    <!-- 备注信息 -->
+    <view class="remark-card" wx:if="{{order.remark}}">
+      <view class="card-header">
+        <text class="title">📝 备注与要求</text>
+      </view>
+      <text class="remark-text">{{order.remark}}</text>
+    </view>
+
+    <!-- 已上传作品 -->
+    <view class="uploaded-card">
+      <view class="card-header">
+        <text class="title">🎨 我的作品</text>
+        <text class="subtitle">{{uploadedPhotos.length}}/20</text>
+      </view>
+
+      <view class="upload-area">
+        <!-- 已上传的照片 -->
+        <view class="photo-grid">
+          <view
+            wx:for="{{uploadedPhotos}}"
+            wx:key="index"
+            class="upload-item"
+          >
+            <image
+              class="upload-photo"
+              src="{{item}}"
+              mode="aspectFill"
+              bindtap="previewUploadedPhoto"
+              data-index="{{index}}"
+            ></image>
+            <view class="delete-btn" bindtap="deletePhoto" data-index="{{index}}">
+              <text>✕</text>
+            </view>
+          </view>
+
+          <!-- 上传按钮 -->
+          <view
+            wx:if="{{uploadedPhotos.length < 20 && order.status === 'in_progress'}}"
+            class="upload-btn"
+            bindtap="uploadPhotos"
+          >
+            <text class="upload-icon">+</text>
+            <text class="upload-text">上传照片</text>
+          </view>
+        </view>
+
+        <view wx:if="{{uploadedPhotos.length === 0}}" class="empty-upload">
+          <text class="empty-icon">📸</text>
+          <text class="empty-text">还没有上传作品</text>
+          <text class="empty-hint">点击上方"+"上传照片</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-bar" wx:if="{{order.status === 'in_progress'}}">
+      <button class="action-btn secondary" bindtap="contactUser">
+        <text>💬 联系用户</text>
+      </button>
+      <button 
+        class="action-btn primary" 
+        bindtap="submitWork"
+        disabled="{{uploadedPhotos.length === 0}}"
+      >
+        <text>✅ 提交作品</text>
+      </button>
+    </view>
+
+    <view class="action-bar" wx:elif="{{order.status === 'pending_confirm'}}">
+      <view class="status-tip">
+        <text class="tip-icon">⏳</text>
+        <text class="tip-text">等待用户确认中...</text>
+      </view>
+    </view>
+
+    <view class="action-bar" wx:elif="{{order.status === 'completed'}}">
+      <view class="status-tip success">
+        <text class="tip-icon">✅</text>
+        <text class="tip-text">订单已完成</text>
+      </view>
+    </view>
+  </view>
+</view>
+
