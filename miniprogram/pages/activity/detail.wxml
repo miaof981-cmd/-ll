@@ -1,0 +1,99 @@
+<!--pages/activity/detail.wxml-->
+<view class="activity-detail-page">
+  <view wx:if="{{!loading && activity}}">
+    <!-- 图片轮播 -->
+    <view class="image-gallery">
+      <swiper 
+        class="gallery-swiper" 
+        indicator-dots="{{true}}"
+        indicator-color="rgba(255,255,255,0.5)"
+        indicator-active-color="#ffffff"
+        autoplay="{{false}}"
+        bindchange="onSwiperChange"
+        bindtap="previewImages"
+      >
+        <swiper-item wx:for="{{activity.images && activity.images.length > 0 ? activity.images : [activity.coverImage]}}" wx:key="index">
+          <image class="gallery-image" src="{{item}}" mode="aspectFill" />
+        </swiper-item>
+      </swiper>
+      <view class="gallery-indicator">{{currentImageIndex + 1}}/{{activity.images && activity.images.length > 0 ? activity.images.length : 1}}</view>
+    </view>
+
+    <!-- 活动信息 -->
+    <view class="activity-header">
+      <view class="header-top">
+        <text class="activity-title">{{activity.title}}</text>
+        <view class="activity-tags">
+          <view wx:if="{{activity.isHot}}" class="tag tag-hot">🔥 热门</view>
+          <view wx:if="{{activity.isNew}}" class="tag tag-new">🆕 新品</view>
+        </view>
+      </view>
+      <text class="activity-subtitle">{{activity.subtitle}}</text>
+      
+      <view class="price-section">
+        <view class="price-main">
+          <text class="price-symbol">¥</text>
+          <text class="price-value">{{activity.price}}</text>
+        </view>
+        <view wx:if="{{activity.originalPrice > activity.price}}" class="price-info">
+          <text class="price-original">原价 ¥{{activity.originalPrice}}</text>
+        </view>
+      </view>
+
+      <view class="activity-stats">
+        <view class="stat-item">
+          <text class="stat-icon">👁</text>
+          <text class="stat-text">{{activity.viewCount || 0}}人浏览</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">🎉</text>
+          <text class="stat-text">{{activity.orderCount || 0}}人参加</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 活动介绍 -->
+    <view class="content-section">
+      <view class="section-title">📝 活动介绍</view>
+      <view class="section-content">
+        <text class="intro-text">{{activity.description}}</text>
+      </view>
+    </view>
+
+    <!-- 详细说明 -->
+    <view wx:if="{{activity.details}}" class="content-section">
+      <view class="section-title">📋 详细说明</view>
+      <view class="section-content">
+        <text class="details-text">{{activity.details}}</text>
+      </view>
+    </view>
+
+    <!-- 可选摄影师 -->
+    <view wx:if="{{photographers.length > 0}}" class="content-section">
+      <view class="section-title">👨‍🎨 可选摄影师（{{photographers.length}}位）</view>
+      <scroll-view class="photographers-scroll" scroll-x="true">
+        <view wx:for="{{photographers}}" wx:key="_id" class="photographer-item">
+          <image class="photographer-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+          <text class="photographer-name">{{item.name}}</text>
+          <view class="photographer-rating">
+            <text class="rating-star">⭐</text>
+            <text class="rating-value">{{item.rating || 5.0}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="bottom-bar">
+      <button class="btn-join" bindtap="joinActivity">
+        立即参加 ¥{{activity.price}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-wrapper">
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>
+

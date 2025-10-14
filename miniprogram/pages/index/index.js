@@ -5,9 +5,20 @@ Page({
   data: {
     announcements: [],
     banners: [],
-    bannerHeight: 400, // 默认高度
-    bannerHeights: {}, // 存储每张图片的高度
-    currentBanner: 0 // 当前轮播图索引
+    bannerHeight: 400,
+    bannerHeights: {},
+    currentBanner: 0,
+    
+    // 活动相关数据
+    activities: [],
+    activeCategory: 'all',
+    categories: [
+      { id: 'all', name: '全部' },
+      { id: '证件照', name: '证件照' },
+      { id: '校园活动', name: '校园活动' },
+      { id: '毕业照', name: '毕业照' },
+      { id: '节日活动', name: '节日活动' }
+    ]
   },
 
   onLoad() {
@@ -27,13 +38,46 @@ Page({
     // 从云数据库获取数据
     const banners = await cloudDB.getBanners();
     const announcements = await cloudDB.getAnnouncements();
+    const activities = await cloudDB.getActivities({ status: 'active' });
 
     console.log('✅ 轮播图数量:', banners.length);
     console.log('✅ 公告数量:', announcements.length);
+    console.log('✅ 活动数量:', activities.length);
 
     this.setData({
       banners,
-      announcements: announcements.length > 0 ? announcements : []
+      announcements: announcements.length > 0 ? announcements : [],
+      activities: activities || []
+    });
+  },
+
+  // 切换分类
+  switchCategory(e) {
+    const category = e.currentTarget.dataset.category;
+    this.setData({ activeCategory: category });
+    this.loadActivities(category);
+  },
+
+  // 加载活动（按分类）
+  async loadActivities(category) {
+    wx.showLoading({ title: '加载中...' });
+    
+    const options = { status: 'active' };
+    if (category !== 'all') {
+      options.category = category;
+    }
+    
+    const activities = await cloudDB.getActivities(options);
+    
+    this.setData({ activities: activities || [] });
+    wx.hideLoading();
+  },
+
+  // 查看活动详情
+  viewActivity(e) {
+    const { id } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/activity/detail?id=${id}`
     });
   },
 

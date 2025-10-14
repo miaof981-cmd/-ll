@@ -1,0 +1,270 @@
+/* pages/activity/detail.wxss */
+.activity-detail-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 140rpx;
+}
+
+/* ==================== 图片轮播 ==================== */
+.image-gallery {
+  position: relative;
+  width: 100%;
+  height: 750rpx;
+  background: #000;
+}
+
+.gallery-swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+}
+
+.gallery-indicator {
+  position: absolute;
+  bottom: 32rpx;
+  right: 32rpx;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 8rpx 20rpx;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+/* ==================== 活动信息 ==================== */
+.activity-header {
+  background: white;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.activity-title {
+  flex: 1;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.4;
+}
+
+.activity-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-left: 16rpx;
+}
+
+.tag {
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tag-hot {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff4d4f 100%);
+  color: white;
+}
+
+.tag-new {
+  background: linear-gradient(135deg, #52c41a 0%, #34c759 100%);
+  color: white;
+}
+
+.activity-subtitle {
+  font-size: 28rpx;
+  color: #999;
+  line-height: 1.6;
+  display: block;
+  margin-bottom: 24rpx;
+}
+
+/* ==================== 价格区域 ==================== */
+.price-section {
+  display: flex;
+  align-items: baseline;
+  gap: 24rpx;
+  padding: 24rpx 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.price-main {
+  display: flex;
+  align-items: baseline;
+}
+
+.price-symbol {
+  font-size: 32rpx;
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.price-value {
+  font-size: 56rpx;
+  color: #ff4d4f;
+  font-weight: 700;
+}
+
+.price-info {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.price-original {
+  font-size: 26rpx;
+  color: #999;
+  text-decoration: line-through;
+}
+
+/* ==================== 统计信息 ==================== */
+.activity-stats {
+  display: flex;
+  gap: 48rpx;
+  margin-top: 24rpx;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.stat-icon {
+  font-size: 28rpx;
+}
+
+.stat-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* ==================== 内容区块 ==================== */
+.content-section {
+  background: white;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+
+.section-content {
+  line-height: 1.8;
+}
+
+.intro-text,
+.details-text {
+  font-size: 28rpx;
+  color: #666;
+  white-space: pre-wrap;
+}
+
+/* ==================== 摄影师列表 ==================== */
+.photographers-scroll {
+  white-space: nowrap;
+  margin-top: 24rpx;
+}
+
+.photographer-item {
+  display: inline-block;
+  width: 180rpx;
+  text-align: center;
+  margin-right: 24rpx;
+  vertical-align: top;
+}
+
+.photographer-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  margin-bottom: 12rpx;
+  border: 4rpx solid #f0f0f0;
+}
+
+.photographer-name {
+  display: block;
+  font-size: 26rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photographer-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+}
+
+.rating-star {
+  font-size: 24rpx;
+}
+
+.rating-value {
+  font-size: 24rpx;
+  color: #faad14;
+  font-weight: 600;
+}
+
+/* ==================== 底部按钮 ==================== */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 20rpx 32rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+.btn-join {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #1a56db 0%, #3b82f6 100%);
+  color: white;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 48rpx;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(26, 86, 219, 0.4);
+}
+
+.btn-join:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* ==================== 加载状态 ==================== */
+.loading-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+

@@ -9,6 +9,8 @@
     "pages/admin/students/students",
     "pages/admin/students/edit",
     "pages/announcement/detail",
+    "pages/activity/detail",
+    "pages/activity/apply",
     "pages/apply/apply",
     "pages/apply/preview",
     "pages/apply/photographer",
