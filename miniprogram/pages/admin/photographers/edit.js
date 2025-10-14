@@ -6,7 +6,9 @@ Page({
     name: '',
     specialty: '',
     description: '',
-    avatar: ''
+    avatar: '',
+    wechatOpenid: '',
+    showOpenidHelp: false
   },
 
   onLoad(options) {
@@ -31,7 +33,8 @@ Page({
           name: photographer.name,
           specialty: photographer.specialty || '',
           description: photographer.description || '',
-          avatar: photographer.avatar || ''
+          avatar: photographer.avatar || '',
+          wechatOpenid: photographer.wechatOpenid || ''
         });
       } else {
         wx.showToast({
@@ -59,6 +62,18 @@ Page({
 
   onDescriptionInput(e) {
     this.setData({ description: e.detail.value });
+  },
+
+  onOpenidInput(e) {
+    this.setData({ wechatOpenid: e.detail.value });
+  },
+
+  showOpenidHelp() {
+    this.setData({ showOpenidHelp: true });
+  },
+
+  hideOpenidHelp() {
+    this.setData({ showOpenidHelp: false });
   },
 
   uploadAvatar() {
@@ -117,7 +132,7 @@ Page({
   },
 
   async save() {
-    const { id, name, specialty, description, avatar } = this.data;
+    const { id, name, specialty, description, avatar, wechatOpenid } = this.data;
 
     if (!name) {
       wx.showToast({
@@ -136,11 +151,42 @@ Page({
         specialty,
         description,
         avatar,
+        wechatOpenid: wechatOpenid || '',
         status: 'available',
         orderCount: 0
       };
 
       const result = await cloudDB.savePhotographer(photographerData);
+
+      // 如果绑定了微信OpenID，同时创建摄影师账号记录
+      if (result && wechatOpenid && wechatOpenid.trim()) {
+        try {
+          const db = wx.cloud.database();
+          
+          // 检查是否已存在
+          const { data: existing } = await db.collection('photographer_accounts')
+            .where({ openid: wechatOpenid.trim() })
+            .get();
+          
+          if (existing.length === 0) {
+            // 添加到摄影师账号表
+            await db.collection('photographer_accounts').add({
+              data: {
+                openid: wechatOpenid.trim(),
+                photographerId: result._id || id,
+                name: name,
+                isActive: true,
+                createdAt: new Date().toISOString()
+              }
+            });
+            console.log('✅ 摄影师账号绑定成功');
+          } else {
+            console.log('ℹ️ 该OpenID已绑定摄影师账号');
+          }
+        } catch (accountErr) {
+          console.error('⚠️ 绑定摄影师账号失败（不影响摄影师保存）:', accountErr);
+        }
+      }
 
       wx.hideLoading();
 
