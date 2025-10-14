@@ -103,7 +103,7 @@
             data-isdefault="{{item.isDefault}}"
             disabled="{{item.isDefault}}"
           >
-            {{item.isDefault ? '不可删除' : '删除'}}
+            {{item.isDefault ? '🔒' : '删除'}}
           </button>
         </view>
       </view>
