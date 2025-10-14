@@ -50,12 +50,14 @@ Page({
     
     try {
       // 从云数据库获取实时统计
-      const [students, photographers, announcements, banners, activities] = await Promise.all([
+      const db = wx.cloud.database();
+      const [students, photographers, announcements, banners, activities, pendingReview] = await Promise.all([
         cloudDB.getStudents(),
         cloudDB.getPhotographers(),
         cloudDB.getAnnouncements(),
         cloudDB.getBanners(),
-        cloudDB.getActivities()
+        cloudDB.getActivities(),
+        db.collection('activity_orders').where({ status: 'pending_review' }).count()
       ]);
 
       const stats = {
@@ -63,7 +65,8 @@ Page({
         totalPhotographers: Array.isArray(photographers) ? photographers.length : 0,
         totalAnnouncements: Array.isArray(announcements) ? announcements.length : 0,
         totalBanners: Array.isArray(banners) ? banners.length : 0,
-        totalActivities: Array.isArray(activities) ? activities.length : 0
+        totalActivities: Array.isArray(activities) ? activities.length : 0,
+        pendingReview: pendingReview.total || 0
       };
 
       console.log('✅ 统计数据:', stats);
@@ -78,7 +81,8 @@ Page({
           totalPhotographers: 0,
           totalAnnouncements: 0,
           totalBanners: 0,
-          totalActivities: 0
+          totalActivities: 0,
+          pendingReview: 0
         }
       });
     }
@@ -130,6 +134,13 @@ Page({
   manageOrders() {
     wx.navigateTo({
       url: '/pages/admin/orders/orders'
+    });
+  },
+
+  // 跳转到待审核页面
+  goToReview() {
+    wx.navigateTo({
+      url: '/pages/admin/review/review'
     });
   },
 

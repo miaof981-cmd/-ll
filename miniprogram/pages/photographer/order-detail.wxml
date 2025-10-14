@@ -90,7 +90,39 @@
       <text class="remark-text">{{order.remark}}</text>
     </view>
 
-    <!-- 已上传作品 -->
+    <!-- 历史提交记录（被拒绝的） -->
+    <view wx:if="{{historyPhotos.length > 0}}" class="history-card">
+      <view class="card-header">
+        <text class="title">📋 历史提交</text>
+        <text class="reject-badge">已拒绝</text>
+      </view>
+      
+      <view wx:if="{{order.adminRejectReason || order.rejectReason}}" class="reject-reason">
+        <text class="reason-label">拒绝原因：</text>
+        <text class="reason-text">{{order.adminRejectReason || order.rejectReason}}</text>
+      </view>
+
+      <view class="photo-grid">
+        <view
+          wx:for="{{historyPhotos}}"
+          wx:key="index"
+          class="upload-item history"
+          bindtap="previewUploadedPhoto"
+          data-index="{{index}}"
+        >
+          <image
+            src="{{item}}"
+            mode="aspectFill"
+            class="photo"
+          />
+          <view class="history-mask">
+            <text>已拒绝</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 当前编辑区 -->
     <view class="uploaded-card">
       <view class="card-header">
         <text class="title">🎨 我的作品</text>

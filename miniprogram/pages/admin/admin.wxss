@@ -79,6 +79,84 @@
   font-weight: 500;
 }
 
+/* ==================== 待审核快捷入口 ==================== */
+.quick-review-section {
+  margin-bottom: var(--spacing-xl);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.review-badge {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c44569 100%);
+  border-radius: 20rpx;
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(238, 90, 111, 0.4);
+}
+
+.badge-icon {
+  font-size: 64rpx;
+  flex-shrink: 0;
+}
+
+.badge-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.badge-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: white;
+}
+
+.badge-desc {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.badge-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 16rpx 24rpx;
+  border-radius: 12rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.count-num {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: white;
+  line-height: 1;
+}
+
+.count-label {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 4rpx;
+}
+
+.badge-arrow {
+  font-size: 48rpx;
+  color: white;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
 /* ==================== 数据统计区 ==================== */
 .stats-section {
   margin-bottom: var(--spacing-xl);

@@ -29,6 +29,7 @@
     "pages/admin/categories/categories",
     "pages/admin/orders/orders",
     "pages/admin/orders/detail",
+    "pages/admin/review/review",
     "pages/user/orders/orders",
     "pages/user/orders/detail",
     "pages/photographer/tasks",

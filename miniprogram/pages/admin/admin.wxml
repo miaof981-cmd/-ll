@@ -16,6 +16,22 @@
     </view>
   </view>
 
+  <!-- 待审核快捷入口 - 醒目展示 -->
+  <view class="quick-review-section" bindtap="goToReview">
+    <view class="review-badge">
+      <text class="badge-icon">🔍</text>
+      <view class="badge-info">
+        <text class="badge-title">待审核作品</text>
+        <text class="badge-desc">快速审核摄影师提交的作品</text>
+      </view>
+      <view class="badge-count">
+        <text class="count-num">{{stats.pendingReview || 0}}</text>
+        <text class="count-label">待审核</text>
+      </view>
+      <view class="badge-arrow">→</view>
+    </view>
+  </view>
+
   <!-- 数据统计卡片 - 可点击跳转 -->
   <view class="stats-section">
     <text class="section-title">📊 数据统计</text>

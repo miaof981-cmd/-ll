@@ -5,7 +5,8 @@ Page({
     order: null,
     activity: null,
     student: null,
-    uploadedPhotos: [], // 已上传的作品
+    uploadedPhotos: [], // 当前编辑区的照片
+    historyPhotos: [], // 历史提交的照片（被拒绝的）
     uploading: false,
     loading: true
   },
@@ -53,11 +54,27 @@ Page({
         }
       }
 
+      // 判断照片放在哪里
+      // 如果订单状态是in_progress且有photos，说明是被拒绝的历史照片
+      // 如果订单状态是pending_review/pending_confirm/completed，photos是已提交的作品
+      let uploadedPhotos = [];
+      let historyPhotos = [];
+      
+      if (order.status === 'in_progress' && order.photos && order.photos.length > 0) {
+        // 被拒绝，照片放到历史记录
+        historyPhotos = order.photos;
+        uploadedPhotos = []; // 当前编辑区为空，可以重新上传
+      } else if (order.photos && order.photos.length > 0) {
+        // 已提交或审核中，照片显示在当前区域
+        uploadedPhotos = order.photos;
+      }
+
       this.setData({
         order,
         activity,
         student,
-        uploadedPhotos: order.photos || [],
+        uploadedPhotos,
+        historyPhotos,
         loading: false
       });
     } catch (e) {
