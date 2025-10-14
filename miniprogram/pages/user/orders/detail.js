@@ -177,10 +177,14 @@ Page({
     const { index } = e.currentTarget.dataset;
     
     console.log('当前订单状态:', this.data.order.status);
-    console.log('是否需要水印:', this.data.order.status === 'pending_confirm');
     
-    // 如果订单状态是待确认，添加水印后再预览
-    if (this.data.order.status === 'pending_confirm') {
+    // 只有订单已完成(completed)、已退款(refunded)或已取消(cancelled)时才显示无水印原图
+    // 其他所有状态（pending_confirm、in_progress等）都需要水印，防止白嫖
+    const needWatermark = !['completed', 'refunded', 'cancelled'].includes(this.data.order.status);
+    
+    console.log('是否需要水印:', needWatermark);
+    
+    if (needWatermark && this.data.order.photos && this.data.order.photos.length > 0) {
       console.log('开始添加水印...');
       wx.showLoading({ title: '添加水印中...' });
       
@@ -207,8 +211,8 @@ Page({
         });
       }
     } else {
-      console.log('订单状态不是pending_confirm，直接预览原图');
-      // 已确认，直接预览
+      console.log('订单已完成/退款/取消，直接预览无水印原图');
+      // 已完成/退款/取消，直接预览无水印原图
       wx.previewImage({
         urls: this.data.order.photos,
         current: this.data.order.photos[index]
