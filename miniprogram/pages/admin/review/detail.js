@@ -7,6 +7,7 @@ Page({
     activity: null,
     photographer: null,
     student: null,
+    historyPhotos: [], // 历史上传的照片（被拒绝的）
     loading: true
   },
 
@@ -61,11 +62,30 @@ Page({
         }
       }
 
+      // 查询历史照片记录（从order_history集合或者从photos字段判断）
+      // 如果当前状态是pending_review但有历史拒绝记录，说明之前上传过
+      let historyPhotos = [];
+      
+      // 尝试从数据库查询该订单的历史记录
+      try {
+        const historyRes = await db.collection('order_photo_history')
+          .where({ orderId: orderId })
+          .orderBy('createdAt', 'desc')
+          .get();
+        
+        if (historyRes.data && historyRes.data.length > 0) {
+          historyPhotos = historyRes.data;
+        }
+      } catch (e) {
+        console.log('查询历史记录失败（可能是集合不存在）:', e);
+      }
+
       this.setData({
         order,
         activity,
         photographer,
         student,
+        historyPhotos,
         loading: false
       });
     } catch (e) {
@@ -92,6 +112,15 @@ Page({
         current: this.data.activity.image
       });
     }
+  },
+
+  // 预览历史照片
+  previewHistoryPhoto(e) {
+    const { photos, index } = e.currentTarget.dataset;
+    wx.previewImage({
+      urls: photos,
+      current: photos[index]
+    });
   },
 
   // 审核通过
@@ -152,12 +181,33 @@ Page({
       wx.showLoading({ title: '处理中...' });
 
       const db = wx.cloud.database();
+      const now = new Date().toISOString();
+
+      // 保存历史记录
+      try {
+        await db.collection('order_photo_history').add({
+          data: {
+            orderId: this.data.orderId,
+            photos: this.data.order.photos || [],
+            rejectType: 'admin',
+            rejectReason: rejectReason,
+            rejectedAt: now,
+            createdAt: now
+          }
+        });
+        console.log('✅ 历史记录已保存');
+      } catch (historyErr) {
+        console.error('⚠️ 保存历史记录失败:', historyErr);
+        // 不影响主流程
+      }
+
+      // 更新订单状态
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
           status: 'in_progress',
           adminRejectReason: rejectReason,
-          adminRejectedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          adminRejectedAt: now,
+          updatedAt: now
         }
       });
 

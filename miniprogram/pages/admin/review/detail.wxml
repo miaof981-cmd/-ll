@@ -5,7 +5,7 @@
 
   <view wx:else>
     <!-- 活动参考信息 -->
-    <view class="reference-section">
+    <view class="reference-section" wx:if="{{activity}}">
       <view class="section-header">
         <text class="section-icon">🎯</text>
         <text class="section-title">活动参考</text>
@@ -14,6 +14,7 @@
       
       <view class="activity-reference">
         <image 
+          wx:if="{{activity.image}}"
           class="activity-cover" 
           src="{{activity.image}}" 
           mode="aspectFill"
@@ -21,7 +22,7 @@
         />
         <view class="activity-details">
           <text class="activity-name">{{activity.name}}</text>
-          <text class="activity-desc">{{activity.description}}</text>
+          <text class="activity-desc" wx:if="{{activity.description}}">{{activity.description}}</text>
           <text class="activity-price">参考价格：¥{{activity.price}}</text>
         </view>
       </view>
@@ -73,8 +74,78 @@
           </view>
         </view>
 
-        <!-- 之前的管理员拒绝记录 -->
-        <view wx:if="{{order.adminRejectedAt}}" class="timeline-item">
+        <!-- 历史记录：管理员驳回或用户拒绝 -->
+        <block wx:for="{{historyPhotos}}" wx:key="index">
+          <!-- 管理员驳回记录 -->
+          <view wx:if="{{item.rejectType === 'admin'}}" class="timeline-item">
+            <view class="timeline-dot reject"></view>
+            <view class="timeline-content">
+              <view class="timeline-header">
+                <text class="timeline-label">🚫 管理员驳回</text>
+                <text class="timeline-time">{{item.rejectedAt}}</text>
+              </view>
+              <view class="reject-reason-box admin">
+                <text class="reject-label">驳回原因：</text>
+                <text class="reject-text">{{item.rejectReason}}</text>
+              </view>
+              <!-- 显示被拒绝的照片 -->
+              <view wx:if="{{item.photos && item.photos.length > 0}}" class="history-photos">
+                <text class="history-label">被拒绝的作品（{{item.photos.length}}张）：</text>
+                <view class="history-photos-grid">
+                  <image 
+                    wx:for="{{item.photos}}" 
+                    wx:for-item="photo" 
+                    wx:for-index="photoIdx"
+                    wx:key="photoIdx"
+                    class="history-photo" 
+                    src="{{photo}}" 
+                    mode="aspectFill"
+                    bindtap="previewHistoryPhoto"
+                    data-photos="{{item.photos}}"
+                    data-index="{{photoIdx}}"
+                  />
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 用户拒绝记录 -->
+          <view wx:elif="{{item.rejectType === 'user'}}" class="timeline-item">
+            <view class="timeline-dot reject"></view>
+            <view class="timeline-content">
+              <view class="timeline-header">
+                <text class="timeline-label">💬 用户要求修改</text>
+                <text class="timeline-time">{{item.rejectedAt}}</text>
+              </view>
+              <view class="reject-reason-box user">
+                <text class="reject-label">拒绝原因：</text>
+                <text class="reject-text">{{item.rejectReason}}</text>
+                <text class="reject-meta">修改次数：{{item.rejectCount || 0}}/3</text>
+              </view>
+              <!-- 显示被拒绝的照片 -->
+              <view wx:if="{{item.photos && item.photos.length > 0}}" class="history-photos">
+                <text class="history-label">被拒绝的作品（{{item.photos.length}}张）：</text>
+                <view class="history-photos-grid">
+                  <image 
+                    wx:for="{{item.photos}}" 
+                    wx:for-item="photo" 
+                    wx:for-index="photoIdx"
+                    wx:key="photoIdx"
+                    class="history-photo" 
+                    src="{{photo}}" 
+                    mode="aspectFill"
+                    bindtap="previewHistoryPhoto"
+                    data-photos="{{item.photos}}"
+                    data-index="{{photoIdx}}"
+                  />
+                </view>
+              </view>
+            </view>
+          </view>
+        </block>
+
+        <!-- 如果没有历史记录，但有当前的拒绝原因，显示当前拒绝 -->
+        <view wx:if="{{historyPhotos.length === 0 && order.adminRejectedAt}}" class="timeline-item">
           <view class="timeline-dot reject"></view>
           <view class="timeline-content">
             <view class="timeline-header">
@@ -88,8 +159,8 @@
           </view>
         </view>
 
-        <!-- 之前的用户拒绝记录 -->
-        <view wx:if="{{order.rejectedAt}}" class="timeline-item">
+        <!-- 如果没有历史记录，但有当前用户拒绝，显示当前拒绝 -->
+        <view wx:if="{{historyPhotos.length === 0 && order.rejectedAt}}" class="timeline-item">
           <view class="timeline-dot reject"></view>
           <view class="timeline-content">
             <view class="timeline-header">

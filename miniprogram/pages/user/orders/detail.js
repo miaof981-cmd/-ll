@@ -449,14 +449,34 @@ Page({
     try {
       const db = wx.cloud.database();
       const currentRejectCount = this.data.order.rejectCount || 0;
+      const now = new Date().toISOString();
+
+      // 保存历史记录
+      try {
+        await db.collection('order_photo_history').add({
+          data: {
+            orderId: this.data.orderId,
+            photos: this.data.order.photos || [],
+            rejectType: 'user',
+            rejectReason: reason,
+            rejectCount: currentRejectCount,
+            rejectedAt: now,
+            createdAt: now
+          }
+        });
+        console.log('✅ 用户拒绝历史记录已保存');
+      } catch (historyErr) {
+        console.error('⚠️ 保存历史记录失败:', historyErr);
+        // 不影响主流程
+      }
       
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
           status: 'in_progress', // 返回拍摄中状态，但保留照片
           rejectReason: reason,
-          rejectedAt: new Date().toISOString(),
+          rejectedAt: now,
           rejectCount: currentRejectCount + 1, // 增加拒绝次数
-          updatedAt: new Date().toISOString()
+          updatedAt: now
           // 注意：不删除photos字段，让摄影师可以基于原照片修改
         }
       });

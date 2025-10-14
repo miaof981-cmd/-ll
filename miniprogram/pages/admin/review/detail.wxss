@@ -260,6 +260,34 @@
   margin-top: 4rpx;
 }
 
+/* 历史照片 */
+.history-photos {
+  margin-top: 12rpx;
+  padding: 12rpx;
+  background: #fafafa;
+  border-radius: 8rpx;
+}
+
+.history-label {
+  display: block;
+  font-size: 22rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.history-photos-grid {
+  display: flex;
+  gap: 8rpx;
+  flex-wrap: wrap;
+}
+
+.history-photo {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 6rpx;
+  border: 2rpx solid #e5e7eb;
+}
+
 /* 基本信息 */
 .info-row {
   display: flex;
