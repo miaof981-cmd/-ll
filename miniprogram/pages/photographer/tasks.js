@@ -17,11 +17,13 @@ Page({
 
   onLoad() {
     this.loadPhotographerInfo();
-    this.loadOrders();
   },
 
   onShow() {
-    this.loadOrders(); // 每次显示页面时刷新订单
+    // 每次显示页面时刷新订单
+    if (this.data.photographerInfo) {
+      this.loadOrders();
+    }
   },
 
   // 加载摄影师信息
@@ -66,6 +68,9 @@ Page({
             ...photographers,
             _id: account.photographerId
           }
+        }, () => {
+          // 摄影师信息加载完成后，立即加载订单
+          this.loadOrders();
         });
       }
     } catch (e) {

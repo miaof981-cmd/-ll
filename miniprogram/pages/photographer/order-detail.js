@@ -231,13 +231,19 @@ Page({
       wx.showLoading({ title: '提交中...' });
 
       const db = wx.cloud.database();
+      const _ = db.command;
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
           status: 'pending_review', // 待管理员审核
           photos: this.data.uploadedPhotos,
           photographerNote: this.data.photographerNote.trim() || '',
           submittedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          // 清除之前的拒绝原因
+          adminRejectReason: _.remove(),
+          adminRejectedAt: _.remove(),
+          rejectReason: _.remove(),
+          rejectedAt: _.remove()
         }
       });
 

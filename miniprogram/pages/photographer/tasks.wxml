@@ -47,35 +47,35 @@
       bindtap="onStatusFilterChange" 
       data-status="to_upload"
     >
-      🔥 待上传
+      待上传
     </view>
     <view 
       class="filter-tab {{statusFilter === 'rejected' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
       data-status="rejected"
     >
-      ⚠️ 需修改
+      需修改
     </view>
     <view 
       class="filter-tab {{statusFilter === 'pending_review' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
       data-status="pending_review"
     >
-      🔍 待审核
+      待审核
     </view>
     <view 
       class="filter-tab {{statusFilter === 'pending_confirm' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
       data-status="pending_confirm"
     >
-      ⏳ 待确认
+      待确认
     </view>
     <view 
       class="filter-tab {{statusFilter === 'completed' ? 'active' : ''}}" 
       bindtap="onStatusFilterChange" 
       data-status="completed"
     >
-      ✅ 已完成
+      已完成
     </view>
   </view>
 
