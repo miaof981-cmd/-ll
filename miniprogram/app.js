@@ -11,14 +11,21 @@ App({
         traceUser: true,
       });
       this.globalData.useCloud = true;
+      console.log('✅ 云开发初始化成功，环境ID:', envId);
     } else {
       this.globalData.useCloud = false;
-      console.warn('云环境未配置，将使用本地模拟数据运行。请在 app.js 中填写 envId 并在开发者工具中开启云开发。');
+      console.warn('⚠️ 云环境未配置，将使用本地模拟数据运行。请在 app.js 中填写 envId 并在开发者工具中开启云开发。');
     }
 
-    // 获取系统信息
-    const systemInfo = wx.getSystemInfoSync();
-    this.globalData.systemInfo = systemInfo;
+    // 获取系统信息（使用新API）
+    try {
+      const systemInfo = wx.getWindowInfo();
+      this.globalData.systemInfo = systemInfo;
+    } catch (e) {
+      // 兼容旧版本
+      const systemInfo = wx.getSystemInfoSync();
+      this.globalData.systemInfo = systemInfo;
+    }
   },
 
   globalData: {
