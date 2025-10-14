@@ -89,6 +89,13 @@
         <text class="function-desc">管理摄影师和作品</text>
         <view class="function-arrow">→</view>
       </view>
+
+      <view class="function-card" bindtap="manageActivities">
+        <view class="function-icon activities">🎯</view>
+        <text class="function-title">活动管理</text>
+        <text class="function-desc">管理活动和订单</text>
+        <view class="function-arrow">→</view>
+      </view>
     </view>
   </view>
 </view>

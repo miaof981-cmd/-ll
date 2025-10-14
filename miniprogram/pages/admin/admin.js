@@ -99,6 +99,13 @@ Page({
     });
   },
 
+  // 管理活动
+  manageActivities() {
+    wx.navigateTo({
+      url: '/pages/admin/activities/activities'
+    });
+  },
+
   // 退出登录
   logout() {
     wx.showModal({
