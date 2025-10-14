@@ -1,5 +1,6 @@
 // pages/apply/payment.js - 支付页面逻辑
 const storage = require('../../utils/storage.js');
+const orderNumber = require('../../utils/order-number.js');
 
 Page({
   data: {
@@ -96,7 +97,11 @@ Page({
       }
 
       // 3. 创建证件照订单
+      const generatedOrderNo = orderNumber.generateOrderNumber();
+      console.log('✅ 生成订单号:', generatedOrderNo);
+      
       const orderData = {
+        orderNo: generatedOrderNo, // 订单号
         activityId: activityId,
         studentId: this.data.studentId,
         studentName: this.data.formData.childName,

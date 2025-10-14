@@ -171,16 +171,43 @@ Page({
 
   // 审核拒绝
   async rejectWork() {
+    const that = this;
+    
+    // 使用自定义弹窗或者系统弹窗
     const res = await wx.showModal({
       title: '审核拒绝',
-      content: '确认拒绝此作品？摄影师需要重新拍摄。',
+      content: '请输入拒绝原因（必填）',
       editable: true,
-      placeholderText: '请输入拒绝原因...'
+      placeholderText: '例如：光线不足、构图不佳、画面模糊等'
     });
 
     if (!res.confirm) return;
 
-    const rejectReason = res.content || '作品不符合要求，请重新拍摄';
+    const rejectReason = (res.content || '').trim();
+    
+    // 验证拒绝原因
+    if (!rejectReason) {
+      wx.showToast({
+        title: '请输入拒绝原因',
+        icon: 'none'
+      });
+      // 重新调用
+      setTimeout(() => {
+        that.rejectWork();
+      }, 1500);
+      return;
+    }
+    
+    if (rejectReason.length < 5) {
+      wx.showToast({
+        title: '拒绝原因至少5个字',
+        icon: 'none'
+      });
+      setTimeout(() => {
+        that.rejectWork();
+      }, 1500);
+      return;
+    }
 
     try {
       wx.showLoading({ title: '处理中...' });

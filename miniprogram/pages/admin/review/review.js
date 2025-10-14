@@ -114,30 +114,71 @@ Page({
   // 快速拒绝
   async quickReject(e) {
     const { id } = e.currentTarget.dataset;
+    const that = this;
 
     const res = await wx.showModal({
       title: '审核拒绝',
-      content: '确认拒绝此作品？',
+      content: '请输入拒绝原因（必填）',
       editable: true,
-      placeholderText: '请输入拒绝原因（可选）',
+      placeholderText: '例如：光线不足、构图不佳、画面模糊等',
       confirmText: '确认拒绝',
       confirmColor: '#ff4d4f'
     });
 
     if (!res.confirm) return;
 
+    const rejectReason = (res.content || '').trim();
+    
+    // 验证拒绝原因
+    if (!rejectReason) {
+      wx.showToast({
+        title: '请输入拒绝原因',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    if (rejectReason.length < 5) {
+      wx.showToast({
+        title: '拒绝原因至少5个字',
+        icon: 'none'
+      });
+      return;
+    }
+
     wx.showLoading({ title: '处理中...' });
 
     try {
-      const rejectReason = res.content || '作品不符合要求';
       const db = wx.cloud.database();
+      const now = new Date().toISOString();
+      
+      // 获取订单信息以保存历史
+      const orderRes = await db.collection('activity_orders').doc(id).get();
+      const order = orderRes.data;
+      
+      // 保存历史记录
+      try {
+        await db.collection('order_photo_history').add({
+          data: {
+            orderId: id,
+            photos: order.photos || [],
+            rejectType: 'admin',
+            rejectReason: rejectReason,
+            submittedAt: order.submittedAt || now,
+            rejectedAt: now,
+            createdAt: now
+          }
+        });
+      } catch (historyErr) {
+        console.error('⚠️ 保存历史记录失败:', historyErr);
+      }
       
       await db.collection('activity_orders').doc(id).update({
         data: {
           status: 'in_progress',
           adminRejectReason: rejectReason,
-          adminRejectedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          adminRejectedAt: now,
+          updatedAt: now
         }
       });
 
