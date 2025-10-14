@@ -248,7 +248,7 @@ Page({
               const imgHeight = imgInfo.height;
               
               // 设置画布大小
-              const dpr = wx.getSystemInfoSync().pixelRatio;
+              const dpr = wx.getWindowInfo().pixelRatio || 2;
               canvas.width = imgWidth * dpr;
               canvas.height = imgHeight * dpr;
               ctx.scale(dpr, dpr);

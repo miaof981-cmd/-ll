@@ -29,12 +29,17 @@ App({
 
     // 获取系统信息（使用新API）
     try {
-      const systemInfo = wx.getWindowInfo();
-      this.globalData.systemInfo = systemInfo;
+      const windowInfo = wx.getWindowInfo();
+      const deviceInfo = wx.getDeviceInfo();
+      const appBaseInfo = wx.getAppBaseInfo();
+      this.globalData.systemInfo = {
+        ...windowInfo,
+        ...deviceInfo,
+        ...appBaseInfo
+      };
     } catch (e) {
-      // 兼容旧版本
-      const systemInfo = wx.getSystemInfoSync();
-      this.globalData.systemInfo = systemInfo;
+      console.warn('获取系统信息失败，使用默认值:', e);
+      this.globalData.systemInfo = {};
     }
   },
 

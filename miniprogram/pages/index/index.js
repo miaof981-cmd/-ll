@@ -43,8 +43,8 @@ Page({
     const { width, height } = e.detail;
     
     // 获取屏幕宽度
-    const systemInfo = wx.getSystemInfoSync();
-    const screenWidth = systemInfo.windowWidth;
+    const windowInfo = wx.getWindowInfo();
+    const screenWidth = windowInfo.windowWidth;
     
     // 计算图片实际显示高度
     const actualHeight = (height / width) * screenWidth;
