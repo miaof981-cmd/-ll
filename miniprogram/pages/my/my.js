@@ -88,6 +88,29 @@ Page({
     });
   },
 
+  // 复制 OpenID（用于添加管理员配置）
+  copyOpenId() {
+    const openid = this.data.userInfo?.openid;
+    if (!openid) {
+      wx.showToast({
+        title: 'OpenID 不存在',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    wx.setClipboardData({
+      data: openid,
+      success: () => {
+        wx.showToast({
+          title: 'OpenID 已复制到剪贴板',
+          icon: 'success',
+          duration: 2000
+        });
+      }
+    });
+  },
+
   // 查看孩子档案
   viewChildRecord(e) {
     const { studentid } = e.currentTarget.dataset;

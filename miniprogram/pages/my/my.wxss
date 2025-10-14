@@ -61,6 +61,44 @@
   margin-left: 8rpx;
 }
 
+/* OpenID 显示区域 */
+.openid-box {
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  font-size: 22rpx;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.openid-box:active {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0.98);
+}
+
+.openid-label {
+  flex-shrink: 0;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.openid-value {
+  flex: 1;
+  margin: 0 12rpx;
+  font-family: 'Monaco', 'Courier New', monospace;
+  word-break: break-all;
+  color: white;
+  font-size: 20rpx;
+}
+
+.copy-icon {
+  flex-shrink: 0;
+  font-size: 28rpx;
+}
+
 /* ==================== 孩子列表 ==================== */
 .children-section {
   margin: 24rpx 32rpx;

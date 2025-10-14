@@ -12,6 +12,12 @@
           <text class="role-name">{{roleConfig[currentRole].name}}</text>
           <text wx:if="{{userRoles.length > 1}}" class="switch-icon">⇄</text>
         </view>
+        <!-- OpenID 显示区域（用于添加管理员） -->
+        <view class="openid-box" wx:if="{{userInfo.openid}}" bindtap="copyOpenId">
+          <text class="openid-label">OpenID: </text>
+          <text class="openid-value">{{userInfo.openid}}</text>
+          <text class="copy-icon">📋</text>
+        </view>
       </view>
     </view>
 
