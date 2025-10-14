@@ -413,6 +413,151 @@ async function deleteBanner(id) {
   }
 }
 
+// ==================== 学籍档案管理 ====================
+
+/**
+ * 获取所有档案
+ */
+async function getArchives() {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.getArchives();
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection('archives')
+      .orderBy('createdAt', 'desc')
+      .get();
+    console.log('✅ 云端获取档案成功:', res.data.length);
+    return res.data;
+  } catch (e) {
+    console.error('❌ 获取档案失败:', e);
+    const storage = require('./storage.js');
+    return storage.getArchives();
+  }
+}
+
+/**
+ * 创建档案
+ */
+async function createArchive(applicationId) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.createArchive(applicationId);
+  }
+  
+  try {
+    const db = getDB();
+    
+    // 获取申请信息
+    const application = await db.collection('applications').doc(applicationId).get();
+    if (!application.data) {
+      throw new Error('申请不存在');
+    }
+    
+    // 生成学号
+    const studentId = await generateStudentId();
+    
+    // 创建档案
+    const res = await db.collection('archives').add({
+      data: {
+        studentId: studentId,
+        password: '123456',
+        childName: application.data.childName,
+        gender: application.data.gender,
+        age: application.data.age,
+        lifePhoto: application.data.lifePhoto,
+        idPhoto: application.data.work, // 证件照
+        parentName: application.data.parentName,
+        parentPhone: application.data.phone,
+        parentWechat: application.data.wechat,
+        expectations: application.data.expectations,
+        applicationId: applicationId,
+        status: 'pending_admission_letter', // 待上传录取通知书
+        createdAt: new Date().toISOString()
+      }
+    });
+    
+    console.log('✅ 云端创建档案成功');
+    return {
+      _id: res._id,
+      studentId: studentId
+    };
+  } catch (e) {
+    console.error('❌ 创建档案失败:', e);
+    const storage = require('./storage.js');
+    return storage.createArchive(applicationId);
+  }
+}
+
+/**
+ * 更新档案
+ */
+async function updateArchive(id, updates) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.updateArchive(id, updates);
+  }
+  
+  try {
+    const db = getDB();
+    await db.collection('archives').doc(id).update({
+      data: {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      }
+    });
+    console.log('✅ 云端更新档案成功');
+    return true;
+  } catch (e) {
+    console.error('❌ 更新档案失败:', e);
+    return false;
+  }
+}
+
+/**
+ * 根据ID获取档案
+ */
+async function getArchiveById(id) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.getArchiveById(id);
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection('archives').doc(id).get();
+    return res.data;
+  } catch (e) {
+    console.error('❌ 获取档案失败:', e);
+    return null;
+  }
+}
+
+/**
+ * 根据学号获取档案
+ */
+async function getArchiveByStudentId(studentId) {
+  if (!isCloudEnabled()) {
+    const storage = require('./storage.js');
+    return storage.getArchiveByStudentId(studentId);
+  }
+  
+  try {
+    const db = getDB();
+    const res = await db.collection('archives')
+      .where({
+        studentId: studentId
+      })
+      .get();
+    return res.data.length > 0 ? res.data[0] : null;
+  } catch (e) {
+    console.error('❌ 获取档案失败:', e);
+    return null;
+  }
+}
+
 // ==================== 导出接口 ====================
 
 module.exports = {
@@ -441,6 +586,13 @@ module.exports = {
   // 轮播图
   getBanners,
   addBanner,
-  deleteBanner
+  deleteBanner,
+  
+  // 学籍档案
+  getArchives,
+  createArchive,
+  updateArchive,
+  getArchiveById,
+  getArchiveByStudentId
 };
 
