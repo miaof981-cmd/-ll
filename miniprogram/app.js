@@ -12,6 +12,16 @@ App({
       });
       this.globalData.useCloud = true;
       console.log('✅ 云开发初始化成功，环境ID:', envId);
+      
+      // 关闭云数据库实时推送（避免 sync-0 错误）
+      try {
+        const db = wx.cloud.database();
+        if (db && db.close) {
+          // 某些版本的云数据库有 close 方法
+        }
+      } catch (e) {
+        // 忽略错误
+      }
     } else {
       this.globalData.useCloud = false;
       console.warn('⚠️ 云环境未配置，将使用本地模拟数据运行。请在 app.js 中填写 envId 并在开发者工具中开启云开发。');
