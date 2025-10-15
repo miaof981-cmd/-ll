@@ -343,14 +343,14 @@
   margin-bottom: 40rpx;
   background: #ffffff;
   border-radius: 24rpx;
-  padding: 48rpx 40rpx;
+  padding: 32rpx 32rpx 40rpx;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
   border: 4rpx solid #1a56db;
   transition: all 0.3s ease;
 }
 
 .student-archive-card.collapsed {
-  padding: 32rpx;
+  padding: 24rpx 28rpx;
 }
 
 .student-archive-card:active {
@@ -361,24 +361,24 @@
 .archive-header {
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  margin-bottom: 32rpx;
-  padding-bottom: 24rpx;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
   border-bottom: 2rpx solid #e2e8f0;
 }
 
 .student-archive-card.collapsed .archive-header {
-  margin-bottom: 24rpx;
+  margin-bottom: 16rpx;
 }
 
 .expand-icon {
-  font-size: 28rpx;
+  font-size: 24rpx;
   color: #1a56db;
   font-weight: 600;
 }
 
 .school-logo {
-  font-size: 72rpx;
+  font-size: 56rpx;
 }
 
 .school-info {
@@ -386,16 +386,16 @@
 }
 
 .school-name {
-  font-size: 36rpx;
+  font-size: 28rpx;
   font-weight: 700;
   color: #1e3a8a;
 }
 
 .school-subtitle {
-  font-size: 20rpx;
+  font-size: 18rpx;
   color: #64748b;
-  letter-spacing: 2rpx;
-  margin-top: 4rpx;
+  letter-spacing: 1rpx;
+  margin-top: 2rpx;
 }
 
 .archive-title {
@@ -403,13 +403,13 @@
   font-size: 44rpx;
   font-weight: 700;
   color: #1e3a8a;
-  margin-bottom: 40rpx;
+  margin-bottom: 28rpx;
   letter-spacing: 4rpx;
 }
 
 .student-archive-card.collapsed .archive-title {
-  font-size: 36rpx;
-  margin-bottom: 24rpx;
+  font-size: 32rpx;
+  margin-bottom: 20rpx;
 }
 
 /* 缩略信息 */
@@ -486,7 +486,7 @@
 .photo-section {
   width: 240rpx;
   height: 320rpx;
-  margin: 0 auto 40rpx;
+  margin: 0 auto 32rpx;
   border-radius: 16rpx;
   overflow: hidden;
   position: relative;
