@@ -15,6 +15,9 @@ Page({
   },
 
   onLoad(options) {
+    console.log('🎯 [用户订单详情页] 页面加载');
+    console.log('📄 当前页面路径:', getCurrentPages()[getCurrentPages().length - 1].route);
+    
     if (options.id) {
       this.setData({ orderId: options.id });
       this.loadOrderDetail(options.id);

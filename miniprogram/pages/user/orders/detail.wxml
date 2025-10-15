@@ -221,7 +221,7 @@
         <button class="action-btn reject-btn" bindtap="rejectWork">
           ❌ 拒绝作品
         </button>
-        <button class="action-btn confirm-btn" bindtap="confirmWork">
+        <button class="action-btn confirm-btn" bindtap="confirmWork" catchtap="confirmWork">
           ✅ 确认满意
         </button>
       </view>
