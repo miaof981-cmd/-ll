@@ -353,16 +353,14 @@ Page({
       }
 
       // 更新订单状态
-      // 获取当前拒绝次数并累加
-      const currentRejectCount = this.data.order.rejectCount || 0;
-      
+      // 注意：管理员拒绝不消耗用户的修改机会，不递增 rejectCount
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
           status: 'in_progress',
           adminRejectReason: rejectReason,
           adminRejectedAt: now,
-          rejectCount: currentRejectCount + 1, // 累加拒绝次数
           updatedAt: now
+          // 不修改 rejectCount，只有用户拒绝才消耗修改机会
         }
       });
 
