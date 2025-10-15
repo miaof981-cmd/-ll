@@ -346,6 +346,16 @@
   padding: 48rpx 40rpx;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
   border: 4rpx solid #1a56db;
+  transition: all 0.3s ease;
+}
+
+.student-archive-card.collapsed {
+  padding: 32rpx;
+}
+
+.student-archive-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
 
 .archive-header {
@@ -355,6 +365,16 @@
   margin-bottom: 32rpx;
   padding-bottom: 24rpx;
   border-bottom: 2rpx solid #e2e8f0;
+}
+
+.student-archive-card.collapsed .archive-header {
+  margin-bottom: 24rpx;
+}
+
+.expand-icon {
+  font-size: 28rpx;
+  color: #1a56db;
+  font-weight: 600;
 }
 
 .school-logo {
@@ -387,6 +407,81 @@
   letter-spacing: 4rpx;
 }
 
+.student-archive-card.collapsed .archive-title {
+  font-size: 36rpx;
+  margin-bottom: 24rpx;
+}
+
+/* 缩略信息 */
+.archive-summary {
+  display: flex;
+  gap: 24rpx;
+  align-items: center;
+}
+
+.summary-photo {
+  width: 120rpx;
+  height: 150rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 100%);
+  border: 2rpx solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-photo-img {
+  width: 100%;
+  height: 100%;
+}
+
+.summary-photo-placeholder {
+  font-size: 48rpx;
+  color: #94a3b8;
+}
+
+.summary-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 26rpx;
+  color: #64748b;
+  min-width: 100rpx;
+}
+
+.summary-value {
+  font-size: 28rpx;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* 详细信息容器 */
+.archive-details {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 证件照区域 */
 .photo-section {
   width: 240rpx;
@@ -400,20 +495,6 @@
 .id-photo {
   width: 100%;
   height: 100%;
-}
-
-.photo-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(26, 86, 219, 0.9);
-  color: white;
-  text-align: center;
-  font-size: 22rpx;
-  padding: 8rpx;
-  font-weight: 600;
-  letter-spacing: 2rpx;
 }
 
 .photo-section.missing {

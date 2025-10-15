@@ -14,6 +14,7 @@ Page({
     isEditing: false,     // 编辑模式
     isAdmin: false,       // 是否管理员
     studentId: '',        // 学生学号
+    archiveExpanded: false, // 学籍档案是否展开
     
     // 新增档案弹窗
     showAddDialog: false,
@@ -119,6 +120,13 @@ Page({
         icon: 'error'
       });
     }
+  },
+
+  // 切换学籍档案展开/收起
+  toggleArchive() {
+    this.setData({
+      archiveExpanded: !this.data.archiveExpanded
+    });
   },
 
   // 切换编辑模式
