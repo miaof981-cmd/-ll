@@ -123,7 +123,7 @@ Page({
         paymentMethod: this.data.paymentMethod,
         status: 'photographing',
         formData: this.data.formData,
-        createDate: createDate,
+        createDate: new Date().toLocaleString('zh-CN'),
         paymentTime: new Date().toLocaleString('zh-CN'),
         idPhoto: ''
       };
