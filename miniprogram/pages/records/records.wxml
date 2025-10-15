@@ -21,58 +21,83 @@
 
   <!-- 瀑布流档案卡片 -->
   <view wx:if="{{!loading}}" class="waterfall-container">
-    <!-- 学籍档案卡片 -->
-    <view wx:if="{{student}}" class="archive-card profile-card {{isEditing ? 'editing' : ''}}">
-      <view class="card-header">
-        <view class="card-icon">🎓</view>
-        <text class="card-type">学籍档案</text>
+    <!-- 学籍档案卡片（复用预览页面样式） -->
+    <view wx:if="{{student}}" class="student-archive-card">
+      <view class="archive-header">
+        <view class="school-logo">🎓</view>
+        <view class="school-info">
+          <view class="school-name">次元学校</view>
+          <view class="school-subtitle">CIYUAN ACADEMY</view>
+        </view>
       </view>
-      <view class="card-body profile-body">
-        <view class="profile-photo-wrapper">
-          <text class="photo-title">📸 证件照</text>
-          <view class="profile-photo">
-            <image wx:if="{{student.avatar}}" class="photo-img" src="{{student.avatar}}" mode="aspectFit" />
-            <text wx:else class="photo-placeholder">📷</text>
-          </view>
+
+      <view class="archive-title">学籍档案</view>
+
+      <!-- 证件照区域 -->
+      <view class="photo-section" wx:if="{{student.avatar}}">
+        <image class="id-photo" src="{{student.avatar}}" mode="aspectFit" />
+        <view class="photo-label">证件照</view>
+      </view>
+      <view class="photo-section missing" wx:else>
+        <view class="photo-placeholder">
+          <view class="placeholder-icon">📷</view>
+          <view class="placeholder-text">暂无证件照</view>
         </view>
-        <view class="profile-info">
-          <view class="info-row">
-            <text class="info-label">姓名</text>
-            <text class="info-value">{{student.name}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">学号</text>
-            <text class="info-value">{{student.studentId}}</text>
-          </view>
-          <view class="info-row" wx:if="{{student.class && student.class !== '待分配'}}">
-            <text class="info-label">班级</text>
-            <text class="info-value">{{student.class}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">性别</text>
-            <text class="info-value">{{student.gender || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">年龄</text>
-            <text class="info-value">{{student.age || '-'}}岁</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">家长姓名</text>
-            <text class="info-value">{{student.parentName || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">联系电话</text>
-            <text class="info-value">{{student.parentPhone || '-'}}</text>
-          </view>
-          <view class="info-row" wx:if="{{student.parentWechat}}">
-            <text class="info-label">家长微信</text>
-            <text class="info-value">{{student.parentWechat}}</text>
-          </view>
+      </view>
+
+      <!-- 学生信息 -->
+      <view class="archive-info-section">
+        <view class="archive-info-row">
+          <view class="archive-info-label">学号</view>
+          <view class="archive-info-value">{{student.studentId}}</view>
         </view>
-        <view wx:if="{{student.expectations}}" class="expectations-section">
-          <view class="expectations-title">💭 家长期许</view>
-          <view class="expectations-content">{{student.expectations}}</view>
+        <view class="archive-info-row">
+          <view class="archive-info-label">姓名</view>
+          <view class="archive-info-value">{{student.name}}</view>
         </view>
+        <view class="archive-info-row">
+          <view class="archive-info-label">性别</view>
+          <view class="archive-info-value">{{student.gender || '未填写'}}</view>
+        </view>
+        <view class="archive-info-row">
+          <view class="archive-info-label">年龄</view>
+          <view class="archive-info-value">{{student.age || '未填写'}}</view>
+        </view>
+        <view class="archive-info-row" wx:if="{{student.class && student.class !== '待分配'}}">
+          <view class="archive-info-label">班级</view>
+          <view class="archive-info-value">{{student.class}}</view>
+        </view>
+      </view>
+
+      <!-- 家长信息 -->
+      <view class="archive-section-title">家长信息</view>
+      <view class="archive-info-section">
+        <view class="archive-info-row">
+          <view class="archive-info-label">家长姓名</view>
+          <view class="archive-info-value">{{student.parentName || '未填写'}}</view>
+        </view>
+        <view class="archive-info-row">
+          <view class="archive-info-label">联系电话</view>
+          <view class="archive-info-value">{{student.parentPhone || '未填写'}}</view>
+        </view>
+        <view class="archive-info-row">
+          <view class="archive-info-label">联系微信</view>
+          <view class="archive-info-value">{{student.parentWechat || '未填写'}}</view>
+        </view>
+      </view>
+
+      <!-- 家长期许 -->
+      <view wx:if="{{student.expectations}}">
+        <view class="archive-section-title">家长期许</view>
+        <view class="archive-expectations-content">
+          {{student.expectations}}
+        </view>
+      </view>
+
+      <!-- 档案底部信息 -->
+      <view class="archive-footer">
+        <view class="footer-text">建档日期：{{student.createdAt}}</view>
+        <view class="footer-seal">🏫 次元学校印</view>
       </view>
     </view>
 
