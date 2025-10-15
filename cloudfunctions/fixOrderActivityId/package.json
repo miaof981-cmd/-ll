@@ -1,0 +1,10 @@
+{
+  "name": "fixOrderActivityId",
+  "version": "1.0.0",
+  "description": "修复订单的activityId - 为没有活动ID的订单补充默认证件照活动",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+
