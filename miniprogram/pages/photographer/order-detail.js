@@ -239,11 +239,12 @@ Page({
           photographerNote: this.data.photographerNote.trim() || '',
           submittedAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          // 清除之前的拒绝原因
+          // 清除之前的拒绝原因（但保留 rejectCount 用于历史记录重建）
           adminRejectReason: _.remove(),
           adminRejectedAt: _.remove(),
           rejectReason: _.remove(),
           rejectedAt: _.remove()
+          // 注意：不删除 rejectCount，保留用于统计和历史记录
         }
       });
 

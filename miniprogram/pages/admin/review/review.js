@@ -175,11 +175,15 @@ Page({
         // 不影响主流程继续执行
       }
       
+      // 获取当前拒绝次数并累加
+      const currentRejectCount = order.rejectCount || 0;
+      
       await db.collection('activity_orders').doc(id).update({
         data: {
           status: 'in_progress',
           adminRejectReason: rejectReason,
           adminRejectedAt: now,
+          rejectCount: currentRejectCount + 1, // 累加拒绝次数
           updatedAt: now
         }
       });

@@ -109,7 +109,10 @@ Page({
           
           // 如果数据库没有历史记录，但订单本身有拒绝信息，尝试从订单字段重建
           // 这是为了兼容在 order_photo_history 集合创建之前的旧数据
-          if (order.rejectCount && order.rejectCount > 0) {
+          // 检查条件：只要有任何拒绝原因或拒绝次数，就尝试重建
+          const hasRejectInfo = order.rejectCount > 0 || order.adminRejectReason || order.rejectReason;
+          
+          if (hasRejectInfo) {
             console.log('🔄 尝试从订单字段重建历史记录...');
             console.log('订单拒绝次数:', order.rejectCount);
             console.log('管理员拒绝原因:', order.adminRejectReason);
@@ -279,7 +282,7 @@ Page({
       title: '审核拒绝',
       content: '', // 留空，不填充默认文字
       editable: true,
-      placeholderText: '例如：光线不足、构图不佳、画面模糊等'
+      placeholderText: '例如：线稿潦草、完成度不符合例图、画面模糊等'
     });
 
     if (!res.confirm) return;
@@ -336,11 +339,15 @@ Page({
       }
 
       // 更新订单状态
+      // 获取当前拒绝次数并累加
+      const currentRejectCount = this.data.order.rejectCount || 0;
+      
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
           status: 'in_progress',
           adminRejectReason: rejectReason,
           adminRejectedAt: now,
+          rejectCount: currentRejectCount + 1, // 累加拒绝次数
           updatedAt: now
         }
       });
