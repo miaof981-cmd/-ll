@@ -184,6 +184,60 @@
       </view>
     </view>
 
+    <!-- 完整历史记录（数据库查询） -->
+    <view wx:if="{{allHistoryPhotos.length > 0}}" class="full-history-card">
+      <view class="card-header">
+        <text class="title">📚 完整历史记录</text>
+        <text class="history-count">共{{allHistoryPhotos.length}}次</text>
+      </view>
+      
+      <!-- 时间线显示 -->
+      <view class="timeline">
+        <block wx:for="{{allHistoryPhotos}}" wx:key="index" wx:for-item="history">
+          <!-- 拒绝记录 -->
+          <view class="timeline-item">
+            <view class="timeline-dot {{history.rejectType === 'admin' ? 'admin-reject' : 'user-reject'}}"></view>
+            <view class="timeline-content">
+              <view class="timeline-header">
+                <text class="timeline-label" wx:if="{{history.rejectType === 'admin'}}">❌ 管理员拒绝</text>
+                <text class="timeline-label" wx:else>🔄 用户要求修改</text>
+                <text class="timeline-time">{{history.rejectedAt}}</text>
+              </view>
+              <view class="timeline-reject {{history.rejectType === 'admin' ? 'admin-reject-bg' : 'user-reject-bg'}}">
+                {{history.rejectReason}}
+              </view>
+            </view>
+          </view>
+          
+          <!-- 提交记录 -->
+          <view class="timeline-item">
+            <view class="timeline-dot submit"></view>
+            <view class="timeline-content">
+              <view class="timeline-header">
+                <text class="timeline-label">📸 您提交了作品</text>
+                <text class="timeline-time">{{history.submittedAt}}</text>
+              </view>
+              <view class="timeline-desc">提交了 {{history.photos.length}} 张照片</view>
+              <!-- 历史照片缩略图 -->
+              <view wx:if="{{history.photos.length > 0}}" class="timeline-photos">
+                <image
+                  wx:for="{{history.photos}}"
+                  wx:for-item="photo"
+                  wx:key="photo"
+                  class="timeline-photo"
+                  src="{{photo}}"
+                  mode="aspectFill"
+                  bindtap="previewHistoryPhoto"
+                  data-photos="{{history.photos}}"
+                  data-index="{{index}}"
+                />
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+
     <!-- 操作按钮 -->
     <view class="action-bar" wx:if="{{order.status === 'in_progress'}}">
       <button class="action-btn secondary" bindtap="contactUser">

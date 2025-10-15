@@ -6,7 +6,8 @@ Page({
     activity: null,
     student: null,
     uploadedPhotos: [], // 当前编辑区的照片
-    historyPhotos: [], // 历史提交的照片（被拒绝的）
+    historyPhotos: [], // 当前被拒绝的照片（显示在历史卡片中）
+    allHistoryPhotos: [], // 数据库中的完整历史记录（所有提交和拒绝）
     photographerNote: '', // 摄影师给用户的备注
     uploading: false,
     loading: true
@@ -59,23 +60,50 @@ Page({
       // 如果订单状态是in_progress且有photos，说明是被拒绝的历史照片
       // 如果订单状态是pending_review/pending_confirm/completed，photos是已提交的作品
       let uploadedPhotos = [];
-      let historyPhotos = [];
+      let currentHistoryPhotos = []; // 当前订单上被拒绝的照片
       
       if (order.status === 'in_progress' && order.photos && order.photos.length > 0) {
         // 被拒绝，照片放到历史记录
-        historyPhotos = order.photos;
+        currentHistoryPhotos = order.photos;
         uploadedPhotos = []; // 当前编辑区为空，可以重新上传
       } else if (order.photos && order.photos.length > 0) {
         // 已提交或审核中，照片显示在当前区域
         uploadedPhotos = order.photos;
       }
 
+      // 查询完整的历史记录（从数据库）
+      let historyPhotos = [];
+      try {
+        console.log('🔍 [摄影师订单] 查询历史记录，订单ID:', orderId);
+        const historyRes = await db.collection('order_photo_history')
+          .where({ orderId: orderId })
+          .orderBy('createdAt', 'desc')
+          .get();
+        
+        console.log('📋 [摄影师订单] 历史记录查询结果:', historyRes.data ? historyRes.data.length : 0, '条');
+        
+        if (historyRes.data && historyRes.data.length > 0) {
+          historyPhotos = historyRes.data;
+          historyPhotos.forEach((h, idx) => {
+            console.log(`   [${idx + 1}] 类型:${h.rejectType}, 时间:${h.rejectedAt}, 原因:${h.rejectReason}`);
+          });
+        }
+      } catch (e) {
+        console.error('❌ [摄影师订单] 查询历史记录失败:', e);
+      }
+
+      console.log('=== [摄影师订单] 页面数据设置 ===');
+      console.log('当前编辑区照片数:', uploadedPhotos.length);
+      console.log('当前被拒照片数:', currentHistoryPhotos.length);
+      console.log('数据库历史记录数:', historyPhotos.length);
+
       this.setData({
         order,
         activity,
         student,
         uploadedPhotos,
-        historyPhotos,
+        historyPhotos: currentHistoryPhotos, // 保持原有逻辑：显示当前被拒的照片
+        allHistoryPhotos: historyPhotos, // 新增：数据库中的完整历史
         photographerNote: order.photographerNote || '',
         loading: false
       });
@@ -165,6 +193,16 @@ Page({
     wx.previewImage({
       urls: this.data.uploadedPhotos,
       current: this.data.uploadedPhotos[index]
+    });
+  },
+
+  // 预览历史照片（从数据库历史记录）
+  previewHistoryPhoto(e) {
+    const { photos, index } = e.currentTarget.dataset;
+    console.log('[摄影师] 预览历史照片，共', photos.length, '张');
+    wx.previewImage({
+      urls: photos,
+      current: photos[index]
     });
   },
 
