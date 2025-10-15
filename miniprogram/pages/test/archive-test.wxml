@@ -8,14 +8,17 @@
     <button class="test-btn primary" bindtap="testCreateArchive">
       🔥 测试1: 直接创建档案
     </button>
-    <button class="test-btn success" bindtap="testFullFlow">
-      🎯 测试2: 完整确认流程
+    <button class="test-btn success" bindtap="testCreatePendingOrder">
+      ⏸️ 测试2: 创建待确认订单（需手动确认）
     </button>
-    <button class="test-btn info" bindtap="testQueryArchives">
-      📋 测试3: 查询所有档案
+    <button class="test-btn info" bindtap="testFullFlow">
+      🎯 测试3: 完整确认流程（自动）
+    </button>
+    <button class="test-btn default" bindtap="testQueryArchives">
+      📋 测试4: 查询所有档案
     </button>
     <button class="test-btn warning" bindtap="testCleanup">
-      🗑️ 测试4: 清空测试数据
+      🗑️ 测试5: 清空测试数据
     </button>
   </view>
 
@@ -42,9 +45,10 @@
   <view class="tips">
     <view class="tip-title">💡 使用说明</view>
     <view class="tip-item">• 测试1：直接创建一个档案，测试写入权限</view>
-    <view class="tip-item">• 测试2：模拟完整流程（创建订单→确认→创建档案）</view>
-    <view class="tip-item">• 测试3：查看数据库中所有档案</view>
-    <view class="tip-item">• 测试4：删除所有测试产生的数据</view>
+    <view class="tip-item">• 测试2：创建待确认订单，需手动前往"我的订单"确认（推荐）</view>
+    <view class="tip-item">• 测试3：自动完成整个流程（创建订单→确认→创建档案）</view>
+    <view class="tip-item">• 测试4：查看数据库中所有档案</view>
+    <view class="tip-item">• 测试5：删除所有测试产生的数据</view>
   </view>
 </view>
 

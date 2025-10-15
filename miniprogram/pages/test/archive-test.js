@@ -89,7 +89,94 @@ Page({
     }
   },
 
-  // 测试2: 模拟完整确认收货流程
+  // 测试2: 创建待确认订单（不自动确认，等用户手动确认）
+  async testCreatePendingOrder() {
+    this.clearLogs();
+    this.addLog('========================================');
+    this.addLog('🧪 测试：创建待确认订单（需手动确认）');
+    this.addLog('========================================');
+
+    try {
+      const db = wx.cloud.database();
+      const now = new Date().toISOString();
+
+      // 1. 创建测试订单（状态：pending_confirm）
+      this.addLog('📝 创建待确认订单...');
+      const orderData = {
+        orderNo: 'TEST' + Date.now(),
+        activityId: '43d365dc68ee129202af48e635a3651e', // 证件照活动ID
+        studentName: '待确认学生_' + Date.now(),
+        parentName: '测试家长',
+        parentPhone: '13800138000',
+        gender: '女',
+        age: 5,
+        class: '待分配',
+        photographerId: '4402541d68edd59f02a92fb31d00f57d', // 真实摄影师ID
+        photographerName: 'miao',
+        lifePhotos: [],
+        photos: [
+          'cloud://cloud1-9gdsq5jxb7e60ab4.636c-cloud1-9gdsq5jxb7e60ab4-1330903800/test-photo-1.png',
+          'cloud://cloud1-9gdsq5jxb7e60ab4.636c-cloud1-9gdsq5jxb7e60ab4-1330903800/test-photo-2.png'
+        ],
+        remark: '测试订单-请手动确认',
+        totalPrice: 22,
+        status: 'pending_confirm', // 待确认状态
+        paymentMethod: 'wechat',
+        rejectCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        submittedAt: now,
+        photographerNote: '测试照片已上传，请确认'
+      };
+
+      const orderRes = await db.collection('activity_orders').add({
+        data: orderData
+      });
+
+      this.addLog(`✅ 待确认订单创建成功！`);
+      this.addLog(`   订单ID: ${orderRes._id}`);
+      this.addLog(`   订单号: ${orderData.orderNo}`);
+      this.addLog(`   学生姓名: ${orderData.studentName}`);
+      this.addLog(`   订单状态: pending_confirm（待确认）`);
+      this.addLog('');
+      this.addLog('📱 请前往"我的订单"查看并手动确认');
+      this.addLog('   点击底部"我的" → "我的订单" → 找到刚创建的订单 → 点击"确认满意"');
+
+      this.setData({ 
+        testResult: `✅ 待确认订单创建成功！\n订单ID: ${orderRes._id}\n\n请前往"我的订单"手动确认` 
+      });
+
+      wx.showModal({
+        title: '订单创建成功',
+        content: '待确认订单已创建，请前往"我的订单"手动确认收货',
+        confirmText: '去确认',
+        cancelText: '稍后',
+        success: (res) => {
+          if (res.confirm) {
+            // 跳转到订单列表
+            wx.navigateTo({
+              url: '/pages/user/orders/orders'
+            });
+          }
+        }
+      });
+    } catch (e) {
+      this.addLog('========================================');
+      this.addLog('❌ 创建订单失败！');
+      this.addLog(`错误: ${e.message}`);
+      this.addLog(`堆栈: ${e.stack}`);
+      this.addLog('========================================');
+
+      this.setData({ testResult: `❌ 失败: ${e.message}` });
+
+      wx.showToast({
+        title: '创建失败',
+        icon: 'error'
+      });
+    }
+  },
+
+  // 测试3: 模拟完整确认收货流程（自动确认）
   async testFullFlow() {
     this.clearLogs();
     this.addLog('========================================');
@@ -235,7 +322,7 @@ Page({
     }
   },
 
-  // 测试3: 查询所有档案
+  // 测试4: 查询所有档案
   async testQueryArchives() {
     this.clearLogs();
     this.addLog('========================================');
@@ -270,11 +357,11 @@ Page({
     }
   },
 
-  // 测试4: 清空所有测试数据
+  // 测试5: 清空所有测试数据
   async testCleanup() {
     const res = await wx.showModal({
       title: '确认清空',
-      content: '确定要删除所有测试数据吗？（仅删除 source=test 的记录）',
+      content: '确定要删除所有测试数据吗？（仅删除 source=test 或 source=order 的测试记录）',
       confirmText: '确定删除',
       cancelText: '取消'
     });

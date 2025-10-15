@@ -57,6 +57,11 @@
   color: white;
 }
 
+.test-btn.default {
+  background: linear-gradient(135deg, #868e96 0%, #495057 100%);
+  color: white;
+}
+
 .test-btn.warning {
   background: linear-gradient(135deg, #ff922b 0%, #fd7e14 100%);
   color: white;
