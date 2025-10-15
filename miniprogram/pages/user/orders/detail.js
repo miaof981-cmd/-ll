@@ -433,6 +433,10 @@ Page({
 
   // 确认作品满意
   async confirmWork() {
+    console.log('🔔 confirmWork() 函数被调用了！');
+    console.log('📋 当前订单数据:', this.data.order);
+    console.log('📋 当前活动数据:', this.data.activityInfo);
+    
     const res = await wx.showModal({
       title: '确认收货',
       content: '确认对摄影师的作品满意吗？确认后订单将完成，并自动创建学生档案。',
