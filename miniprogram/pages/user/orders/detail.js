@@ -1,4 +1,5 @@
 const orderStatus = require('../../../utils/order-status.js');
+const studentIdUtil = require('../../../utils/student-id.js');
 
 Page({
   data: {
@@ -421,7 +422,7 @@ Page({
   async confirmWork() {
     const res = await wx.showModal({
       title: '确认收货',
-      content: '确认对摄影师的作品满意吗？确认后订单将完成。',
+      content: '确认对摄影师的作品满意吗？确认后订单将完成，并自动创建学生档案。',
       confirmText: '确认满意',
       cancelText: '再看看'
     });
@@ -432,13 +433,91 @@ Page({
 
     try {
       const db = wx.cloud.database();
+      const now = new Date().toISOString();
+      
+      // 1. 更新订单状态
       await db.collection('activity_orders').doc(this.data.orderId).update({
         data: {
           status: 'completed',
-          confirmedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          confirmedAt: now,
+          updatedAt: now
         }
       });
+
+      // 2. 检查是否是证件照订单，如果是则自动创建学生档案
+      const order = this.data.order;
+      const activity = this.data.activityInfo;
+      
+      console.log('📋 检查是否需要创建学生档案...');
+      console.log('   活动类别:', activity?.category);
+      console.log('   学生姓名:', order?.studentName);
+      
+      // 判断是否是证件照订单（category === '证件照'）
+      if (activity?.category === '证件照' && order?.studentName) {
+        console.log('✅ 这是证件照订单，开始创建学生档案...');
+        
+        try {
+          // 2.1 检查该学生是否已有档案
+          const existingStudent = await db.collection('students')
+            .where({ 
+              name: order.studentName,
+              _openid: order._openid 
+            })
+            .get();
+          
+          if (existingStudent.data && existingStudent.data.length > 0) {
+            console.log('⚠️ 学生档案已存在，跳过创建');
+          } else {
+            // 2.2 生成新学号
+            const studentId = await studentIdUtil.generateNextStudentId();
+            console.log('✅ 生成学号:', studentId);
+            
+            // 2.3 创建学生档案
+            const studentData = {
+              studentId: studentId,
+              name: order.studentName,
+              avatar: order.photos && order.photos.length > 0 ? order.photos[0] : '', // 使用证件照作为头像
+              gender: order.gender || '',
+              age: order.age || 0,
+              class: order.class || '待分配',
+              parentName: order.parentName || '',
+              parentPhone: order.parentPhone || '',
+              createdAt: now,
+              updatedAt: now,
+              source: 'order', // 标记来源：订单自动创建
+              sourceOrderId: this.data.orderId // 来源订单ID
+            };
+            
+            await db.collection('students').add({
+              data: studentData
+            });
+            
+            console.log('✅ 学生档案创建成功！学号:', studentId);
+            
+            // 2.4 更新订单，关联学号
+            await db.collection('activity_orders').doc(this.data.orderId).update({
+              data: {
+                studentId: studentId,
+                updatedAt: now
+              }
+            });
+            
+            wx.hideLoading();
+            wx.showModal({
+              title: '确认成功',
+              content: `订单已完成！已为 ${order.studentName} 自动创建学生档案，学号：${studentId}`,
+              showCancel: false,
+              success: () => {
+                this.loadOrderDetail(this.data.orderId);
+              }
+            });
+            return;
+          }
+        } catch (archiveError) {
+          console.error('⚠️ 创建学生档案失败:', archiveError);
+          // 档案创建失败不影响订单完成，只是提示用户
+        }
+      }
 
       wx.hideLoading();
       wx.showModal({

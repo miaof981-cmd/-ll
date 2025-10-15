@@ -1,0 +1,10 @@
+{
+  "name": "fixStudentIds",
+  "version": "1.0.0",
+  "description": "修复学生学号 - 按创建时间顺序重新分配连续学号",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+
