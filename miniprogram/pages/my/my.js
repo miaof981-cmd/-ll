@@ -102,11 +102,8 @@ Page({
       console.log('📡 开始加载孩子列表...');
       
       // 从 students 集合查询当前用户的孩子
-      const res = await db.collection('students')
-        .where({
-          _openid: wx.cloud.database().command.eq(wx.cloud.database().command.openid())
-        })
-        .get();
+      // 云数据库会自动根据权限过滤 _openid
+      const res = await db.collection('students').get();
       
       console.log('✅ 查询到的孩子数量:', res.data ? res.data.length : 0);
       
