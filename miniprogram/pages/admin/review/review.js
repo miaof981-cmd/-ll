@@ -156,7 +156,7 @@ Page({
       const orderRes = await db.collection('activity_orders').doc(id).get();
       const order = orderRes.data;
       
-      // 保存历史记录
+      // 保存历史记录（如果集合存在）
       try {
         await db.collection('order_photo_history').add({
           data: {
@@ -169,8 +169,10 @@ Page({
             createdAt: now
           }
         });
+        console.log('✅ 历史记录保存成功');
       } catch (historyErr) {
-        console.error('⚠️ 保存历史记录失败:', historyErr);
+        console.warn('⚠️ 保存历史记录失败（集合可能不存在）:', historyErr.message);
+        // 不影响主流程继续执行
       }
       
       await db.collection('activity_orders').doc(id).update({

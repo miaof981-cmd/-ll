@@ -282,8 +282,8 @@ Page({
         });
         console.log('✅ 历史记录已保存');
       } catch (historyErr) {
-        console.error('⚠️ 保存历史记录失败:', historyErr);
-        // 不影响主流程
+        console.warn('⚠️ 保存历史记录失败（集合可能不存在）:', historyErr.message);
+        // 不影响主流程继续执行
       }
 
       // 更新订单状态
