@@ -26,13 +26,9 @@
       <view class="archive-header">
         <view class="school-logo">🎓</view>
         <view class="school-info">
-          <view class="school-name">次元学校</view>
+          <view class="school-name">次元学校 · 学籍档案</view>
           <view class="school-subtitle">CIYUAN ACADEMY</view>
         </view>
-      </view>
-
-      <view class="archive-title-row">
-        <view class="archive-title">学籍档案</view>
         <view class="expand-icon">{{archiveExpanded ? '▲' : '▼'}}</view>
       </view>
 
