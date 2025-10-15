@@ -85,7 +85,6 @@ Page({
       const orderData = {
         orderNo: generatedOrderNo, // 订单号
         activityId: activityId,
-        studentId: this.data.studentId,
         studentName: this.data.formData.childName,
         parentName: this.data.formData.parentName || '',
         parentPhone: this.data.formData.parentPhone || '',
