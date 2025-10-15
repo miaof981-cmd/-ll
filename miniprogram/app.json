@@ -35,7 +35,8 @@
     "pages/user/orders/detail",
     "pages/photographer/tasks",
     "pages/photographer/order-detail",
-    "pages/photographer/detail"
+    "pages/photographer/detail",
+    "pages/test/archive-test"
   ],
   "window": {
     "backgroundTextStyle": "light",

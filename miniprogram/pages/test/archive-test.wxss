@@ -1,0 +1,158 @@
+.test-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 20rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40rpx;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  color: white;
+  text-align: center;
+}
+
+.title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.test-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.test-btn {
+  height: 100rpx;
+  line-height: 100rpx;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+}
+
+.test-btn.primary {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+}
+
+.test-btn.success {
+  background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+  color: white;
+}
+
+.test-btn.info {
+  background: linear-gradient(135deg, #339af0 0%, #1971c2 100%);
+  color: white;
+}
+
+.test-btn.warning {
+  background: linear-gradient(135deg, #ff922b 0%, #fd7e14 100%);
+  color: white;
+}
+
+.result-box {
+  background: white;
+  padding: 30rpx;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.result-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.result-text {
+  font-size: 28rpx;
+  color: #666;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.logs-container {
+  background: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.logs-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.clear-btn {
+  padding: 10rpx 30rpx;
+  background: #f0f0f0;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.logs-scroll {
+  height: 600rpx;
+  padding: 30rpx;
+}
+
+.log-item {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #333;
+  padding: 8rpx 0;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.no-logs {
+  text-align: center;
+  color: #999;
+  padding: 100rpx 0;
+  font-size: 28rpx;
+}
+
+.tips {
+  background: white;
+  padding: 30rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.tip-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.tip-item {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.8;
+  padding: 8rpx 0;
+}
+

@@ -1,0 +1,50 @@
+<view class="test-page">
+  <view class="header">
+    <text class="title">🧪 档案创建测试工具</text>
+    <text class="subtitle">快速测试档案创建功能，无需完整流程</text>
+  </view>
+
+  <view class="test-buttons">
+    <button class="test-btn primary" bindtap="testCreateArchive">
+      🔥 测试1: 直接创建档案
+    </button>
+    <button class="test-btn success" bindtap="testFullFlow">
+      🎯 测试2: 完整确认流程
+    </button>
+    <button class="test-btn info" bindtap="testQueryArchives">
+      📋 测试3: 查询所有档案
+    </button>
+    <button class="test-btn warning" bindtap="testCleanup">
+      🗑️ 测试4: 清空测试数据
+    </button>
+  </view>
+
+  <view wx:if="{{testResult}}" class="result-box">
+    <view class="result-title">测试结果</view>
+    <text class="result-text">{{testResult}}</text>
+  </view>
+
+  <view class="logs-container">
+    <view class="logs-header">
+      <text class="logs-title">控制台日志</text>
+      <button class="clear-btn" bindtap="clearLogs">清空</button>
+    </view>
+    <scroll-view class="logs-scroll" scroll-y>
+      <view wx:for="{{logs}}" wx:key="index" class="log-item">
+        {{item}}
+      </view>
+      <view wx:if="{{logs.length === 0}}" class="no-logs">
+        暂无日志
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="tips">
+    <view class="tip-title">💡 使用说明</view>
+    <view class="tip-item">• 测试1：直接创建一个档案，测试写入权限</view>
+    <view class="tip-item">• 测试2：模拟完整流程（创建订单→确认→创建档案）</view>
+    <view class="tip-item">• 测试3：查看数据库中所有档案</view>
+    <view class="tip-item">• 测试4：删除所有测试产生的数据</view>
+  </view>
+</view>
+
