@@ -269,9 +269,29 @@
   box-shadow: 0 0 0 2rpx #1890ff;
 }
 
+.timeline-dot.current {
+  background: #52c41a;
+  box-shadow: 0 0 0 2rpx #52c41a;
+  animation: pulse 2s infinite;
+}
+
 .timeline-dot.reject {
   background: #ff4d4f;
   box-shadow: 0 0 0 2rpx #ff4d4f;
+}
+
+.timeline-dot.create {
+  background: #8c8c8c;
+  box-shadow: 0 0 0 2rpx #8c8c8c;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2rpx #52c41a;
+  }
+  50% {
+    box-shadow: 0 0 0 6rpx rgba(82, 196, 26, 0.3);
+  }
 }
 
 .timeline-item::before {
@@ -310,6 +330,15 @@
 .timeline-time {
   font-size: 24rpx;
   color: #999;
+}
+
+.timeline-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  font-size: 26rpx;
+  color: #666;
+  margin-top: 12rpx;
 }
 
 .history-photos-grid {
