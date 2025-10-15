@@ -2,7 +2,8 @@
 <view class="container">
   <!-- 摄影师信息卡片 -->
   <view wx:if="{{photographerInfo}}" class="photographer-card">
-    <image class="avatar" src="{{photographerInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+    <image wx:if="{{photographerInfo.avatar}}" class="avatar" src="{{photographerInfo.avatar}}" mode="aspectFill"></image>
+    <view wx:else class="avatar avatar-placeholder">{{photographerInfo.name ? photographerInfo.name.substring(0,1) : '摄'}}</view>
     <view class="info">
       <text class="name">{{photographerInfo.name}}</text>
       <text class="specialty">{{photographerInfo.specialty || '专业摄影师'}}</text>

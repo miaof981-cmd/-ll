@@ -90,6 +90,16 @@
   border: 4rpx solid #e2e8f0;
 }
 
+.photographer-avatar-placeholder {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 40rpx;
+  font-weight: 600;
+}
+
 .photographer-info {
   flex: 1;
 }

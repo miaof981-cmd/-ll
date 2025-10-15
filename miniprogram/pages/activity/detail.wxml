@@ -78,7 +78,8 @@
       <view class="section-title">👨‍🎨 可选摄影师（{{photographers.length}}位）</view>
       <scroll-view class="photographers-scroll" scroll-x="true">
         <view wx:for="{{photographers}}" wx:key="_id" class="photographer-item">
-          <image class="photographer-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+          <image wx:if="{{item.avatar}}" class="photographer-avatar" src="{{item.avatar}}" mode="aspectFill" />
+          <view wx:else class="photographer-avatar photographer-avatar-placeholder">{{item.name ? item.name.substring(0,1) : '摄'}}</view>
           <text class="photographer-name">{{item.name}}</text>
           <view class="photographer-rating">
             <text class="rating-star">⭐</text>

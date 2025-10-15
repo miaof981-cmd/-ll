@@ -41,7 +41,8 @@
   <view class="info-section">
     <view class="section-title">摄影师信息</view>
     <view class="photographer-card">
-      <image class="photographer-avatar" src="{{application.photographerAvatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+      <image wx:if="{{application.photographerAvatar}}" class="photographer-avatar" src="{{application.photographerAvatar}}" mode="aspectFill"/>
+      <view wx:else class="photographer-avatar photographer-avatar-placeholder">{{application.photographerName ? application.photographerName.substring(0,1) : '摄'}}</view>
       <view class="photographer-info">
         <view class="photographer-name">{{application.photographerName}}</view>
         <view class="photographer-status">
