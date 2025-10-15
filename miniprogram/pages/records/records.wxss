@@ -371,12 +371,6 @@
   margin-bottom: 16rpx;
 }
 
-.expand-icon {
-  font-size: 24rpx;
-  color: #1a56db;
-  font-weight: 600;
-}
-
 .school-logo {
   font-size: 56rpx;
 }
@@ -398,18 +392,38 @@
   margin-top: 2rpx;
 }
 
+/* 标题行（包含标题和展开图标） */
+.archive-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28rpx;
+  position: relative;
+}
+
+.student-archive-card.collapsed .archive-title-row {
+  margin-bottom: 20rpx;
+}
+
 .archive-title {
   text-align: center;
   font-size: 44rpx;
   font-weight: 700;
   color: #1e3a8a;
-  margin-bottom: 28rpx;
   letter-spacing: 4rpx;
 }
 
 .student-archive-card.collapsed .archive-title {
   font-size: 32rpx;
-  margin-bottom: 20rpx;
+}
+
+.expand-icon {
+  position: absolute;
+  right: 0;
+  font-size: 28rpx;
+  color: #1a56db;
+  font-weight: 600;
+  padding: 8rpx;
 }
 
 /* 缩略信息 */

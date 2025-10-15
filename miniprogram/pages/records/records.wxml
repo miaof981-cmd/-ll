@@ -29,10 +29,12 @@
           <view class="school-name">次元学校</view>
           <view class="school-subtitle">CIYUAN ACADEMY</view>
         </view>
-        <view class="expand-icon">{{archiveExpanded ? '▲' : '▼'}}</view>
       </view>
 
-      <view class="archive-title">学籍档案</view>
+      <view class="archive-title-row">
+        <view class="archive-title">学籍档案</view>
+        <view class="expand-icon">{{archiveExpanded ? '▲' : '▼'}}</view>
+      </view>
 
       <!-- 缩略信息（收起时显示） -->
       <view wx:if="{{!archiveExpanded}}" class="archive-summary">
