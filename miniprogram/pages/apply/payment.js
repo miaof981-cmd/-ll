@@ -60,30 +60,8 @@ Page({
       }
 
       const db = wx.cloud.database();
-      const createDate = wx.getStorageSync('createDate') || new Date().toISOString();
 
-      // 1. 创建学生记录
-      const studentData = {
-        studentId: this.data.studentId,
-        name: this.data.formData.childName,
-        gender: this.data.formData.childGender,
-        age: parseInt(this.data.formData.childAge) || 0,
-        parentOpenid: userOpenId,
-        parentName: this.data.formData.parentName,
-        parentPhone: this.data.formData.parentPhone,
-        lifePhotos: this.data.formData.childPhoto ? [this.data.formData.childPhoto] : [],
-        status: 'waiting_photo', // 等待证件照拍摄
-        createdAt: createDate,
-        updatedAt: new Date().toISOString()
-      };
-
-      const studentRes = await db.collection('students').add({
-        data: studentData
-      });
-
-      console.log('✅ 学生记录创建成功:', studentRes._id);
-
-      // 2. 获取证件照活动ID（查找证件照活动，优先默认，无默认则取第一个）
+      // 1. 获取证件照活动ID（查找证件照活动，优先默认，无默认则取第一个）
       const activityRes = await db.collection('activities')
         .where({
           category: '证件照'
@@ -100,7 +78,7 @@ Page({
         console.warn('⚠️ 未找到证件照活动');
       }
 
-      // 3. 创建证件照订单
+      // 2. 创建证件照订单
       const generatedOrderNo = orderNumber.generateOrderNumber();
       console.log('✅ 生成订单号:', generatedOrderNo);
       
@@ -132,7 +110,7 @@ Page({
 
       console.log('✅ 订单创建成功:', orderRes._id);
 
-      // 4. 本地也保存一份（兼容旧逻辑）
+      // 3. 本地也保存一份（兼容旧逻辑）
       const application = {
         id: orderRes._id,
         studentId: this.data.studentId,
