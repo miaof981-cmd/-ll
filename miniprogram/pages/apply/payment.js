@@ -111,9 +111,9 @@ Page({
         studentName: this.data.formData.childName,
         parentName: this.data.formData.parentName || '',
         parentPhone: this.data.formData.parentPhone || '',
-        gender: this.data.formData.gender || '',
-        age: this.data.formData.age || 0,
-        class: this.data.formData.class || '待分配',
+        gender: this.data.formData.childGender || '', // 修正：使用 childGender
+        age: parseInt(this.data.formData.childAge) || 0, // 修正：使用 childAge
+        class: '待分配', // 暂时没有班级字段
         photographerId: this.data.photographer._id || this.data.photographer.id,
         photographerName: this.data.photographer.name,
         lifePhotos: this.data.formData.childPhoto ? [this.data.formData.childPhoto] : [],
