@@ -102,21 +102,24 @@ Page({
         }
       }
 
-      // 查询历史记录
+      // 查询历史记录（用户只能看到自己的拒绝记录，不显示管理员内部审核流程）
       let historyPhotos = [];
       try {
-        console.log('🔍 [用户订单] 查询历史记录，订单ID:', orderId);
+        console.log('🔍 [用户订单] 查询历史记录（仅用户拒绝），订单ID:', orderId);
         const historyRes = await db.collection('order_photo_history')
-          .where({ orderId: orderId })
+          .where({ 
+            orderId: orderId,
+            rejectType: 'user' // 只查询用户自己的拒绝记录
+          })
           .orderBy('createdAt', 'desc')
           .get();
         
-        console.log('📋 [用户订单] 历史记录查询结果:', historyRes.data ? historyRes.data.length : 0, '条');
+        console.log('📋 [用户订单] 历史记录查询结果:', historyRes.data ? historyRes.data.length : 0, '条（仅用户拒绝）');
         
         if (historyRes.data && historyRes.data.length > 0) {
           historyPhotos = historyRes.data;
           historyPhotos.forEach((h, idx) => {
-            console.log(`   [${idx + 1}] 类型:${h.rejectType}, 时间:${h.rejectedAt}, 原因:${h.rejectReason}`);
+            console.log(`   [${idx + 1}] 时间:${h.rejectedAt}, 原因:${h.rejectReason}`);
           });
         }
       } catch (e) {

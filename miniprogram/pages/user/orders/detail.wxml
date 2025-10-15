@@ -100,29 +100,28 @@
           </view>
         </view>
 
-        <!-- 历史记录（所有提交和拒绝的完整记录） -->
+        <!-- 历史修改记录（仅显示用户自己要求修改的记录） -->
         <block wx:if="{{historyPhotos.length > 0}}">
           <view class="history-divider">
-            <text class="divider-text">📚 历史记录（共{{historyPhotos.length}}次）</text>
+            <text class="divider-text">📚 修改记录（共{{historyPhotos.length}}次）</text>
           </view>
           
           <block wx:for="{{historyPhotos}}" wx:key="index" wx:for-item="history">
-            <!-- 拒绝记录 -->
+            <!-- 用户要求修改 -->
             <view class="timeline-item">
-              <view class="timeline-dot {{history.rejectType === 'admin' ? 'admin-reject' : 'user-reject'}}"></view>
+              <view class="timeline-dot user-reject"></view>
               <view class="timeline-content">
                 <view class="timeline-header">
-                  <view class="timeline-title" wx:if="{{history.rejectType === 'admin'}}">❌ 管理员拒绝</view>
-                  <view class="timeline-title" wx:else>🔄 您要求修改</view>
+                  <view class="timeline-title">🔄 您要求修改</view>
                   <view class="timeline-time">{{history.rejectedAt}}</view>
                 </view>
-                <view class="timeline-desc reject {{history.rejectType === 'admin' ? 'admin-reject-bg' : 'user-reject-bg'}}">
-                  拒绝原因：{{history.rejectReason}}
+                <view class="timeline-desc reject user-reject-bg">
+                  修改原因：{{history.rejectReason}}
                 </view>
               </view>
             </view>
             
-            <!-- 提交记录 -->
+            <!-- 摄影师提交记录 -->
             <view class="timeline-item">
               <view class="timeline-dot"></view>
               <view class="timeline-content">

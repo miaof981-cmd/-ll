@@ -152,30 +152,11 @@
   box-shadow: 0 0 0 6rpx rgba(250, 173, 20, 0.2);
 }
 
-/* 管理员拒绝：红色 */
-.timeline-dot.admin-reject {
-  background: #ff4d4f;
-  border-color: #ff4d4f;
-  box-shadow: 0 0 0 6rpx rgba(255, 77, 79, 0.2);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-/* 用户拒绝：橙色 */
+/* 用户要求修改：橙色 */
 .timeline-dot.user-reject {
   background: #ff9800;
   border-color: #ff9800;
   box-shadow: 0 0 0 6rpx rgba(255, 152, 0, 0.2);
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
 }
 
 .timeline-content {
@@ -270,12 +251,7 @@
   font-weight: 500;
 }
 
-/* 拒绝原因背景区分 */
-.admin-reject-bg {
-  background: #fff1f0 !important;
-  border-left-color: #ff4d4f !important;
-}
-
+/* 修改原因背景 */
 .user-reject-bg {
   background: #fff7e6 !important;
   border-left-color: #ff9800 !important;
