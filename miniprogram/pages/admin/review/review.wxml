@@ -96,18 +96,16 @@
       <view class="actions">
         <button 
           class="action-btn approve" 
-          bindtap="quickApprove"
+          catchtap="quickApprove"
           data-id="{{item._id}}"
-          catchtap="stopPropagation"
         >
           <text class="btn-icon">✓</text>
           <text class="btn-text">通过</text>
         </button>
         <button 
           class="action-btn reject" 
-          bindtap="quickReject"
+          catchtap="quickReject"
           data-id="{{item._id}}"
-          catchtap="stopPropagation"
         >
           <text class="btn-icon">✕</text>
           <text class="btn-text">拒绝</text>
