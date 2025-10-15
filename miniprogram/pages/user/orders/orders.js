@@ -79,7 +79,14 @@ Page({
               order.photographerInfo = photographerRes.data;
             }
           } catch (e) {
-            console.error('加载摄影师信息失败:', e);
+            console.warn('摄影师信息加载失败，使用订单中的信息:', order.photographerId);
+            // 使用订单中已有的摄影师信息
+            if (order.photographerName) {
+              order.photographerInfo = {
+                name: order.photographerName,
+                _id: order.photographerId
+              };
+            }
           }
         }
 
