@@ -214,15 +214,18 @@ Page({
   async confirmOrder(e) {
     const { id } = e.currentTarget.dataset;
     
+    console.log('🎯 [订单列表] 确认订单，ID:', id);
+    
     const res = await wx.showModal({
       title: '确认收货',
-      content: '确认对摄影师的作品满意吗？',
+      content: '确认对摄影师的作品满意吗？确认后订单将完成，并自动创建学生档案。',
       confirmText: '确认满意',
       cancelText: '查看详情'
     });
 
     if (res.cancel) {
       // 跳转到详情页查看
+      console.log('📋 用户选择查看详情');
       wx.navigateTo({
         url: `/pages/user/orders/detail?id=${id}`
       });
@@ -230,22 +233,19 @@ Page({
     }
 
     if (res.confirm) {
+      console.log('✅ 用户确认，开始处理...');
       wx.showLoading({ title: '处理中...' });
+      
       try {
-        const db = wx.cloud.database();
-        await db.collection('activity_orders').doc(id).update({
-          data: {
-            status: 'completed',
-            confirmedAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        });
-
+        // ⚠️ 重要：直接跳转到详情页，让详情页的 confirmWork() 处理
+        // 因为详情页已经有完整的档案创建逻辑
+        console.log('🔄 跳转到详情页处理确认逻辑...');
         wx.hideLoading();
-        wx.showToast({ title: '确认成功', icon: 'success' });
-        this.loadOrders(); // 重新加载订单列表
+        wx.navigateTo({
+          url: `/pages/user/orders/detail?id=${id}&autoConfirm=true`
+        });
       } catch (e) {
-        console.error('确认失败:', e);
+        console.error('❌ 确认失败:', e);
         wx.hideLoading();
         wx.showToast({ title: '操作失败', icon: 'none' });
       }

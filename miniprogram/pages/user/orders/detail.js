@@ -17,10 +17,19 @@ Page({
   onLoad(options) {
     console.log('🎯 [用户订单详情页] 页面加载');
     console.log('📄 当前页面路径:', getCurrentPages()[getCurrentPages().length - 1].route);
+    console.log('📋 参数:', options);
     
     if (options.id) {
       this.setData({ orderId: options.id });
       this.loadOrderDetail(options.id);
+      
+      // 如果有 autoConfirm 参数，自动触发确认
+      if (options.autoConfirm === 'true') {
+        console.log('🔔 检测到自动确认参数，将在页面加载后自动确认...');
+        setTimeout(() => {
+          this.confirmWork();
+        }, 500); // 延迟500ms确保页面数据已加载
+      }
     }
     
     // 检查页面栈，判断是否可以返回
