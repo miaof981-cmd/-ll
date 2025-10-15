@@ -158,7 +158,13 @@ Page({
       
       // 保存历史记录（如果集合存在）
       try {
-        await db.collection('order_photo_history').add({
+        console.log('💾 [快速审核] 准备保存历史记录...');
+        console.log('   - orderId:', id);
+        console.log('   - photos数量:', (order.photos || []).length);
+        console.log('   - rejectType: admin');
+        console.log('   - rejectReason:', rejectReason);
+        
+        const addRes = await db.collection('order_photo_history').add({
           data: {
             orderId: id,
             photos: order.photos || [],
@@ -169,9 +175,10 @@ Page({
             createdAt: now
           }
         });
-        console.log('✅ 历史记录保存成功');
+        console.log('✅ [快速审核] 历史记录保存成功！新记录ID:', addRes._id);
       } catch (historyErr) {
-        console.warn('⚠️ 保存历史记录失败（集合可能不存在）:', historyErr.message);
+        console.warn('⚠️ [快速审核] 保存历史记录失败（集合可能不存在）:', historyErr.message);
+        console.error('完整错误:', historyErr);
         // 不影响主流程继续执行
       }
       

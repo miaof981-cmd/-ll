@@ -99,25 +99,9 @@
           </view>
         </view>
 
-        <!-- 历史记录（按时间倒序，最新的在上面） -->
+        <!-- 历史记录（按时间倒序，每条记录内部先提交后拒绝） -->
         <block wx:for="{{historyPhotos}}" wx:key="index" wx:for-item="history">
-          <!-- 拒绝记录 -->
-          <view class="timeline-item">
-            <view class="timeline-dot reject"></view>
-            <view class="timeline-content">
-              <view class="timeline-header">
-                <text class="timeline-label" wx:if="{{history.rejectType === 'admin'}}">❌ 管理员拒绝</text>
-                <text class="timeline-label" wx:else>🔄 用户要求修改</text>
-                <text class="timeline-time">{{history.rejectedAt}}</text>
-              </view>
-              <view class="reject-reason">
-                <text class="reject-label">拒绝原因：</text>
-                <text class="reject-text">{{history.rejectReason}}</text>
-              </view>
-            </view>
-          </view>
-          
-          <!-- 提交记录 -->
+          <!-- 提交记录（先发生） -->
           <view class="timeline-item">
             <view class="timeline-dot"></view>
             <view class="timeline-content">
@@ -139,6 +123,22 @@
                     data-url="{{photo}}"
                   />
                 </view>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 拒绝记录（后发生） -->
+          <view class="timeline-item">
+            <view class="timeline-dot reject"></view>
+            <view class="timeline-content">
+              <view class="timeline-header">
+                <text class="timeline-label" wx:if="{{history.rejectType === 'admin'}}">❌ 管理员拒绝</text>
+                <text class="timeline-label" wx:else>🔄 用户要求修改</text>
+                <text class="timeline-time">{{history.rejectedAt}}</text>
+              </view>
+              <view class="reject-reason">
+                <text class="reject-label">拒绝原因：</text>
+                <text class="reject-text">{{history.rejectReason}}</text>
               </view>
             </view>
           </view>

@@ -64,17 +64,24 @@ Page({
       // 查询历史照片记录
       let historyPhotos = [];
       try {
-        console.log('🔍 查询历史记录，订单ID:', orderId);
+        console.log('🔍 [订单管理] 查询历史记录，订单ID:', orderId);
+        console.log('📊 查询条件: where({ orderId:', orderId, '})');
+        
         const historyRes = await db.collection('order_photo_history')
           .where({ orderId: orderId })
           .orderBy('createdAt', 'desc')
           .get();
         
-        console.log('📋 历史记录查询结果:', historyRes.data);
+        console.log('📋 [订单管理] 历史记录查询结果:');
+        console.log('   - 查询到记录数:', historyRes.data ? historyRes.data.length : 0);
+        console.log('   - 完整数据:', historyRes.data);
         
         if (historyRes.data && historyRes.data.length > 0) {
           historyPhotos = historyRes.data;
-          console.log('✅ 找到历史记录', historyPhotos.length, '条');
+          console.log('✅ [订单管理] 找到历史记录', historyPhotos.length, '条');
+          historyPhotos.forEach((h, idx) => {
+            console.log(`   [${idx + 1}] 类型:${h.rejectType}, 时间:${h.rejectedAt}, 原因:${h.rejectReason}`);
+          });
         } else {
           console.log('⚠️ 数据库中没有找到历史记录');
           
@@ -243,47 +250,108 @@ Page({
 
   // 审核拒绝
   async rejectWork() {
-    wx.showModal({
+    const that = this;
+    
+    const modalRes = await wx.showModal({
       title: '审核拒绝',
-      content: '确认拒绝此作品？摄影师需要重新拍摄。',
+      content: '',
       editable: true,
-      placeholderText: '请输入拒绝原因...',
-      success: async (res) => {
-        if (res.confirm) {
-          const rejectReason = res.content || '作品不符合要求，请重新拍摄';
-          
-          wx.showLoading({ title: '处理中...' });
-          try {
-            const db = wx.cloud.database();
-            await db.collection('activity_orders').doc(this.data.orderId).update({
-              data: {
-                status: orderStatus.ORDER_STATUS.IN_PROGRESS,
-                adminRejectReason: rejectReason,
-                adminRejectedAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-              }
-            });
-
-            wx.hideLoading();
-            wx.showToast({
-              title: '已拒绝，通知摄影师重拍',
-              icon: 'success',
-              duration: 2000
-            });
-
-            // 重新加载订单详情
-            this.loadOrderDetail(this.data.orderId);
-          } catch (e) {
-            console.error('操作失败:', e);
-            wx.hideLoading();
-            wx.showToast({
-              title: '操作失败',
-              icon: 'error'
-            });
-          }
-        }
-      }
+      placeholderText: '例如：光线不足、构图不佳、画面模糊等',
+      confirmText: '确认拒绝',
+      confirmColor: '#ff4d4f'
     });
+
+    if (!modalRes.confirm) return;
+
+    const rejectReason = (modalRes.content || '').trim();
+    
+    // 验证拒绝原因
+    if (!rejectReason) {
+      wx.showToast({
+        title: '请输入拒绝原因',
+        icon: 'none'
+      });
+      setTimeout(() => {
+        that.rejectWork();
+      }, 1500);
+      return;
+    }
+    
+    if (rejectReason.length < 5) {
+      wx.showToast({
+        title: '拒绝原因至少5个字',
+        icon: 'none'
+      });
+      setTimeout(() => {
+        that.rejectWork();
+      }, 1500);
+      return;
+    }
+    
+    wx.showLoading({ title: '处理中...' });
+    
+    try {
+      const db = wx.cloud.database();
+      const now = new Date().toISOString();
+      
+      // 保存历史记录
+      try {
+        console.log('💾 [订单管理-拒绝] 准备保存历史记录...');
+        console.log('   - orderId:', this.data.orderId);
+        console.log('   - photos数量:', (this.data.order.photos || []).length);
+        console.log('   - rejectType: admin');
+        console.log('   - rejectReason:', rejectReason);
+        
+        const addRes = await db.collection('order_photo_history').add({
+          data: {
+            orderId: this.data.orderId,
+            photos: this.data.order.photos || [],
+            rejectType: 'admin',
+            rejectReason: rejectReason,
+            submittedAt: this.data.order.submittedAt || now,
+            rejectedAt: now,
+            createdAt: now
+          }
+        });
+        console.log('✅ [订单管理-拒绝] 历史记录保存成功！新记录ID:', addRes._id);
+      } catch (historyErr) {
+        console.warn('⚠️ [订单管理-拒绝] 保存历史记录失败（集合可能不存在）:', historyErr.message);
+        console.error('完整错误:', historyErr);
+        // 不影响主流程继续执行
+      }
+      
+      // 获取当前拒绝次数并累加
+      const currentRejectCount = this.data.order.rejectCount || 0;
+      
+      await db.collection('activity_orders').doc(this.data.orderId).update({
+        data: {
+          status: orderStatus.ORDER_STATUS.IN_PROGRESS,
+          adminRejectReason: rejectReason,
+          adminRejectedAt: now,
+          rejectCount: currentRejectCount + 1, // 累加拒绝次数
+          updatedAt: now
+        }
+      });
+
+      wx.hideLoading();
+      wx.showToast({
+        title: '已拒绝，通知摄影师重拍',
+        icon: 'success',
+        duration: 2000
+      });
+
+      // 重新加载订单详情
+      setTimeout(() => {
+        this.loadOrderDetail(this.data.orderId);
+      }, 500);
+    } catch (e) {
+      console.error('操作失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '操作失败',
+        icon: 'error'
+      });
+    }
   },
 
   // 开始拍摄

@@ -94,16 +94,23 @@ Page({
       // 尝试从数据库查询该订单的历史记录
       try {
         console.log('🔍 查询历史记录，订单ID:', orderId);
+        console.log('📊 查询条件: where({ orderId:', orderId, '})');
+        
         const historyRes = await db.collection('order_photo_history')
           .where({ orderId: orderId })
           .orderBy('createdAt', 'desc')
           .get();
         
-        console.log('📋 历史记录查询结果:', historyRes.data);
+        console.log('📋 历史记录查询结果:');
+        console.log('   - 查询到记录数:', historyRes.data ? historyRes.data.length : 0);
+        console.log('   - 完整数据:', historyRes.data);
         
         if (historyRes.data && historyRes.data.length > 0) {
           historyPhotos = historyRes.data;
           console.log('✅ 找到历史记录', historyPhotos.length, '条');
+          historyPhotos.forEach((h, idx) => {
+            console.log(`   [${idx + 1}] 类型:${h.rejectType}, 时间:${h.rejectedAt}, 原因:${h.rejectReason}`);
+          });
         } else {
           console.log('⚠️ 数据库中没有找到历史记录');
           
@@ -321,7 +328,13 @@ Page({
 
       // 保存历史记录（包含提交时间和拒绝时间）
       try {
-        await db.collection('order_photo_history').add({
+        console.log('💾 准备保存历史记录...');
+        console.log('   - orderId:', this.data.orderId);
+        console.log('   - photos数量:', (this.data.order.photos || []).length);
+        console.log('   - rejectType: admin');
+        console.log('   - rejectReason:', rejectReason);
+        
+        const addRes = await db.collection('order_photo_history').add({
           data: {
             orderId: this.data.orderId,
             photos: this.data.order.photos || [],
@@ -332,9 +345,10 @@ Page({
             createdAt: now
           }
         });
-        console.log('✅ 历史记录已保存');
+        console.log('✅ 历史记录保存成功！新记录ID:', addRes._id);
       } catch (historyErr) {
         console.warn('⚠️ 保存历史记录失败（集合可能不存在）:', historyErr.message);
+        console.error('完整错误:', historyErr);
         // 不影响主流程继续执行
       }
 
