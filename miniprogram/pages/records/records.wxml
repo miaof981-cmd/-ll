@@ -28,10 +28,12 @@
         <text class="card-type">学籍档案</text>
       </view>
       <view class="card-body profile-body">
-        <view class="profile-photo">
-          <image wx:if="{{student.avatar}}" class="photo-img" src="{{student.avatar}}" mode="aspectFill" />
-          <text wx:else class="photo-placeholder">📷</text>
-          <text class="photo-label">证件照</text>
+        <view class="profile-photo-wrapper">
+          <text class="photo-title">📸 证件照</text>
+          <view class="profile-photo">
+            <image wx:if="{{student.avatar}}" class="photo-img" src="{{student.avatar}}" mode="aspectFit" />
+            <text wx:else class="photo-placeholder">📷</text>
+          </view>
         </view>
         <view class="profile-info">
           <view class="info-row">
@@ -55,13 +57,21 @@
             <text class="info-value">{{student.age || '-'}}岁</text>
           </view>
           <view class="info-row">
-            <text class="info-label">家长</text>
+            <text class="info-label">家长姓名</text>
             <text class="info-value">{{student.parentName || '-'}}</text>
           </view>
           <view class="info-row">
-            <text class="info-label">电话</text>
+            <text class="info-label">联系电话</text>
             <text class="info-value">{{student.parentPhone || '-'}}</text>
           </view>
+          <view class="info-row" wx:if="{{student.parentWechat}}">
+            <text class="info-label">家长微信</text>
+            <text class="info-value">{{student.parentWechat}}</text>
+          </view>
+        </view>
+        <view wx:if="{{student.expectations}}" class="expectations-section">
+          <view class="expectations-title">💭 家长期许</view>
+          <view class="expectations-content">{{student.expectations}}</view>
         </view>
       </view>
     </view>

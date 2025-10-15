@@ -541,6 +541,8 @@ Page({
               class: order.class || '待分配',
               parentName: order.parentName || '',
               parentPhone: order.parentPhone || '',
+              parentWechat: order.parentWechat || '', // 家长微信号
+              expectations: order.remark || order.expectations || '', // 对孩子的期许
               createdAt: now,
               updatedAt: now,
               source: 'order', // 标记来源：订单自动创建

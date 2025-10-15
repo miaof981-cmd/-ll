@@ -369,22 +369,39 @@
   background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
 }
 
+.profile-photo-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.photo-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #667eea;
+  letter-spacing: 2rpx;
+}
+
 .profile-photo {
   position: relative;
-  width: 240rpx;
-  height: 300rpx;
-  margin: 0 auto 24rpx;
+  width: 280rpx;
+  height: 350rpx;
   border: 4rpx dashed #667eea;
   border-radius: 16rpx;
   overflow: hidden;
   background: white;
   box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .photo-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .photo-placeholder {
@@ -395,20 +412,6 @@
   height: 100%;
   font-size: 80rpx;
   color: #bbb;
-}
-
-.photo-label {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 24rpx;
-  text-align: center;
-  font-weight: 600;
-  letter-spacing: 2rpx;
 }
 
 .profile-info {
@@ -455,6 +458,30 @@
   color: #2c3e50;
   font-weight: 600;
   text-align: right;
+}
+
+.expectations-section {
+  margin-top: 16rpx;
+  padding: 24rpx;
+  background: white;
+  border: 2rpx solid #e8ecf1;
+  border-radius: 12rpx;
+}
+
+.expectations-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 16rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 2rpx dashed #e8ecf1;
+}
+
+.expectations-content {
+  font-size: 26rpx;
+  color: #5a6c7d;
+  line-height: 1.8;
+  text-align: justify;
 }
 
 /* ==================== 成绩卡片 ==================== */

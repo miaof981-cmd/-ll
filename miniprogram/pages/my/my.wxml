@@ -59,7 +59,7 @@
         <view class="child-info">
           <text class="child-name">{{item.name}}</text>
           <text class="child-detail">学号: {{item.studentId}}</text>
-          <text class="child-detail">{{item.grade}} {{item.class}}</text>
+          <text wx:if="{{item.class && item.class !== '待分配'}}" class="child-detail">{{item.grade}} {{item.class}}</text>
         </view>
         <view class="arrow">→</view>
       </view>

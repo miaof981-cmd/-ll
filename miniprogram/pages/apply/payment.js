@@ -88,13 +88,15 @@ Page({
         studentName: this.data.formData.childName,
         parentName: this.data.formData.parentName || '',
         parentPhone: this.data.formData.parentPhone || '',
+        parentWechat: this.data.formData.parentWechat || '', // 家长微信号
         gender: this.data.formData.childGender || '', // 修正：使用 childGender
         age: parseInt(this.data.formData.childAge) || 0, // 修正：使用 childAge
         class: '待分配', // 暂时没有班级字段
         photographerId: this.data.photographer._id || this.data.photographer.id,
         photographerName: this.data.photographer.name,
         lifePhotos: this.data.formData.childPhoto ? [this.data.formData.childPhoto] : [],
-        remark: this.data.formData.expectations || '',
+        remark: this.data.formData.expectations || '', // 对孩子的期许
+        expectations: this.data.formData.expectations || '', // 对孩子的期许（冗余字段，确保兼容）
         totalPrice: this.data.photographer.price || 20,
         status: 'in_progress', // 进行中（拍摄中）
         paymentMethod: this.data.paymentMethod,
