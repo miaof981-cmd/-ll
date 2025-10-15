@@ -1,49 +1,12 @@
 <!--pages/records/records.wxml-->
 <view class="records-container">
-  <!-- 学生基本信息卡片 -->
-  <view wx:if="{{student}}" class="student-info-card">
-    <view class="info-header">
-      <view class="student-avatar">
-        <image wx:if="{{student.avatar}}" class="avatar-img" src="{{student.avatar}}" mode="aspectFill" />
-        <text wx:else class="avatar-placeholder">👤</text>
-      </view>
-      <view class="student-basic">
-        <text class="student-name">{{student.name}}</text>
-        <text class="student-id">学号：{{student.studentId}}</text>
-        <text class="student-class">{{student.class || '待分配'}}</text>
-      </view>
-      <view class="profile-action" bindtap="logout">
-        <text class="action-text">退出</text>
-      </view>
+  <!-- 顶部标题栏 -->
+  <view class="header-bar">
+    <view class="header-left">
+      <text class="header-icon">📚</text>
+      <text class="header-title">学生档案</text>
     </view>
-    
-    <view class="info-details">
-      <view class="detail-item">
-        <text class="detail-label">性别</text>
-        <text class="detail-value">{{student.gender || '-'}}</text>
-      </view>
-      <view class="detail-item">
-        <text class="detail-label">年龄</text>
-        <text class="detail-value">{{student.age || '-'}}岁</text>
-      </view>
-      <view class="detail-item">
-        <text class="detail-label">家长</text>
-        <text class="detail-value">{{student.parentName || '-'}}</text>
-      </view>
-      <view class="detail-item">
-        <text class="detail-label">联系电话</text>
-        <text class="detail-value">{{student.parentPhone || '-'}}</text>
-      </view>
-    </view>
-  </view>
-
-  <!-- 档案标题 -->
-  <view class="section-title-bar">
-    <view class="title-left">
-      <text class="section-icon">📚</text>
-      <text class="section-title">学生档案</text>
-    </view>
-    <view class="title-right" wx:if="{{isAdmin}}">
+    <view class="header-right" wx:if="{{isAdmin}}">
       <button class="btn-edit" bindtap="toggleEdit">
         {{isEditing ? '完成' : '编辑'}}
       </button>
@@ -51,10 +14,58 @@
         + 添加
       </button>
     </view>
+    <view class="header-action" wx:else bindtap="logout">
+      <text class="action-text">退出</text>
+    </view>
   </view>
 
   <!-- 瀑布流档案卡片 -->
   <view wx:if="{{!loading}}" class="waterfall-container">
+    <!-- 学籍档案卡片 -->
+    <view wx:if="{{student}}" class="archive-card profile-card {{isEditing ? 'editing' : ''}}">
+      <view class="card-header">
+        <view class="card-icon">🎓</view>
+        <text class="card-type">学籍档案</text>
+      </view>
+      <view class="card-body profile-body">
+        <view class="profile-photo">
+          <image wx:if="{{student.avatar}}" class="photo-img" src="{{student.avatar}}" mode="aspectFill" />
+          <text wx:else class="photo-placeholder">📷</text>
+          <text class="photo-label">证件照</text>
+        </view>
+        <view class="profile-info">
+          <view class="info-row">
+            <text class="info-label">姓名</text>
+            <text class="info-value">{{student.name}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">学号</text>
+            <text class="info-value">{{student.studentId}}</text>
+          </view>
+          <view class="info-row" wx:if="{{student.class && student.class !== '待分配'}}">
+            <text class="info-label">班级</text>
+            <text class="info-value">{{student.class}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">性别</text>
+            <text class="info-value">{{student.gender || '-'}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">年龄</text>
+            <text class="info-value">{{student.age || '-'}}岁</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">家长</text>
+            <text class="info-value">{{student.parentName || '-'}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">电话</text>
+            <text class="info-value">{{student.parentPhone || '-'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 成绩卡片 -->
     <view 
       wx:for="{{records.reportCards}}" 
