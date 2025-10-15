@@ -380,7 +380,10 @@ async function getRecords(studentId) {
   
   try {
     const db = getDB();
-    const res = await db.collection(`records:${studentId}`).get();
+    // 使用统一的 student_records 集合，通过 studentId 字段查询
+    const res = await db.collection('student_records')
+      .where({ studentId: studentId })
+      .get();
     console.log('✅ 云端获取档案成功:', res.data.length);
     return res.data;
   } catch (e) {
@@ -401,15 +404,17 @@ async function addRecord(studentId, record) {
   
   try {
     const db = getDB();
-    const res = await db.collection(`records:${studentId}`).add({
+    // 使用统一的 student_records 集合，添加 studentId 字段
+    const res = await db.collection('student_records').add({
       data: {
+        studentId: studentId,
         ...record,
         createdAt: new Date().toISOString()
       }
     });
     
     console.log('✅ 云端添加档案成功');
-    return { _id: res._id, ...record };
+    return { _id: res._id, studentId, ...record };
   } catch (e) {
     console.error('❌ 添加档案失败:', e);
     throw e;

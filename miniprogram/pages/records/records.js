@@ -104,6 +104,7 @@ Page({
           studentId: student.studentId,
           name: student.name
         },
+        student: student, // 完整的学生信息（包含证件照、性别、年龄、班级等）
         studentId: student.studentId,
         records,
         loading: false

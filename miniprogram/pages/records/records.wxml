@@ -1,16 +1,39 @@
 <!--pages/records/records.wxml-->
 <view class="records-container">
-  <!-- 顶部用户信息卡片 -->
-  <view class="user-profile-card">
-    <view class="profile-avatar">
-      <text class="avatar-icon">👤</text>
+  <!-- 学生基本信息卡片 -->
+  <view wx:if="{{student}}" class="student-info-card">
+    <view class="info-header">
+      <view class="student-avatar">
+        <image wx:if="{{student.avatar}}" class="avatar-img" src="{{student.avatar}}" mode="aspectFill" />
+        <text wx:else class="avatar-placeholder">👤</text>
+      </view>
+      <view class="student-basic">
+        <text class="student-name">{{student.name}}</text>
+        <text class="student-id">学号：{{student.studentId}}</text>
+        <text class="student-class">{{student.class || '待分配'}}</text>
+      </view>
+      <view class="profile-action" bindtap="logout">
+        <text class="action-text">退出</text>
+      </view>
     </view>
-    <view class="profile-info">
-      <text class="profile-name">{{userInfo.name}}</text>
-      <text class="profile-id">学号：{{userInfo.studentId}}</text>
-    </view>
-    <view class="profile-action" bindtap="logout">
-      <text class="action-text">退出</text>
+    
+    <view class="info-details">
+      <view class="detail-item">
+        <text class="detail-label">性别</text>
+        <text class="detail-value">{{student.gender || '-'}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">年龄</text>
+        <text class="detail-value">{{student.age || '-'}}岁</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">家长</text>
+        <text class="detail-value">{{student.parentName || '-'}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">联系电话</text>
+        <text class="detail-value">{{student.parentPhone || '-'}}</text>
+      </view>
     </view>
   </view>
 
