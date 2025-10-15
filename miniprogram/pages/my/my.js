@@ -97,14 +97,35 @@ Page({
   // 加载孩子列表
   async loadChildren() {
     try {
-      const userInfo = this.data.userInfo;
-      if (userInfo && userInfo.children) {
+      const db = wx.cloud.database();
+      
+      console.log('📡 开始加载孩子列表...');
+      
+      // 从 students 集合查询当前用户的孩子
+      const res = await db.collection('students')
+        .where({
+          _openid: wx.cloud.database().command.eq(wx.cloud.database().command.openid())
+        })
+        .get();
+      
+      console.log('✅ 查询到的孩子数量:', res.data ? res.data.length : 0);
+      
+      if (res.data && res.data.length > 0) {
+        console.log('📋 孩子列表:', res.data);
         this.setData({
-          children: userInfo.children
+          children: res.data
+        });
+      } else {
+        console.log('⚠️ 没有找到孩子记录');
+        this.setData({
+          children: []
         });
       }
     } catch (e) {
-      console.error('加载孩子列表失败:', e);
+      console.error('❌ 加载孩子列表失败:', e);
+      this.setData({
+        children: []
+      });
     }
   },
 
