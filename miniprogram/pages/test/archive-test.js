@@ -285,7 +285,36 @@ Page({
         this.addLog(`   档案ID: ${addResult._id}`);
         this.addLog(`   学号: ${studentId}`);
 
-        // 3.5 更新订单关联学号
+        // 3.5 创建学籍档案记录
+        this.addLog('📝 创建学籍档案记录...');
+        const recordData = {
+          studentId: studentId,
+          studentName: orderData.studentName,
+          gender: orderData.gender,
+          age: orderData.age,
+          birthDate: '',
+          idCard: '',
+          phone: orderData.parentPhone,
+          parentName: orderData.parentName,
+          parentPhone: orderData.parentPhone,
+          address: '',
+          class: orderData.class,
+          avatar: orderData.photos[0],
+          lifePhotos: [],
+          status: 'active',
+          createdAt: now,
+          updatedAt: now,
+          source: 'order',
+          sourceOrderId: orderRes._id
+        };
+        
+        await db.collection('student_records').add({
+          data: recordData
+        });
+        
+        this.addLog('✅ 学籍档案记录创建成功！');
+
+        // 3.6 更新订单关联学号
         await db.collection('activity_orders').doc(orderRes._id).update({
           data: {
             studentId: studentId,

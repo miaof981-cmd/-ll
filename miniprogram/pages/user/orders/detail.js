@@ -557,7 +557,36 @@ Page({
             console.log('   档案ID:', addResult._id);
             console.log('   学号:', studentId);
             
-            // 2.4 更新订单，关联学号
+            // 2.4 创建学籍档案记录（student_records）
+            console.log('📝 创建学籍档案记录...');
+            const recordData = {
+              studentId: studentId,
+              studentName: order.studentName,
+              gender: order.gender || '',
+              age: order.age || 0,
+              birthDate: '',
+              idCard: '',
+              phone: order.parentPhone || '',
+              parentName: order.parentName || '',
+              parentPhone: order.parentPhone || '',
+              address: '',
+              class: order.class || '待分配',
+              avatar: order.photos && order.photos.length > 0 ? order.photos[0] : '', // 证件照
+              lifePhotos: order.lifePhotos || [],
+              status: 'active',
+              createdAt: now,
+              updatedAt: now,
+              source: 'order', // 标记来源：订单自动创建
+              sourceOrderId: this.data.orderId
+            };
+            
+            await db.collection('student_records').add({
+              data: recordData
+            });
+            
+            console.log('✅ 学籍档案记录创建成功！');
+            
+            // 2.5 更新订单，关联学号
             await db.collection('activity_orders').doc(this.data.orderId).update({
               data: {
                 studentId: studentId,

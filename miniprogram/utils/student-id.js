@@ -5,14 +5,21 @@
 
 /**
  * 生成下一个学号
- * @returns {Promise<string>} 返回格式化的学号，如 "0001", "0002"
+ * @returns {Promise<string>} 返回格式化的学号，如 "20250001", "20250002"
  */
 async function generateNextStudentId() {
   try {
     const db = wx.cloud.database();
+    const year = new Date().getFullYear(); // 当前年份，如 2025
     
-    // 获取当前最大的学号
+    // 获取当前年份的所有学号
     const { data: students } = await db.collection('students')
+      .where({
+        studentId: db.RegExp({
+          regexp: `^${year}`, // 匹配以当前年份开头的学号
+          options: 'i'
+        })
+      })
       .orderBy('studentId', 'desc')
       .limit(1)
       .get();
@@ -23,15 +30,15 @@ async function generateNextStudentId() {
       const lastStudentId = students[0].studentId;
       console.log('📝 当前最大学号:', lastStudentId);
       
-      // 解析最后一个学号的数字部分
-      const lastNumber = parseInt(lastStudentId);
+      // 提取年份后面的数字部分（后4位）
+      const lastNumber = parseInt(lastStudentId.substring(4));
       if (!isNaN(lastNumber)) {
         nextNumber = lastNumber + 1;
       }
     }
     
-    // 格式化为4位数字，前面补0
-    const newStudentId = String(nextNumber).padStart(4, '0');
+    // 格式化：年份(4位) + 序号(4位)，如 20250001
+    const newStudentId = `${year}${String(nextNumber).padStart(4, '0')}`;
     console.log('✅ 生成新学号:', newStudentId);
     
     return newStudentId;
