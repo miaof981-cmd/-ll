@@ -280,6 +280,19 @@
   box-shadow: 0 0 0 2rpx #ff4d4f;
 }
 
+/* 管理员拒绝：红色 */
+.timeline-dot.admin-reject {
+  background: #ff4d4f;
+  box-shadow: 0 0 0 2rpx #ff4d4f;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 用户拒绝：橙色 */
+.timeline-dot.user-reject {
+  background: #ff9800;
+  box-shadow: 0 0 0 2rpx #ff9800;
+}
+
 .timeline-dot.create {
   background: #8c8c8c;
   box-shadow: 0 0 0 2rpx #8c8c8c;
@@ -361,6 +374,24 @@
   background: white;
   border-radius: 8rpx;
   border-left: 4rpx solid #ff4d4f;
+}
+
+/* 管理员拒绝原因：红色左边框 + 红色背景 */
+.admin-reject-reason {
+  margin-top: 12rpx;
+  padding: 12rpx;
+  background: #fff1f0;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #ff4d4f;
+}
+
+/* 用户拒绝原因：橙色左边框 + 橙色背景 */
+.user-reject-reason {
+  margin-top: 12rpx;
+  padding: 12rpx;
+  background: #fff7e6;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #ff9800;
 }
 
 .reject-label {
