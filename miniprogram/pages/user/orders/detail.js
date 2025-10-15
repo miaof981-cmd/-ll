@@ -6,6 +6,7 @@ Page({
     order: null,
     activityInfo: null,
     photographerInfo: null,
+    historyPhotos: [], // 历史提交记录
     loading: true,
     showRejectModal: false,
     rejectReason: '',
@@ -101,16 +102,42 @@ Page({
         }
       }
 
+      // 查询历史记录
+      let historyPhotos = [];
+      try {
+        console.log('🔍 [用户订单] 查询历史记录，订单ID:', orderId);
+        const historyRes = await db.collection('order_photo_history')
+          .where({ orderId: orderId })
+          .orderBy('createdAt', 'desc')
+          .get();
+        
+        console.log('📋 [用户订单] 历史记录查询结果:', historyRes.data ? historyRes.data.length : 0, '条');
+        
+        if (historyRes.data && historyRes.data.length > 0) {
+          historyPhotos = historyRes.data;
+          historyPhotos.forEach((h, idx) => {
+            console.log(`   [${idx + 1}] 类型:${h.rejectType}, 时间:${h.rejectedAt}, 原因:${h.rejectReason}`);
+          });
+        }
+      } catch (e) {
+        console.error('❌ [用户订单] 查询历史记录失败:', e);
+      }
+
       // 添加状态信息
       order.statusText = orderStatus.getStatusText(order.status);
       order.statusColor = orderStatus.getStatusColor(order.status);
       order.statusIcon = orderStatus.getStatusIcon(order.status);
       order.userActions = orderStatus.getUserActions(order.status);
 
+      console.log('=== [用户订单] 页面数据设置 ===');
+      console.log('订单信息:', order);
+      console.log('历史记录数量:', historyPhotos.length);
+
       this.setData({
         order,
         activityInfo,
         photographerInfo,
+        historyPhotos,
         loading: false
       });
 
@@ -236,6 +263,37 @@ Page({
       wx.previewImage({
         urls: this.data.order.photos,
         current: this.data.order.photos[index]
+      });
+    }
+  },
+
+  // 预览历史照片（历史记录始终带水印）
+  async previewHistoryPhoto(e) {
+    const { photos, index } = e.currentTarget.dataset;
+    
+    console.log('预览历史照片，共', photos.length, '张');
+    
+    wx.showLoading({ title: '添加水印中...' });
+    
+    try {
+      const watermarkedImages = await this.addWatermarkToImages(photos);
+      wx.hideLoading();
+      
+      wx.previewImage({
+        urls: watermarkedImages,
+        current: watermarkedImages[index]
+      });
+    } catch (e) {
+      console.error('添加水印失败:', e);
+      wx.hideLoading();
+      wx.showToast({
+        title: '水印添加失败，显示原图',
+        icon: 'none'
+      });
+      // 失败则直接预览原图
+      wx.previewImage({
+        urls: photos,
+        current: photos[index]
       });
     }
   },

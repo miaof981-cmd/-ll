@@ -100,6 +100,57 @@
           </view>
         </view>
 
+        <!-- 历史记录（所有提交和拒绝的完整记录） -->
+        <block wx:if="{{historyPhotos.length > 0}}">
+          <view class="history-divider">
+            <text class="divider-text">📚 历史记录（共{{historyPhotos.length}}次）</text>
+          </view>
+          
+          <block wx:for="{{historyPhotos}}" wx:key="index" wx:for-item="history">
+            <!-- 拒绝记录 -->
+            <view class="timeline-item">
+              <view class="timeline-dot {{history.rejectType === 'admin' ? 'admin-reject' : 'user-reject'}}"></view>
+              <view class="timeline-content">
+                <view class="timeline-header">
+                  <view class="timeline-title" wx:if="{{history.rejectType === 'admin'}}">❌ 管理员拒绝</view>
+                  <view class="timeline-title" wx:else>🔄 您要求修改</view>
+                  <view class="timeline-time">{{history.rejectedAt}}</view>
+                </view>
+                <view class="timeline-desc reject {{history.rejectType === 'admin' ? 'admin-reject-bg' : 'user-reject-bg'}}">
+                  拒绝原因：{{history.rejectReason}}
+                </view>
+              </view>
+            </view>
+            
+            <!-- 提交记录 -->
+            <view class="timeline-item">
+              <view class="timeline-dot"></view>
+              <view class="timeline-content">
+                <view class="timeline-header">
+                  <view class="timeline-title">📸 摄影师提交</view>
+                  <view class="timeline-time">{{history.submittedAt}}</view>
+                </view>
+                <view class="timeline-desc">提交了 {{history.photos.length}} 张照片</view>
+                <!-- 历史照片预览 -->
+                <view wx:if="{{history.photos.length > 0}}" class="timeline-photos history-photos">
+                  <view
+                    wx:for="{{history.photos}}"
+                    wx:for-item="photo"
+                    wx:key="photo"
+                    class="timeline-photo-item"
+                    bindtap="previewHistoryPhoto"
+                    data-photos="{{history.photos}}"
+                    data-index="{{index}}"
+                  >
+                    <image class="timeline-photo-img" src="{{photo}}" mode="aspectFill"></image>
+                    <view class="history-badge">历史</view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+        </block>
+
         <!-- 订单创建 -->
         <view class="timeline-item">
           <view class="timeline-dot active"></view>
