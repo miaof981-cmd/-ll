@@ -55,6 +55,72 @@
       </view>
     </view>
 
+    <!-- 作品照片 -->
+    <view wx:if="{{order.photos && order.photos.length > 0}}" class="section-card">
+      <view class="section-title">提交作品（{{order.photos.length}}张）</view>
+      <view class="photos-grid">
+        <image 
+          wx:for="{{order.photos}}" 
+          wx:key="index" 
+          class="photo-item"
+          src="{{item}}" 
+          mode="aspectFill"
+          bindtap="previewPhoto"
+          data-url="{{item}}"
+        />
+      </view>
+    </view>
+
+    <!-- 历史记录 -->
+    <view wx:if="{{historyPhotos.length > 0}}" class="section-card">
+      <view class="section-title">交稿历史（{{historyPhotos.length}}次）</view>
+      <view class="timeline">
+        <block wx:for="{{historyPhotos}}" wx:key="index" wx:for-item="history">
+          <!-- 提交记录 -->
+          <view class="timeline-item">
+            <view class="timeline-dot"></view>
+            <view class="timeline-content">
+              <view class="timeline-header">
+                <text class="timeline-label">📸 摄影师提交作品</text>
+                <text class="timeline-time">{{history.submittedAt}}</text>
+              </view>
+              <!-- 显示提交的照片 -->
+              <view wx:if="{{history.photos && history.photos.length > 0}}" class="history-photos">
+                <view class="history-photos-grid">
+                  <image 
+                    wx:for="{{history.photos}}" 
+                    wx:for-item="photo"
+                    wx:key="photo"
+                    class="history-photo"
+                    src="{{photo}}" 
+                    mode="aspectFill"
+                    bindtap="previewPhoto"
+                    data-url="{{photo}}"
+                  />
+                </view>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 拒绝记录 -->
+          <view class="timeline-item">
+            <view class="timeline-dot reject"></view>
+            <view class="timeline-content">
+              <view class="timeline-header">
+                <text class="timeline-label" wx:if="{{history.rejectType === 'admin'}}">❌ 管理员拒绝</text>
+                <text class="timeline-label" wx:else>🔄 用户要求修改</text>
+                <text class="timeline-time">{{history.rejectedAt}}</text>
+              </view>
+              <view class="reject-reason">
+                <text class="reject-label">拒绝原因：</text>
+                <text class="reject-text">{{history.rejectReason}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+
     <!-- 订单信息 -->
     <view class="section-card">
       <view class="section-title">订单信息</view>

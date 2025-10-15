@@ -232,3 +232,115 @@
   background: #9ca3af;
 }
 
+/* 照片网格 */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.photo-item {
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+  background: #f0f0f0;
+}
+
+/* 时间线 */
+.timeline {
+  position: relative;
+  padding-left: 40rpx;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 32rpx;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -40rpx;
+  top: 8rpx;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #1890ff;
+  border: 3rpx solid white;
+  box-shadow: 0 0 0 2rpx #1890ff;
+}
+
+.timeline-dot.reject {
+  background: #ff4d4f;
+  box-shadow: 0 0 0 2rpx #ff4d4f;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -32rpx;
+  top: 24rpx;
+  bottom: 0;
+  width: 2rpx;
+  background: #e8e8e8;
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-content {
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  padding: 20rpx;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.timeline-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.timeline-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.history-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.history-photo {
+  width: 100%;
+  height: 150rpx;
+  border-radius: 8rpx;
+  background: #f0f0f0;
+}
+
+.reject-reason {
+  margin-top: 12rpx;
+  padding: 12rpx;
+  background: white;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #ff4d4f;
+}
+
+.reject-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.reject-text {
+  font-size: 26rpx;
+  color: #333;
+  margin-left: 8rpx;
+}

@@ -7,6 +7,7 @@ Page({
     userInfo: null,
     activityInfo: null,
     photographerInfo: null,
+    historyPhotos: [],  // 添加历史记录
     loading: true
   },
 
@@ -60,17 +61,93 @@ Page({
         }
       }
 
+      // 查询历史照片记录
+      let historyPhotos = [];
+      try {
+        console.log('🔍 查询历史记录，订单ID:', orderId);
+        const historyRes = await db.collection('order_photo_history')
+          .where({ orderId: orderId })
+          .orderBy('createdAt', 'desc')
+          .get();
+        
+        console.log('📋 历史记录查询结果:', historyRes.data);
+        
+        if (historyRes.data && historyRes.data.length > 0) {
+          historyPhotos = historyRes.data;
+          console.log('✅ 找到历史记录', historyPhotos.length, '条');
+        } else {
+          console.log('⚠️ 数据库中没有找到历史记录');
+          
+          // 如果数据库没有历史记录，但订单本身有拒绝信息，尝试从订单字段重建
+          const hasRejectInfo = order.rejectCount > 0 || order.adminRejectReason || order.rejectReason;
+          
+          if (hasRejectInfo) {
+            console.log('🔄 尝试从订单字段重建历史记录...');
+            console.log('订单拒绝次数:', order.rejectCount);
+            console.log('管理员拒绝原因:', order.adminRejectReason);
+            console.log('用户拒绝原因:', order.rejectReason);
+            
+            // 如果有管理员拒绝记录
+            if (order.adminRejectReason && order.adminRejectedAt) {
+              historyPhotos.push({
+                orderId: orderId,
+                photos: order.photos || [],
+                rejectType: 'admin',
+                rejectReason: order.adminRejectReason,
+                submittedAt: order.submittedAt || order.adminRejectedAt,
+                rejectedAt: order.adminRejectedAt,
+                createdAt: order.adminRejectedAt,
+                _fromOrderField: true
+              });
+              console.log('✅ 从订单字段重建了管理员拒绝记录');
+            }
+            
+            // 如果有用户拒绝记录
+            if (order.rejectReason && order.rejectedAt) {
+              historyPhotos.push({
+                orderId: orderId,
+                photos: order.photos || [],
+                rejectType: 'user',
+                rejectReason: order.rejectReason,
+                submittedAt: order.submittedAt || order.rejectedAt,
+                rejectedAt: order.rejectedAt,
+                rejectCount: order.rejectCount,
+                createdAt: order.rejectedAt,
+                _fromOrderField: true
+              });
+              console.log('✅ 从订单字段重建了用户拒绝记录');
+            }
+            
+            // 按时间排序（最新的在前）
+            historyPhotos.sort((a, b) => {
+              const timeA = new Date(a.rejectedAt || a.createdAt).getTime();
+              const timeB = new Date(b.rejectedAt || b.createdAt).getTime();
+              return timeB - timeA;
+            });
+            
+            console.log('✅ 重建历史记录完成，共', historyPhotos.length, '条');
+          }
+        }
+      } catch (e) {
+        console.error('❌ 查询历史记录失败:', e);
+      }
+
       // 添加状态信息
       order.statusText = orderStatus.getStatusText(order.status);
       order.statusColor = orderStatus.getStatusColor(order.status);
       order.statusIcon = orderStatus.getStatusIcon(order.status);
       order.adminActions = orderStatus.getAdminActions(order.status);
 
+      console.log('=== 页面数据设置 ===');
+      console.log('订单信息:', order);
+      console.log('历史记录数量:', historyPhotos.length);
+
       this.setData({
         order,
         userInfo,
         activityInfo,
         photographerInfo,
+        historyPhotos,
         loading: false
       });
 
@@ -83,6 +160,23 @@ Page({
         icon: 'error'
       });
     }
+  },
+
+  // 预览照片
+  previewPhoto(e) {
+    const { url } = e.currentTarget.dataset;
+    const { order } = this.data;
+    
+    // 收集所有照片URL
+    let urls = [];
+    if (order.photos && order.photos.length > 0) {
+      urls = [...order.photos];
+    }
+    
+    wx.previewImage({
+      urls: urls.length > 0 ? urls : [url],
+      current: url
+    });
   },
 
   // 联系用户
