@@ -73,6 +73,11 @@
         <text class="menu-text">管理后台</text>
         <text class="arrow">→</text>
       </navigator>
+      <navigator class="menu-item test-item" url="/pages/test/archive-test">
+        <text class="menu-icon">🧪</text>
+        <text class="menu-text">档案测试工具</text>
+        <text class="arrow">→</text>
+      </navigator>
     </view>
 
     <!-- 摄影师功能：快捷入口 -->
