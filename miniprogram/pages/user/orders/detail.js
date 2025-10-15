@@ -85,11 +85,18 @@ Page({
 
       // 加载活动信息
       let activityInfo = null;
-      try {
-        const activityRes = await db.collection('activities').doc(order.activityId).get();
-        activityInfo = activityRes.data;
-      } catch (e) {
-        console.error('加载活动信息失败:', e);
+      if (order.activityId) {
+        try {
+          console.log('🔍 [用户订单] 加载活动信息, activityId:', order.activityId);
+          const activityRes = await db.collection('activities').doc(order.activityId).get();
+          activityInfo = activityRes.data;
+          console.log('✅ [用户订单] 活动信息加载成功:', activityInfo?.name, '类别:', activityInfo?.category);
+        } catch (e) {
+          console.error('❌ [用户订单] 加载活动信息失败:', e);
+          console.error('   订单的 activityId:', order.activityId);
+        }
+      } else {
+        console.warn('⚠️ [用户订单] 订单没有 activityId');
       }
 
       // 加载摄影师信息

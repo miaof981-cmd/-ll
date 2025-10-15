@@ -83,17 +83,21 @@ Page({
 
       console.log('✅ 学生记录创建成功:', studentRes._id);
 
-      // 2. 获取证件照活动ID（查找默认证件照活动）
+      // 2. 获取证件照活动ID（查找证件照活动，优先默认，无默认则取第一个）
       const activityRes = await db.collection('activities')
         .where({
-          isDefault: true,
           category: '证件照'
         })
         .get();
 
       let activityId = '';
       if (activityRes.data && activityRes.data.length > 0) {
-        activityId = activityRes.data[0]._id;
+        // 优先选择默认活动，如果没有默认则取第一个
+        const defaultActivity = activityRes.data.find(a => a.isDefault === true);
+        activityId = defaultActivity ? defaultActivity._id : activityRes.data[0]._id;
+        console.log('✅ 使用证件照活动:', activityId);
+      } else {
+        console.warn('⚠️ 未找到证件照活动');
       }
 
       // 3. 创建证件照订单

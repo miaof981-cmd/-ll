@@ -11,24 +11,25 @@ exports.main = async (event, context) => {
   console.log('🔧 开始修复订单的 activityId...');
   
   try {
-    // 1. 查找默认证件照活动
+    // 1. 查找证件照活动（优先默认，无默认则取第一个）
     const { data: activities } = await db.collection('activities')
       .where({
-        isDefault: true,
         category: '证件照'
       })
       .get();
     
     if (!activities || activities.length === 0) {
-      console.error('❌ 未找到默认证件照活动');
+      console.error('❌ 未找到证件照活动');
       return {
         success: false,
-        message: '未找到默认证件照活动，请先在 activities 集合中创建'
+        message: '未找到证件照活动，请先在 activities 集合中创建'
       };
     }
     
-    const defaultActivity = activities[0];
-    console.log('✅ 找到默认证件照活动:', defaultActivity.name, '(_id:', defaultActivity._id, ')');
+    // 优先选择默认活动，如果没有默认则取第一个
+    const defaultActivity = activities.find(a => a.isDefault === true) || activities[0];
+    console.log('✅ 找到证件照活动:', defaultActivity.name || '(无名称)', '(_id:', defaultActivity._id, ')');
+    console.log('   是否默认活动:', defaultActivity.isDefault === true ? '是' : '否');
     
     // 2. 查找所有没有 activityId 或 activityId 为空的订单
     const { data: orders } = await db.collection('activity_orders')
