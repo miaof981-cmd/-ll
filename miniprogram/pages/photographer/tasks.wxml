@@ -112,11 +112,17 @@
         <!-- 活动信息 -->
         <view class="activity-section">
           <image 
-            wx:if="{{item.activityInfo && item.activityInfo.image}}"
+            wx:if="{{item.activityInfo && item.activityInfo.coverImage}}"
             class="activity-thumb" 
-            src="{{item.activityInfo.image}}" 
+            src="{{item.activityInfo.coverImage}}" 
             mode="aspectFill"
+            binderror="onImageError"
+            data-id="{{item._id}}"
+            data-type="activity"
           />
+          <view wx:else class="activity-thumb-placeholder">
+            <text>📷</text>
+          </view>
           <view class="activity-info">
             <text class="activity-name">{{item.activityInfo.name || '活动'}}</text>
             <text class="activity-price">¥{{item.activityInfo.price || item.price || 0}}</text>

@@ -260,6 +260,23 @@ Page({
     
     const date = new Date(dateStr);
     return `${date.getMonth() + 1}月${date.getDate()}日下单`;
+  },
+
+  // 图片加载错误处理
+  onImageError(e) {
+    const { id, type } = e.currentTarget.dataset;
+    console.error('❌ 图片加载失败:', {
+      type: type,
+      orderId: id,
+      src: e.detail.errMsg
+    });
+    
+    // 可以在这里添加重试逻辑或显示占位图
+    wx.showToast({
+      title: '部分图片加载失败',
+      icon: 'none',
+      duration: 2000
+    });
   }
 });
 
