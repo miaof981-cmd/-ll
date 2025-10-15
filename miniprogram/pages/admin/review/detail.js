@@ -105,7 +105,56 @@ Page({
           historyPhotos = historyRes.data;
           console.log('✅ 找到历史记录', historyPhotos.length, '条');
         } else {
-          console.log('⚠️ 没有找到历史记录');
+          console.log('⚠️ 数据库中没有找到历史记录');
+          
+          // 如果数据库没有历史记录，但订单本身有拒绝信息，尝试从订单字段重建
+          // 这是为了兼容在 order_photo_history 集合创建之前的旧数据
+          if (order.rejectCount && order.rejectCount > 0) {
+            console.log('🔄 尝试从订单字段重建历史记录...');
+            console.log('订单拒绝次数:', order.rejectCount);
+            console.log('管理员拒绝原因:', order.adminRejectReason);
+            console.log('用户拒绝原因:', order.rejectReason);
+            
+            // 如果有管理员拒绝记录
+            if (order.adminRejectReason && order.adminRejectedAt) {
+              historyPhotos.push({
+                orderId: orderId,
+                photos: order.photos || [],
+                rejectType: 'admin',
+                rejectReason: order.adminRejectReason,
+                submittedAt: order.submittedAt || order.adminRejectedAt,
+                rejectedAt: order.adminRejectedAt,
+                createdAt: order.adminRejectedAt,
+                _fromOrderField: true // 标记这是从订单字段重建的
+              });
+              console.log('✅ 从订单字段重建了管理员拒绝记录');
+            }
+            
+            // 如果有用户拒绝记录
+            if (order.rejectReason && order.rejectedAt) {
+              historyPhotos.push({
+                orderId: orderId,
+                photos: order.photos || [],
+                rejectType: 'user',
+                rejectReason: order.rejectReason,
+                submittedAt: order.submittedAt || order.rejectedAt,
+                rejectedAt: order.rejectedAt,
+                rejectCount: order.rejectCount,
+                createdAt: order.rejectedAt,
+                _fromOrderField: true
+              });
+              console.log('✅ 从订单字段重建了用户拒绝记录');
+            }
+            
+            // 按时间排序（最新的在前）
+            historyPhotos.sort((a, b) => {
+              const timeA = new Date(a.rejectedAt || a.createdAt).getTime();
+              const timeB = new Date(b.rejectedAt || b.createdAt).getTime();
+              return timeB - timeA;
+            });
+            
+            console.log('✅ 重建历史记录完成，共', historyPhotos.length, '条');
+          }
         }
       } catch (e) {
         console.error('❌ 查询历史记录失败:', e);
