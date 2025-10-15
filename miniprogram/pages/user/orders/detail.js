@@ -132,9 +132,15 @@ Page({
       order.statusColor = orderStatus.getStatusColor(order.status);
       order.statusIcon = orderStatus.getStatusIcon(order.status);
       order.userActions = orderStatus.getUserActions(order.status);
+      
+      // 确保 rejectCount 有默认值（新订单可能没有这个字段）
+      if (order.rejectCount === undefined || order.rejectCount === null) {
+        order.rejectCount = 0;
+      }
 
       console.log('=== [用户订单] 页面数据设置 ===');
       console.log('订单信息:', order);
+      console.log('拒绝次数:', order.rejectCount);
       console.log('历史记录数量:', historyPhotos.length);
 
       this.setData({

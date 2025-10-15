@@ -105,6 +105,11 @@ Page({
         activityId: activityId,
         studentId: this.data.studentId,
         studentName: this.data.formData.childName,
+        parentName: this.data.formData.parentName || '',
+        parentPhone: this.data.formData.parentPhone || '',
+        gender: this.data.formData.gender || '',
+        age: this.data.formData.age || 0,
+        class: this.data.formData.class || '待分配',
         photographerId: this.data.photographer._id || this.data.photographer.id,
         photographerName: this.data.photographer.name,
         lifePhotos: this.data.formData.childPhoto ? [this.data.formData.childPhoto] : [],
@@ -112,6 +117,7 @@ Page({
         totalPrice: this.data.photographer.price || 20,
         status: 'in_progress', // 进行中（拍摄中）
         paymentMethod: this.data.paymentMethod,
+        rejectCount: 0, // 初始化拒绝次数为0
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
