@@ -436,24 +436,33 @@ Page({
 
   // 确认作品满意
   async confirmWork() {
-    console.log('🔔 confirmWork() 函数被调用了！');
-    console.log('📋 当前订单数据:', this.data.order);
-    console.log('📋 当前活动数据:', this.data.activityInfo);
+    console.log('========================================');
+    console.log('🎯 confirmWork() 点击触发！！！');
+    console.log('========================================');
+    console.log('📦 当前订单数据:', JSON.stringify(this.data.order, null, 2));
+    console.log('📦 当前活动数据:', JSON.stringify(this.data.activityInfo, null, 2));
+    console.log('📦 订单ID:', this.data.orderId);
     
-    const res = await wx.showModal({
-      title: '确认收货',
-      content: '确认对摄影师的作品满意吗？确认后订单将完成，并自动创建学生档案。',
-      confirmText: '确认满意',
-      cancelText: '再看看'
-    });
-
-    if (!res.confirm) return;
-
-    wx.showLoading({ title: '处理中...' });
-
     try {
+      const res = await wx.showModal({
+        title: '确认收货',
+        content: '确认对摄影师的作品满意吗？确认后订单将完成，并自动创建学生档案。',
+        confirmText: '确认满意',
+        cancelText: '再看看'
+      });
+
+      console.log('💬 用户选择:', res.confirm ? '确认' : '取消');
+
+      if (!res.confirm) {
+        console.log('⏹ 用户取消确认');
+        return;
+      }
+
+      wx.showLoading({ title: '处理中...' });
+
       const db = wx.cloud.database();
       const now = new Date().toISOString();
+      console.log('⏰ 当前时间:', now);
       
       // 1. 更新订单状态
       await db.collection('activity_orders').doc(this.data.orderId).update({
@@ -464,17 +473,30 @@ Page({
         }
       });
 
+      console.log('✅ 订单状态已更新为 completed');
+
       // 2. 检查是否是证件照订单，如果是则自动创建学生档案
       const order = this.data.order;
       const activity = this.data.activityInfo;
       
+      console.log('========================================');
       console.log('📋 检查是否需要创建学生档案...');
-      console.log('   活动类别:', activity?.category);
-      console.log('   学生姓名:', order?.studentName);
+      console.log('   订单信息:');
+      console.log('     - 学生姓名:', order?.studentName);
+      console.log('     - 性别:', order?.gender);
+      console.log('     - 年龄:', order?.age);
+      console.log('     - 照片数量:', order?.photos?.length);
+      console.log('     - 第一张照片:', order?.photos?.[0]);
+      console.log('   活动信息:');
+      console.log('     - 活动ID:', activity?._id);
+      console.log('     - 活动名称:', activity?.name);
+      console.log('     - 活动类别:', activity?.category);
+      console.log('     - 类别类型:', typeof activity?.category);
+      console.log('========================================');
       
       // 判断是否是证件照订单（category === '证件照'）
       if (activity?.category === '证件照' && order?.studentName) {
-        console.log('✅ 这是证件照订单，开始创建学生档案...');
+        console.log('✅ 条件匹配！这是证件照订单，开始创建学生档案...');
         
         try {
           // 2.1 检查该学生是否已有档案
@@ -485,12 +507,20 @@ Page({
             })
             .get();
           
+          console.log('🔍 检查学生档案是否已存在...');
+          console.log('   查询条件: name =', order.studentName, ', _openid =', order._openid);
+          console.log('   查询结果数量:', existingStudent.data?.length);
+
           if (existingStudent.data && existingStudent.data.length > 0) {
             console.log('⚠️ 学生档案已存在，跳过创建');
+            console.log('   已存在的档案:', existingStudent.data[0]);
           } else {
+            console.log('📝 档案不存在，开始创建新档案...');
+            
             // 2.2 生成新学号
+            console.log('🔢 开始生成学号...');
             const studentId = await studentIdUtil.generateNextStudentId();
-            console.log('✅ 生成学号:', studentId);
+            console.log('✅ 学号生成成功:', studentId);
             
             // 2.3 创建学生档案
             const studentData = {
@@ -508,11 +538,15 @@ Page({
               sourceOrderId: this.data.orderId // 来源订单ID
             };
             
-            await db.collection('students').add({
+            console.log('🧾 准备写入档案数据:', JSON.stringify(studentData, null, 2));
+            
+            const addResult = await db.collection('students').add({
               data: studentData
             });
             
-            console.log('✅ 学生档案创建成功！学号:', studentId);
+            console.log('✅ 学生档案创建成功！');
+            console.log('   档案ID:', addResult._id);
+            console.log('   学号:', studentId);
             
             // 2.4 更新订单，关联学号
             await db.collection('activity_orders').doc(this.data.orderId).update({
@@ -534,9 +568,22 @@ Page({
             return;
           }
         } catch (archiveError) {
-          console.error('⚠️ 创建学生档案失败:', archiveError);
+          console.error('========================================');
+          console.error('❌ 创建学生档案失败！');
+          console.error('错误信息:', archiveError);
+          console.error('错误堆栈:', archiveError.stack);
+          console.error('========================================');
           // 档案创建失败不影响订单完成，只是提示用户
+          wx.showToast({
+            title: '档案创建失败: ' + archiveError.message,
+            icon: 'none',
+            duration: 3000
+          });
         }
+      } else {
+        console.log('⚠️ 条件不匹配，不创建档案');
+        console.log('   activity?.category === "证件照"?', activity?.category === '证件照');
+        console.log('   order?.studentName?', !!order?.studentName);
       }
 
       wx.hideLoading();
@@ -549,9 +596,18 @@ Page({
         }
       });
     } catch (e) {
-      console.error('确认失败:', e);
+      console.error('========================================');
+      console.error('❌ confirmWork 执行出错！');
+      console.error('错误类型:', e.name);
+      console.error('错误信息:', e.message);
+      console.error('错误堆栈:', e.stack);
+      console.error('========================================');
       wx.hideLoading();
-      wx.showToast({ title: '操作失败', icon: 'none' });
+      wx.showToast({ 
+        title: '操作失败: ' + e.message, 
+        icon: 'none',
+        duration: 3000
+      });
     }
   },
 
