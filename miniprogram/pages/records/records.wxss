@@ -14,6 +14,7 @@
   padding: 32rpx 24rpx 24rpx;
   background: white;
   border-bottom: 1rpx solid #eee;
+  transition: all 0.3s ease;
 }
 
 .header-left {
@@ -32,26 +33,44 @@
   color: #2c3e50;
 }
 
-.header-right {
+.header-actions {
   display: flex;
+  align-items: center;
   gap: 16rpx;
+  flex-shrink: 0;
 }
 
-.btn-edit, .btn-add {
-  padding: 12rpx 24rpx;
-  font-size: 24rpx;
-  border-radius: 12rpx;
-  border: none;
+/* 圆形图标按钮 */
+.icon-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
 }
 
-.btn-edit {
-  background: #ecf0f1;
-  color: #34495e;
+.icon-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(59, 130, 246, 0.4);
 }
 
-.btn-add {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.icon-btn.delete {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.3);
+}
+
+.icon-btn.delete:active {
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.4);
+}
+
+.icon-btn-icon {
+  font-size: 32rpx;
   color: white;
+  font-weight: 500;
 }
 
 .header-action {
@@ -297,11 +316,78 @@
 }
 
 .card-type {
+  flex: 1;
   font-size: 26rpx;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 2rpx;
+}
+
+/* 卡片操作按钮 */
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-left: auto;
+}
+
+.card-edit-icon,
+.card-delete-icon {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  transition: all 0.2s ease;
+}
+
+.card-edit-icon {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+}
+
+.card-edit-icon:active {
+  background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
+  transform: scale(0.95);
+}
+
+.card-delete-icon {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.card-delete-icon:active {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  transform: scale(0.95);
+}
+
+/* 学籍档案编辑按钮 */
+/* 浮动编辑按钮 - 圆形铅笔图标 */
+.floating-edit-btn {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(59, 130, 246, 0.4);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.floating-edit-btn:active {
+  transform: scale(0.9);
+  box-shadow: 0 2rpx 12rpx rgba(59, 130, 246, 0.5);
+}
+
+.floating-edit-btn .edit-icon {
+  font-size: 28rpx;
+  color: white;
 }
 
 .card-body {
@@ -339,6 +425,7 @@
 
 /* ==================== 学籍档案卡片（复用预览页面样式） ==================== */
 .student-archive-card {
+  position: relative;
   margin: 24rpx;
   margin-bottom: 40rpx;
   background: #ffffff;
@@ -509,11 +596,18 @@
 }
 
 /* 信息区域 */
+/* 档案小标题头部（带按钮） */
+.archive-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 32rpx 0 16rpx;
+}
+
 .archive-section-title {
   font-size: 28rpx;
   font-weight: 600;
   color: #1e3a8a;
-  margin: 32rpx 0 16rpx;
   padding-left: 16rpx;
   border-left: 6rpx solid #1a56db;
 }
@@ -560,6 +654,121 @@
 }
 
 /* 档案底部 */
+/* ==================== 生活照相册卡片 ==================== */
+.life-photos-card {
+  background: white;
+  border-left: 6rpx solid #3b82f6;
+}
+
+.life-photos-card .card-header {
+  background: #f8fafc;
+}
+
+.photo-count {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-left: 8rpx;
+}
+
+.edit-icon {
+  margin-left: auto;
+  width: 52rpx;
+  height: 52rpx;
+  background: #3b82f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  box-shadow: 0 2rpx 8rpx rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.edit-icon:active {
+  transform: scale(0.9);
+  background: #2563eb;
+  box-shadow: 0 1rpx 4rpx rgba(59, 130, 246, 0.4);
+}
+
+.life-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.life-photo-item {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #f1f5f9;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.life-photo-item:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.12);
+}
+
+.life-photo-item.locked {
+  border: 2rpx solid #3b82f6;
+  box-shadow: 0 2rpx 8rpx rgba(59, 130, 246, 0.2);
+}
+
+.life-photo-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-lock-badge {
+  position: absolute;
+  bottom: 6rpx;
+  right: 6rpx;
+  width: 44rpx;
+  height: 44rpx;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8rpx);
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.2);
+}
+
+.lock-icon {
+  font-size: 22rpx;
+}
+
+/* 更多照片遮罩 */
+.more-photos {
+  position: relative;
+}
+
+.more-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4rpx);
+}
+
+.more-count {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: white;
+}
+
 .archive-footer {
   display: flex;
   justify-content: space-between;
@@ -659,10 +868,21 @@
   border-left: 6rpx solid #10b981;
 }
 
+/* 图片容器 - 统一圆角边框样式 */
+.image-container {
+  width: 100%;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #f5f5f5;
+  margin: 16rpx 0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
 .card-image {
   width: 100%;
+  height: 400rpx;
   display: block;
-  background: var(--bg-tertiary);
+  object-fit: cover;
 }
 
 /* ==================== 编辑模式样式 ==================== */

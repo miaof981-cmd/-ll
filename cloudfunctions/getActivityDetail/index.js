@@ -40,14 +40,26 @@ exports.main = async (event, context) => {
     
     // 获取摄影师信息
     let photographers = [];
-    if (activity.photographerIds && activity.photographerIds.length > 0) {
-      const photographersRes = await db.collection('photographers')
-        .where({
-          _id: db.command.in(activity.photographerIds)
-        })
-        .get();
-      
-      photographers = photographersRes.data;
+    try {
+      if (activity.photographerIds && activity.photographerIds.length > 0) {
+        const photographersRes = await db.collection('photographers')
+          .where({ _id: db.command.in(activity.photographerIds) })
+          .limit(100)
+          .get();
+        photographers = photographersRes.data || [];
+      }
+
+      // 兜底策略：若未配置或数量过少，则展示可用摄影师（status=available）供用户选择
+      if (!photographers || photographers.length === 0) {
+        const fallbackRes = await db.collection('photographers')
+          .where({ status: 'available' })
+          .limit(100)
+          .get();
+        photographers = fallbackRes.data || [];
+      }
+    } catch (e) {
+      console.error('加载摄影师列表失败:', e);
+      photographers = [];
     }
     
     return {

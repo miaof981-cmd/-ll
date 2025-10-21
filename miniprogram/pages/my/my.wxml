@@ -78,6 +78,11 @@
         <text class="menu-text">档案测试工具</text>
         <text class="arrow">→</text>
       </navigator>
+      <navigator class="menu-item test-item" url="/pages/test-notification/test-notification">
+        <text class="menu-icon">📨</text>
+        <text class="menu-text">订阅消息测试</text>
+        <text class="arrow">→</text>
+      </navigator>
     </view>
 
     <!-- 摄影师功能：快捷入口 -->
@@ -119,13 +124,10 @@
   <!-- 未登录状态 -->
   <view wx:else class="not-login">
     <view class="login-icon">👤</view>
-    <text class="login-tip">欢迎来到学校小程序</text>
+    <text class="login-tip">欢迎来到次元学校</text>
     <text class="login-subtitle">请先登录查看更多功能</text>
     <navigator class="login-btn" url="/pages/login/login">
       <text>微信登录</text>
-    </navigator>
-    <navigator class="enroll-btn" url="/pages/apply/apply">
-      <text>申请入学</text>
     </navigator>
   </view>
 </view>

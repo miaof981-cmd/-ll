@@ -11,21 +11,28 @@ Page({
     },
     activeTab: 'grades', // grades, punishments, images
     loading: true,
-    isEditing: false,     // 编辑模式
     isAdmin: false,       // 是否管理员
     studentId: '',        // 学生学号
     archiveExpanded: false, // 学籍档案是否展开
+    isEditMode: false,    // 是否编辑模式（管理员专属）
     
-    // 新增档案弹窗
+    // 新增/编辑档案弹窗
     showAddDialog: false,
     addRecordType: 'grade',
-    newRecord: {}
+    newRecord: {},
+    editingRecordId: null // 正在编辑的档案ID，null表示新增
   },
 
   onLoad(options) {
     // 检查是否管理员
     const app = getApp();
     const isAdmin = app.globalData.isAdmin || false;
+    
+    console.log('📋 档案页面加载');
+    console.log('   app.globalData.isAdmin:', app.globalData.isAdmin);
+    console.log('   isAdmin:', isAdmin);
+    console.log('   options:', options);
+    
     this.setData({ isAdmin });
     
     // 支持从URL参数传入studentId（管理员查看档案）
@@ -100,6 +107,11 @@ Page({
         images: allRecords.filter(r => r.type === 'image')
       };
 
+      // 计算显示的照片
+      const photoData = this.calculateDisplayPhotos(student);
+      
+      console.log('🔧 设置档案数据, isAdmin保持为:', this.data.isAdmin);
+      
       this.setData({
         userInfo: {
           studentId: student.studentId,
@@ -108,8 +120,12 @@ Page({
         student: student, // 完整的学生信息（包含证件照、性别、年龄、班级等）
         studentId: student.studentId,
         records,
-        loading: false
+        loading: false,
+        // isAdmin: this.data.isAdmin, // 保持原有的管理员状态，不要覆盖
+        ...photoData // 展开照片显示数据
       });
+      
+      console.log('✅ 档案数据已设置, 当前 isAdmin:', this.data.isAdmin);
 
       wx.hideLoading();
     } catch (e) {
@@ -129,10 +145,164 @@ Page({
     });
   },
 
-  // 切换编辑模式
-  toggleEdit() {
+  // 计算显示的照片（证件照在第一个，只显示前3张）
+  calculateDisplayPhotos(student) {
+    if (!student) {
+      return {
+        displayPhotos: [],
+        displayPhotoCount: 0,
+        hasMorePhotos: false,
+        morePhotoCount: 0
+      };
+    }
+
+    // 证件照：优先使用 avatar，其次 certificatePhoto
+    const certificatePhoto = student.avatar || student.certificatePhoto || null;
+    
+    // 生活照：过滤掉证件照
+    const lifePhotos = (student.lifePhotos || []).filter(p => p !== certificatePhoto && p !== student.avatar);
+    
+    // 总数：证件照 + 生活照
+    const totalCount = (certificatePhoto ? 1 : 0) + lifePhotos.length;
+
+    // 证件照占1个位置，剩余2个位置给生活照
+    const maxDisplay = 2;
+    const displayPhotos = lifePhotos.slice(0, maxDisplay);
+    const hasMorePhotos = lifePhotos.length > maxDisplay;
+    const morePhotoCount = lifePhotos.length - maxDisplay;
+
+    return {
+      displayPhotos,
+      displayPhotoCount: totalCount,
+      hasMorePhotos,
+      morePhotoCount
+    };
+  },
+
+  // 编辑生活照
+  editLifePhotos(e) {
+    console.log('🎯 点击编辑生活照按钮');
+    console.log('   studentId:', this.data.studentId);
+    
+    if (!this.data.studentId) {
+      console.error('❌ studentId 为空，无法跳转');
+      wx.showToast({
+        title: 'studentId 为空',
+        icon: 'error'
+      });
+      return;
+    }
+    
+    console.log('✅ 跳转到编辑页面');
+    wx.navigateTo({
+      url: `/pages/my/edit-photos?studentId=${this.data.studentId}`,
+      success: () => {
+        console.log('✅ 跳转成功');
+      },
+      fail: (err) => {
+        console.error('❌ 跳转失败:', err);
+        wx.showToast({
+          title: '跳转失败',
+          icon: 'error'
+        });
+      }
+    });
+  },
+
+  // 预览生活照
+  previewLifePhoto(e) {
+    const index = e.currentTarget.dataset.index;
+    const student = this.data.student;
+    
+    if (!student) return;
+    
+    // 证件照：优先使用 avatar
+    const certificatePhoto = student.avatar || student.certificatePhoto;
+    
+    // 构建预览数组：证件照在第一个，后面是生活照
+    const previewUrls = [];
+    if (certificatePhoto) {
+      previewUrls.push(certificatePhoto);
+    }
+    
+    // 生活照：过滤掉证件照
+    const lifePhotos = (student.lifePhotos || []).filter(p => p !== certificatePhoto && p !== student.avatar);
+    previewUrls.push(...lifePhotos);
+    
+    if (previewUrls.length > 0) {
+      wx.previewImage({
+        urls: previewUrls,
+        current: previewUrls[index] || previewUrls[0]
+      });
+    }
+  },
+
+
+  // 编辑学生基本信息
+  editStudentBasicInfo() {
+    wx.navigateTo({
+      url: `/pages/admin/students/edit?studentId=${this.data.studentId}`
+    });
+  },
+
+  // 编辑档案记录
+  editRecord(e) {
+    const { id, type, item } = e.currentTarget.dataset;
+    console.log('编辑档案:', type, id, item);
+    
+    // 设置当前编辑的档案
     this.setData({
-      isEditing: !this.data.isEditing
+      showAddDialog: true,
+      addRecordType: type,
+      newRecord: item,
+      editingRecordId: id
+    });
+  },
+
+  // 删除学生
+  deleteStudent() {
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除学生「${this.data.student.name}」吗？\n这将同时删除该学生的所有档案记录。`,
+      confirmColor: '#ef4444',
+      success: async (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '删除中...' });
+          try {
+            const db = wx.cloud.database();
+            
+            // 1. 删除学生记录
+            await db.collection('students')
+              .where({ studentId: this.data.studentId })
+              .remove();
+
+            // 2. 删除学生档案记录
+            await db.collection('student_records')
+              .where({ studentId: this.data.studentId })
+              .remove();
+
+            console.log('✅ 学生删除成功:', this.data.studentId);
+            
+            wx.hideLoading();
+            wx.showToast({
+              title: '删除成功',
+              icon: 'success'
+            });
+
+            // 延迟返回
+            setTimeout(() => {
+              wx.navigateBack();
+            }, 1500);
+          } catch (e) {
+            console.error('❌ 删除学生失败:', e);
+            wx.hideLoading();
+            wx.showToast({
+              title: '删除失败',
+              icon: 'error'
+            });
+          }
+        }
+      }
     });
   },
 

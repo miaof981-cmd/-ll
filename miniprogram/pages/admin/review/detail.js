@@ -249,16 +249,72 @@ Page({
     if (!res.confirm) return;
 
     try {
-      wx.showLoading({ title: '处理中...' });
+      console.log('========================================');
+      console.log('🔍 [审核通过] 开始执行...');
+      console.log('   订单ID:', this.data.orderId);
+      console.log('   当前状态:', this.data.order.status);
+      console.log('========================================');
+
+      wx.showLoading({ title: '处理中...', mask: true });
 
       const db = wx.cloud.database();
-      await db.collection('activity_orders').doc(this.data.orderId).update({
-        data: {
-          status: 'pending_confirm',
-          reviewedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      });
+      const updateData = {
+        status: 'pending_confirm',
+        reviewedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      console.log('📝 准备更新数据:', updateData);
+
+      const updateResult = await db.collection('activity_orders')
+        .doc(this.data.orderId)
+        .update({
+          data: updateData
+        });
+
+      console.log('✅ 数据库更新结果:', updateResult);
+      console.log('   更新记录数:', updateResult.stats.updated);
+
+      if (updateResult.stats.updated === 0) {
+        console.error('⚠️ 警告：没有记录被更新！可能的原因：');
+        console.error('   1. 订单ID不存在');
+        console.error('   2. 数据库权限不足');
+        console.error('   3. 订单已被删除');
+        
+        wx.hideLoading();
+        wx.showModal({
+          title: '更新失败',
+          content: '订单状态未更新，请检查订单是否存在。详细信息请查看控制台。',
+          showCancel: false
+        });
+        return;
+      }
+
+      // 验证更新是否成功
+      console.log('🔍 验证更新结果...');
+      const verifyResult = await db.collection('activity_orders')
+        .doc(this.data.orderId)
+        .get();
+      
+      console.log('📊 验证结果 - 订单状态:', verifyResult.data.status);
+      
+      if (verifyResult.data.status !== 'pending_confirm') {
+        console.error('❌ 验证失败：状态未正确更新！');
+        console.error('   期望状态: pending_confirm');
+        console.error('   实际状态:', verifyResult.data.status);
+        
+        wx.hideLoading();
+        wx.showModal({
+          title: '状态异常',
+          content: `订单状态未正确更新。\n期望：待确认\n实际：${verifyResult.data.status}`,
+          showCancel: false
+        });
+        return;
+      }
+
+      console.log('========================================');
+      console.log('✅ [审核通过] 执行成功！');
+      console.log('========================================');
 
       wx.hideLoading();
       wx.showToast({
@@ -271,11 +327,19 @@ Page({
         wx.navigateBack();
       }, 2000);
     } catch (e) {
-      console.error('操作失败:', e);
+      console.error('========================================');
+      console.error('❌ [审核通过] 执行失败！');
+      console.error('错误信息:', e);
+      console.error('错误代码:', e.errCode);
+      console.error('错误消息:', e.errMsg);
+      console.error('完整错误:', JSON.stringify(e));
+      console.error('========================================');
+
       wx.hideLoading();
-      wx.showToast({
+      wx.showModal({
         title: '操作失败',
-        icon: 'error'
+        content: `审核失败：${e.errMsg || e.message}\n\n错误代码：${e.errCode || '未知'}\n\n请截图此信息并联系技术人员。`,
+        showCancel: false
       });
     }
   },

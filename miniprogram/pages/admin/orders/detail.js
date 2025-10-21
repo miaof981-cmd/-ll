@@ -145,9 +145,13 @@ Page({
       order.statusIcon = orderStatus.getStatusIcon(order.status);
       order.adminActions = orderStatus.getAdminActions(order.status);
 
-      console.log('=== 页面数据设置 ===');
+      console.log('========================================');
+      console.log('=== [订单管理] 页面数据设置 ===');
       console.log('订单信息:', order);
+      console.log('订单状态:', order.status);
+      console.log('管理员操作:', order.adminActions);
       console.log('历史记录数量:', historyPhotos.length);
+      console.log('========================================');
 
       this.setData({
         order,
@@ -205,8 +209,15 @@ Page({
   async handleAction(e) {
     const { action } = e.currentTarget.dataset;
     
+    console.log('========================================');
+    console.log('🔘 [按钮点击] handleAction 被触发');
+    console.log('   操作类型:', action);
+    console.log('   事件对象:', e);
+    console.log('========================================');
+    
     switch (action) {
       case 'approve':
+        console.log('✅ 执行审核通过操作...');
         await this.approveWork();
         break;
       case 'reject_review':
@@ -232,20 +243,24 @@ Page({
 
   // 审核通过
   async approveWork() {
-    wx.showModal({
+    console.log('========================================');
+    console.log('🔍 [订单管理-审核通过] 开始执行...');
+    console.log('   订单ID:', this.data.orderId);
+    console.log('   当前状态:', this.data.order.status);
+    console.log('========================================');
+
+    const res = await wx.showModal({
       title: '审核通过',
-      content: '确认摄影师作品已达标？审核通过后将展示给用户确认。',
-      success: async (res) => {
-        if (res.confirm) {
-          await this.updateOrderStatus(orderStatus.ORDER_STATUS.PENDING_CONFIRM);
-          wx.showToast({
-            title: '审核通过，等待用户确认',
-            icon: 'success',
-            duration: 2000
-          });
-        }
-      }
+      content: '确认摄影师作品已达标？审核通过后将展示给用户确认。'
     });
+
+    if (!res.confirm) {
+      console.log('❌ 用户取消审核');
+      return;
+    }
+
+    console.log('✅ 用户确认审核，开始更新订单状态...');
+    await this.updateOrderStatus(orderStatus.ORDER_STATUS.PENDING_CONFIRM);
   },
 
   // 审核拒绝
@@ -419,31 +434,99 @@ Page({
 
   // 更新订单状态
   async updateOrderStatus(newStatus) {
-    wx.showLoading({ title: '处理中...' });
+    console.log('========================================');
+    console.log('🔍 [更新订单状态] 开始执行...');
+    console.log('   订单ID:', this.data.orderId);
+    console.log('   当前状态:', this.data.order.status);
+    console.log('   目标状态:', newStatus);
+    console.log('========================================');
+
+    wx.showLoading({ title: '处理中...', mask: true });
 
     try {
       const db = wx.cloud.database();
-      await db.collection('activity_orders').doc(this.data.orderId).update({
-        data: {
-          status: newStatus,
-          updatedAt: new Date().toISOString()
-        }
-      });
+      const updateData = {
+        status: newStatus,
+        updatedAt: new Date().toISOString()
+      };
+
+      // 如果是审核通过，添加审核时间
+      if (newStatus === orderStatus.ORDER_STATUS.PENDING_CONFIRM) {
+        updateData.reviewedAt = new Date().toISOString();
+      }
+
+      console.log('📝 准备更新数据:', updateData);
+
+      const updateResult = await db.collection('activity_orders')
+        .doc(this.data.orderId)
+        .update({
+          data: updateData
+        });
+
+      console.log('✅ 数据库更新结果:', updateResult);
+      console.log('   更新记录数:', updateResult.stats.updated);
+
+      if (updateResult.stats.updated === 0) {
+        console.error('⚠️ 警告：没有记录被更新！');
+        wx.hideLoading();
+        wx.showModal({
+          title: '更新失败',
+          content: '订单状态未更新，请查看控制台。',
+          showCancel: false
+        });
+        return;
+      }
+
+      // 验证更新是否成功
+      console.log('🔍 验证更新结果...');
+      const verifyResult = await db.collection('activity_orders')
+        .doc(this.data.orderId)
+        .get();
+      
+      console.log('📊 验证结果 - 订单状态:', verifyResult.data.status);
+      
+      if (verifyResult.data.status !== newStatus) {
+        console.error('❌ 验证失败：状态未正确更新！');
+        console.error('   期望状态:', newStatus);
+        console.error('   实际状态:', verifyResult.data.status);
+        
+        wx.hideLoading();
+        wx.showModal({
+          title: '状态异常',
+          content: `订单状态未正确更新。\n期望：${newStatus}\n实际：${verifyResult.data.status}`,
+          showCancel: false
+        });
+        return;
+      }
+
+      console.log('========================================');
+      console.log('✅ [更新订单状态] 执行成功！');
+      console.log('========================================');
 
       wx.hideLoading();
       wx.showToast({
         title: '操作成功',
-        icon: 'success'
+        icon: 'success',
+        duration: 2000
       });
 
       // 重新加载订单详情
-      this.loadOrderDetail(this.data.orderId);
+      setTimeout(() => {
+        this.loadOrderDetail(this.data.orderId);
+      }, 500);
     } catch (e) {
-      console.error('更新订单状态失败:', e);
+      console.error('========================================');
+      console.error('❌ [更新订单状态] 执行失败！');
+      console.error('错误信息:', e);
+      console.error('错误代码:', e.errCode);
+      console.error('错误消息:', e.errMsg);
+      console.error('========================================');
+
       wx.hideLoading();
-      wx.showToast({
+      wx.showModal({
         title: '操作失败',
-        icon: 'error'
+        content: `更新失败：${e.errMsg || e.message}\n错误代码：${e.errCode || '未知'}`,
+        showCancel: false
       });
     }
   }

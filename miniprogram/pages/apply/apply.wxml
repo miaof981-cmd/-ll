@@ -82,21 +82,20 @@
 
     <view class="form-item">
       <view class="form-label required">生活照片</view>
-      <view class="upload-tip">上传孩子的生活照，限1张</view>
-      <view class="photo-upload">
-        <view wx:if="{{!formData.childPhoto}}" class="upload-btn" bindtap="uploadChildPhoto">
-          <view class="upload-icon">📷</view>
-          <view class="upload-text">点击上传</view>
+      <view class="upload-tip">上传孩子的生活照，最多4张（证件照完成后会自动添加为第5张）</view>
+      <view class="photos-grid">
+        <!-- 已上传的照片 -->
+        <view wx:for="{{formData.lifePhotos}}" wx:key="index" class="photo-item">
+          <image class="photo-img" src="{{item}}" mode="aspectFill" bindtap="previewLifePhoto" data-index="{{index}}"/>
+          <view class="photo-delete" bindtap="deleteLifePhoto" data-index="{{index}}">×</view>
         </view>
-        <view wx:else class="photo-preview">
-          <image class="preview-image" src="{{formData.childPhoto}}" mode="aspectFill"/>
-          <view class="photo-actions">
-            <view class="action-btn" bindtap="previewPhoto" data-url="{{formData.childPhoto}}">
-              <text>👁️ 预览</text>
-            </view>
-            <view class="action-btn delete" bindtap="deleteChildPhoto">
-              <text>🗑️ 删除</text>
-            </view>
+        
+        <!-- 上传按钮 -->
+        <view wx:if="{{formData.lifePhotos.length < 4}}" class="photo-item" bindtap="uploadLifePhotos">
+          <view class="upload-item">
+            <view class="upload-icon">📷</view>
+            <view class="upload-text">{{formData.lifePhotos.length === 0 ? '点击上传' : '继续添加'}}</view>
+            <view class="upload-count">{{formData.lifePhotos.length}}/4</view>
           </view>
         </view>
       </view>

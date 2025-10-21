@@ -6,7 +6,7 @@ Page({
       childName: '',
       childGender: '男',
       childAge: '',
-      childPhoto: '',
+      lifePhotos: [], // 生活照片数组，最多4张
       parentName: '',
       parentPhone: '',
       parentWechat: '',
@@ -40,46 +40,99 @@ Page({
     });
   },
 
-  // 上传孩子照片
-  uploadChildPhoto() {
+  // 上传生活照片（最多4张）
+  uploadLifePhotos() {
+    const currentCount = this.data.formData.lifePhotos.length;
+    const remainingCount = 4 - currentCount;
+    
+    if (remainingCount <= 0) {
+      wx.showToast({
+        title: '最多上传4张照片',
+        icon: 'none'
+      });
+      return;
+    }
+
     wx.chooseMedia({
-      count: 1,
+      count: remainingCount,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
-      success: (res) => {
-        const tempFilePath = res.tempFiles[0].tempFilePath;
-        this.setData({
-          'formData.childPhoto': tempFilePath
+      success: async (res) => {
+        console.log('📷 选择了', res.tempFiles.length, '张照片');
+        
+        wx.showLoading({
+          title: '上传中...',
+          mask: true
         });
-        wx.showToast({
-          title: '照片上传成功',
-          icon: 'success'
-        });
+        
+        try {
+          // 上传到云存储
+          const uploadPromises = res.tempFiles.map((file, index) => {
+            const cloudPath = `life-photos/${Date.now()}_${index}_${Math.random().toString(36).slice(2)}.${file.tempFilePath.split('.').pop()}`;
+            console.log(`📤 开始上传第 ${index + 1} 张照片到云存储:`, cloudPath);
+            
+            return wx.cloud.uploadFile({
+              cloudPath: cloudPath,
+              filePath: file.tempFilePath
+            });
+          });
+          
+          const uploadResults = await Promise.all(uploadPromises);
+          console.log('✅ 所有照片上传完成:', uploadResults);
+          
+          // 获取云存储的 fileID
+          const newPhotos = uploadResults.map((result, index) => {
+            console.log(`   [${index + 1}] fileID:`, result.fileID);
+            return result.fileID;
+          });
+          
+          const updatedPhotos = [...this.data.formData.lifePhotos, ...newPhotos];
+          this.setData({
+            'formData.lifePhotos': updatedPhotos
+          });
+          
+          wx.hideLoading();
+          wx.showToast({
+            title: `已上传${newPhotos.length}张照片`,
+            icon: 'success'
+          });
+        } catch (err) {
+          console.error('❌ 上传照片到云存储失败:', err);
+          wx.hideLoading();
+          wx.showModal({
+            title: '上传失败',
+            content: '照片上传失败，请重试：' + (err.errMsg || err.message),
+            showCancel: false
+          });
+        }
       },
       fail: (err) => {
-        console.error('选择照片失败：', err);
+        console.error('❌ 选择照片失败：', err);
       }
     });
   },
 
-  // 预览照片
-  previewPhoto(e) {
-    const url = e.currentTarget.dataset.url;
+  // 预览生活照
+  previewLifePhoto(e) {
+    const index = e.currentTarget.dataset.index;
     wx.previewImage({
-      urls: [url],
-      current: url
+      urls: this.data.formData.lifePhotos,
+      current: this.data.formData.lifePhotos[index]
     });
   },
 
-  // 删除照片
-  deleteChildPhoto() {
+  // 删除生活照
+  deleteLifePhoto(e) {
+    const index = e.currentTarget.dataset.index;
     wx.showModal({
       title: '确认删除',
       content: '确定要删除这张照片吗？',
       success: (res) => {
         if (res.confirm) {
+          const photos = [...this.data.formData.lifePhotos];
+          photos.splice(index, 1);
           this.setData({
-            'formData.childPhoto': ''
+            'formData.lifePhotos': photos
           });
           wx.showToast({
             title: '已删除',
@@ -92,7 +145,7 @@ Page({
 
   // 表单验证
   validateForm() {
-    const { childName, childPhoto, parentName, parentPhone, parentWechat } = this.data.formData;
+    const { childName, lifePhotos, parentName, parentPhone, parentWechat } = this.data.formData;
 
     if (!childName.trim()) {
       wx.showToast({
@@ -102,9 +155,9 @@ Page({
       return false;
     }
 
-    if (!childPhoto) {
+    if (!lifePhotos || lifePhotos.length === 0) {
       wx.showToast({
-        title: '请上传孩子的生活照',
+        title: '请至少上传1张生活照',
         icon: 'none'
       });
       return false;

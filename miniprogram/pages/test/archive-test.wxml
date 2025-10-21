@@ -20,6 +20,54 @@
     <button class="test-btn warning" bindtap="testCleanup">
       🗑️ 测试5: 清空测试数据
     </button>
+    <button class="test-btn purple" bindtap="addLifePhotosToStudent">
+      📸 测试6: 给现有学生添加生活照
+    </button>
+    <button class="test-btn danger" bindtap="fixOldOrdersWithLifePhotos">
+      🔧 测试7: 修复旧订单添加生活照
+    </button>
+    <button class="test-btn info" bindtap="checkOrderReviewStatus">
+      🔍 测试8: 检查订单审核状态
+    </button>
+    <button class="test-btn success" bindtap="manualApproveOrder">
+      ✅ 测试9: 批量审核通过订单
+    </button>
+    <button class="test-btn warning" bindtap="checkLifePhotosIssue">
+      📷 测试10: 检查参考图加载问题
+    </button>
+    <button class="test-btn info" bindtap="checkSpecificOrderLifePhotos">
+      🔎 测试11: 检查具体订单生活照
+    </button>
+    <button class="test-btn danger" bindtap="cleanInvalidLifePhotos">
+      🧹 测试12: 清理无效的生活照链接
+    </button>
+    <button class="test-btn primary" bindtap="fixWaitingShootOrders">
+      🔧 测试13: 修复 waiting_shoot 状态订单
+    </button>
+    <button class="test-btn info" bindtap="checkActivityData">
+      🔍 测试14: 检查活动数据
+    </button>
+    <button class="test-btn warning" bindtap="checkLatestOrders">
+      📋 测试15: 检查最新订单状态
+    </button>
+    <button class="test-btn danger" bindtap="fixAllWaitingShootToInProgress">
+      🔥 测试16: 一键修复所有待拍摄订单
+    </button>
+    <button class="test-btn danger" bindtap="deleteTestOrders">
+      🗑️ 测试17: 删除所有测试订单
+    </button>
+    <button class="test-btn info" bindtap="checkActivityPhotographers">
+      🔍 测试18: 检查活动和摄影师数据
+    </button>
+    <button class="test-btn danger" bindtap="deleteAllOrders">
+      💣 测试19: 删除所有订单（危险）
+    </button>
+    <button class="test-btn info" bindtap="checkLatestOrderPrice">
+      💰 测试20: 检查最新订单价格
+    </button>
+    <button class="test-btn warning" bindtap="diagnosePaymentIssue">
+      🔧 测试21: 诊断支付问题（完整分析）
+    </button>
   </view>
 
   <view wx:if="{{testResult}}" class="result-box">
@@ -49,6 +97,12 @@
     <view class="tip-item">• 测试3：自动完成整个流程（创建订单→确认→创建档案）</view>
     <view class="tip-item">• 测试4：查看数据库中所有档案</view>
     <view class="tip-item">• 测试5：删除所有测试产生的数据</view>
+    <view class="tip-item">• 测试6：给学号20250002的学生添加4张生活照</view>
+    <view class="tip-item">• 测试7：修复所有旧订单，添加测试生活照（解决参考图看不到的问题）</view>
+    <view class="tip-item">• 测试8：检查所有订单的审核状态，查看待审核和待确认订单</view>
+    <view class="tip-item">• 测试9：批量将所有待审核订单改为待确认状态（修复审核无效问题）</view>
+    <view class="tip-item">• 测试10：检查所有订单的生活照字段，统计有无参考图，测试云存储访问</view>
+    <view class="tip-item">• 测试11：查看最近5个订单的生活照详细信息，包括URL和字段类型</view>
   </view>
 </view>
 

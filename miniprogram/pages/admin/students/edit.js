@@ -7,8 +7,13 @@ Page({
     isEdit: false,
     formData: {
       name: '',
+      gender: '',
+      age: '',
+      avatar: '', // 证件照
       parentName: '',
-      admissionLetter: ''
+      parentPhone: '',
+      parentWechat: '',
+      expectations: ''
     },
     initRecords: [] // 初始档案记录
   },
@@ -39,8 +44,13 @@ Page({
         this.setData({
           formData: {
             name: student.name,
+            gender: student.gender || '',
+            age: student.age || '',
+            avatar: student.avatar || '',
             parentName: student.parentName,
-            admissionLetter: student.admissionLetter || ''
+            parentPhone: student.parentPhone || '',
+            parentWechat: student.parentWechat || '',
+            expectations: student.expectations || ''
           }
         });
       } else {
@@ -66,10 +76,90 @@ Page({
     });
   },
 
+  // 选择性别
+  selectGender(e) {
+    this.setData({
+      'formData.gender': e.currentTarget.dataset.gender
+    });
+  },
+
+  // 输入年龄
+  onAgeInput(e) {
+    this.setData({
+      'formData.age': e.detail.value
+    });
+  },
+
+  // 上传证件照
+  uploadAvatar() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: async (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+
+        wx.showLoading({ title: '上传中...' });
+
+        try {
+          // 上传到云存储
+          const timestamp = Date.now();
+          const cloudPath = `avatars/${this.data.studentId || timestamp}_${Math.random().toString(36).slice(2)}.jpg`;
+
+          const uploadResult = await wx.cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: tempFilePath
+          });
+
+          console.log('✅ 证件照上传成功:', uploadResult.fileID);
+
+          this.setData({
+            'formData.avatar': uploadResult.fileID
+          });
+
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传成功',
+            icon: 'success'
+          });
+        } catch (e) {
+          console.error('❌ 上传证件照失败:', e);
+          wx.hideLoading();
+          wx.showToast({
+            title: '上传失败',
+            icon: 'error'
+          });
+        }
+      }
+    });
+  },
+
   // 输入家长姓名
   onParentNameInput(e) {
     this.setData({
       'formData.parentName': e.detail.value
+    });
+  },
+
+  // 输入家长电话
+  onParentPhoneInput(e) {
+    this.setData({
+      'formData.parentPhone': e.detail.value
+    });
+  },
+
+  // 输入家长微信
+  onParentWechatInput(e) {
+    this.setData({
+      'formData.parentWechat': e.detail.value
+    });
+  },
+
+  // 输入家长期许
+  onExpectationsInput(e) {
+    this.setData({
+      'formData.expectations': e.detail.value
     });
   },
 
@@ -208,12 +298,28 @@ Page({
 
   // 保存学生
   async saveStudent() {
-    const { name, parentName, admissionLetter } = this.data.formData;
+    const { name, gender, age, parentName, parentPhone } = this.data.formData;
 
     // 验证必填字段
     if (!name.trim()) {
       wx.showToast({
         title: '请输入学生姓名',
+        icon: 'error'
+      });
+      return;
+    }
+
+    if (!gender) {
+      wx.showToast({
+        title: '请选择性别',
+        icon: 'error'
+      });
+      return;
+    }
+
+    if (!age) {
+      wx.showToast({
+        title: '请输入年龄',
         icon: 'error'
       });
       return;
@@ -227,9 +333,9 @@ Page({
       return;
     }
 
-    if (!this.data.isEdit && !admissionLetter) {
+    if (!parentPhone.trim()) {
       wx.showToast({
-        title: '请上传录取通知书',
+        title: '请输入联系电话',
         icon: 'error'
       });
       return;
@@ -240,7 +346,18 @@ Page({
     try {
       if (this.data.isEdit) {
         // 更新学生信息
-        const success = await cloudDB.updateStudent(this.data.studentId, this.data.formData);
+        const updateData = {
+          name: this.data.formData.name,
+          gender: this.data.formData.gender,
+          age: this.data.formData.age,
+          avatar: this.data.formData.avatar,
+          parentName: this.data.formData.parentName,
+          parentPhone: this.data.formData.parentPhone,
+          parentWechat: this.data.formData.parentWechat,
+          expectations: this.data.formData.expectations
+        };
+        
+        const success = await cloudDB.updateStudent(this.data.studentId, updateData);
         
         if (!success) {
           throw new Error('更新失败');
@@ -249,8 +366,10 @@ Page({
         // 添加新学生
         const studentData = {
           name,
+          gender,
+          age,
           parentName,
-          admissionLetter,
+          parentPhone,
           password: '123456'
         };
 
@@ -288,15 +407,52 @@ Page({
         }
       }
 
+      console.log('✅ 保存成功，准备返回...');
+      
       wx.hideLoading();
       wx.showToast({
         title: '保存成功',
-        icon: 'success'
+        icon: 'success',
+        duration: 1000
       });
 
+      // Toast显示后自动返回
       setTimeout(() => {
-        wx.navigateBack();
-      }, 1500);
+        console.log('⏱️ 延迟结束，执行返回...');
+        
+        const pages = getCurrentPages();
+        console.log('📚 当前页面栈长度:', pages.length);
+        
+        if (pages.length > 1) {
+          // 有上一页，正常返回
+          wx.navigateBack({
+            success: () => {
+              console.log('✅ 返回上一页成功');
+            },
+            fail: (err) => {
+              console.error('❌ 返回失败:', err);
+            }
+          });
+        } else {
+          // 没有上一页，跳转到档案页或学生列表
+          console.log('⚠️ 这是第一页，跳转到学生档案页');
+          if (this.data.studentId) {
+            wx.redirectTo({
+              url: `/pages/records/records?studentId=${this.data.studentId}`,
+              success: () => {
+                console.log('✅ 跳转到档案页成功');
+              }
+            });
+          } else {
+            wx.switchTab({
+              url: '/pages/my/my',
+              success: () => {
+                console.log('✅ 跳转到我的页面成功');
+              }
+            });
+          }
+        }
+      }, 1200);
 
     } catch (error) {
       console.error('❌ 保存学生失败:', error);

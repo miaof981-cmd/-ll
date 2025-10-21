@@ -96,6 +96,38 @@ Page({
       console.log('当前编辑区照片数:', uploadedPhotos.length);
       console.log('当前被拒照片数:', currentHistoryPhotos.length);
       console.log('数据库历史记录数:', historyPhotos.length);
+      console.log('📷 参考照片（生活照）数量:', order.lifePhotos ? order.lifePhotos.length : 0);
+      if (order.lifePhotos && order.lifePhotos.length > 0) {
+        console.log('   生活照列表:', order.lifePhotos);
+      } else {
+        console.warn('⚠️ 订单中没有生活照数据！');
+      }
+
+      // 转换生活照的云存储URL为临时链接
+      if (order.lifePhotos && order.lifePhotos.length > 0) {
+        try {
+          console.log('🔄 开始转换生活照云存储URL为临时链接...');
+          const tempUrlResult = await wx.cloud.getTempFileURL({
+            fileList: order.lifePhotos
+          });
+          console.log('✅ 临时链接转换结果:', tempUrlResult);
+          
+          if (tempUrlResult.fileList) {
+            order.lifePhotos = tempUrlResult.fileList.map((file, index) => {
+              if (file.status === 0 && file.tempFileURL) {
+                console.log(`   [${index + 1}] 转换成功: ${file.tempFileURL}`);
+                return file.tempFileURL;
+              } else {
+                console.warn(`   [${index + 1}] 转换失败: ${file.errMsg}`);
+                return file.fileID; // 失败时使用原URL
+              }
+            });
+          }
+        } catch (err) {
+          console.error('❌ 生活照临时链接转换失败:', err);
+          // 失败不影响其他功能，继续使用原URL
+        }
+      }
 
       this.setData({
         order,

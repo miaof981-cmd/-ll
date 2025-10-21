@@ -139,8 +139,23 @@ Page({
 
   // 跳转到待审核页面
   goToReview() {
+    console.log('========================================');
+    console.log('🔘 [管理后台] goToReview 被点击');
+    console.log('   准备跳转到: /pages/admin/review/review');
+    console.log('========================================');
+    
     wx.navigateTo({
-      url: '/pages/admin/review/review'
+      url: '/pages/admin/review/review',
+      success: () => {
+        console.log('✅ 跳转成功');
+      },
+      fail: (err) => {
+        console.error('❌ 跳转失败:', err);
+        wx.showToast({
+          title: '跳转失败：' + err.errMsg,
+          icon: 'none'
+        });
+      }
     });
   },
 

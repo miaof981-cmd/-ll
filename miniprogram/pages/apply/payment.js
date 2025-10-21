@@ -7,16 +7,52 @@ Page({
     photographer: {},
     formData: {},
     studentId: '',
-    paymentMethod: 'wechat'
+    submitting: false, // 防止重复提交
+    orderCreating: false // 订单创建中标志
   },
 
   onLoad() {
+    // 检查是否正在创建订单（全局锁）
+    const isCreating = wx.getStorageSync('orderCreating');
+    if (isCreating) {
+      console.warn('⚠️ 检测到订单正在创建中，禁止重复进入');
+      wx.showModal({
+        title: '提示',
+        content: '订单正在创建中，请稍候...',
+        showCancel: false,
+        success: () => {
+          wx.reLaunch({
+            url: '/pages/index/index'
+          });
+        }
+      });
+      return;
+    }
+
     // 获取所有必要数据
     const photographerData = wx.getStorageSync('selectedPhotographer');
-    const formData = JSON.parse(wx.getStorageSync('applyFormData'));
+    const formDataStr = wx.getStorageSync('applyFormData');
     const studentId = wx.getStorageSync('studentId');
 
-    if (photographerData) {
+    // 检查是否有必要的数据
+    if (!photographerData || !formDataStr) {
+      console.warn('⚠️ 缺少必要数据，可能是重复进入或数据已清除');
+      wx.showModal({
+        title: '提示',
+        content: '订单信息已失效，请重新提交申请',
+        showCancel: false,
+        success: () => {
+          wx.reLaunch({
+            url: '/pages/index/index'
+          });
+        }
+      });
+      return;
+    }
+
+    const formData = JSON.parse(formDataStr);
+
+    if (photographerData && formData) {
       this.setData({
         photographer: JSON.parse(photographerData),
         formData,
@@ -28,23 +64,29 @@ Page({
         icon: 'none'
       });
       setTimeout(() => {
-        wx.navigateBack();
+        wx.reLaunch({
+          url: '/pages/index/index'
+        });
       }, 1500);
     }
   },
 
-  // 选择支付方式
-  selectPaymentMethod(e) {
-    const method = e.currentTarget.dataset.method;
-    this.setData({
-      paymentMethod: method
-    });
-  },
-
   // 提交支付
   async submitPayment() {
+    // 防止重复提交
+    if (this.data.submitting || this.data.orderCreating) {
+      console.warn('⚠️ 正在提交中，请勿重复点击');
+      return;
+    }
+
+    // 设置全局锁
+    console.log('🔒 设置全局锁，防止重复创建订单');
+    wx.setStorageSync('orderCreating', true);
+    this.setData({ submitting: true, orderCreating: true });
+
     wx.showLoading({
-      title: '提交中...'
+      title: '提交中...',
+      mask: true // 添加遮罩，防止用户点击其他地方
     });
 
     try {
@@ -94,12 +136,13 @@ Page({
         class: '待分配', // 暂时没有班级字段
         photographerId: this.data.photographer._id || this.data.photographer.id,
         photographerName: this.data.photographer.name,
-        lifePhotos: this.data.formData.childPhoto ? [this.data.formData.childPhoto] : [],
+        lifePhotos: this.data.formData.lifePhotos || [],
         remark: this.data.formData.expectations || '', // 对孩子的期许
         expectations: this.data.formData.expectations || '', // 对孩子的期许（冗余字段，确保兼容）
         totalPrice: this.data.photographer.price || 20,
-        status: 'in_progress', // 进行中（拍摄中）
-        paymentMethod: this.data.paymentMethod,
+        status: 'pending_payment', // 待支付
+        paymentStatus: 'unpaid',   // 未支付
+        paymentMethod: 'wechat',   // 固定使用微信支付
         rejectCount: 0, // 初始化拒绝次数为0
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -111,54 +154,121 @@ Page({
 
       console.log('✅ 订单创建成功:', orderRes._id);
 
-      // 3. 本地也保存一份（兼容旧逻辑）
-      const application = {
-        id: orderRes._id,
-        studentId: this.data.studentId,
-        studentName: this.data.formData.childName,
-        parentName: this.data.formData.parentName,
-        parentPhone: this.data.formData.parentPhone,
-        childPhoto: this.data.formData.childPhoto,
-        photographerId: this.data.photographer.id || this.data.photographer._id,
-        photographerName: this.data.photographer.name,
-        price: this.data.photographer.price,
-        paymentMethod: this.data.paymentMethod,
-        status: 'photographing',
-        formData: this.data.formData,
-        createDate: new Date().toLocaleString('zh-CN'),
-        paymentTime: new Date().toLocaleString('zh-CN'),
-        idPhoto: ''
-      };
+      // 3. 调用微信支付
+      await this.callWechatPay(generatedOrderNo, orderData.totalPrice, orderRes._id);
+    } catch (e) {
+      console.error('❌ 提交失败:', e);
+      
+      // 失败时清除全局锁，允许重试
+      console.log('❌ 订单创建失败，清除全局锁，允许重试');
+      wx.removeStorageSync('orderCreating');
+      this.setData({ submitting: false, orderCreating: false });
+      
+      wx.hideLoading();
+      wx.showToast({
+        title: '提交失败: ' + e.message,
+        icon: 'none',
+        duration: 3000
+      });
+    }
+  },
 
-      storage.saveApplication(application);
+  // 调用微信支付
+  async callWechatPay(orderNo, totalPrice, orderId) {
+    try {
+      console.log('💳 调用微信支付...');
+      console.log('   订单号:', orderNo);
+      console.log('   金额:', totalPrice, '元');
+      console.log('   订单ID:', orderId);
 
-      // 清除临时数据
+      // 调用统一下单云函数
+      const { result } = await wx.cloud.callFunction({
+        name: 'unifiedOrder',
+        data: {
+          orderNo: orderNo,
+          totalFee: Math.round(totalPrice * 100), // 转换为分
+          description: '次元学校-证件照拍摄'
+        }
+      });
+
+      console.log('📦 统一下单结果:', result);
+
+      if (!result.success) {
+        throw new Error(result.errMsg || '统一下单失败');
+      }
+
+      // 调起微信支付
+      const paymentResult = result.result.payment;
+      
+      wx.hideLoading();
+      
+      const payRes = await wx.requestPayment({
+        timeStamp: paymentResult.timeStamp,
+        nonceStr: paymentResult.nonceStr,
+        package: paymentResult.package,
+        signType: paymentResult.signType,
+        paySign: paymentResult.paySign
+      });
+
+      console.log('✅ 支付成功:', payRes);
+
+      // 支付成功后清除全局锁和缓存数据
+      console.log('✅ 支付成功，清除全局锁和缓存数据');
+      wx.removeStorageSync('orderCreating');
       wx.removeStorageSync('applyFormData');
       wx.removeStorageSync('selectedPhotographer');
       wx.removeStorageSync('studentId');
       wx.removeStorageSync('createDate');
 
-      wx.hideLoading();
-
       // 显示成功提示
       wx.showModal({
-        title: '申请成功',
+        title: '支付成功',
         content: '您的入学申请已提交，摄影师将在3个工作日内完成拍摄。',
         showCancel: false,
         success: () => {
-          // 跳转到我的订单页面
+          // 跳转到订单详情
           wx.redirectTo({
-            url: '/pages/user/orders/orders'
+            url: `/pages/user/orders/detail?orderId=${orderId}`
           });
         }
       });
-    } catch (e) {
-      console.error('❌ 提交失败:', e);
-      wx.hideLoading();
-      wx.showToast({
-        title: '提交失败: ' + e.message,
-        icon: 'none'
-      });
+
+    } catch (err) {
+      console.error('❌ 支付失败:', err);
+      
+      // 支付失败，清除锁
+      wx.removeStorageSync('orderCreating');
+      this.setData({ submitting: false, orderCreating: false });
+
+      if (err.errMsg === 'requestPayment:fail cancel') {
+        // 用户取消支付
+        wx.showModal({
+          title: '支付取消',
+          content: '您取消了支付，订单已保存，可以稍后在"我的订单"中继续支付。',
+          showCancel: false,
+          success: () => {
+            wx.redirectTo({
+              url: '/pages/user/orders/orders'
+            });
+          }
+        });
+      } else {
+        // 其他错误
+        wx.showToast({
+          title: '支付失败: ' + (err.errMsg || err.message),
+          icon: 'none',
+          duration: 3000
+        });
+      }
+    }
+  },
+
+  // 页面卸载时清理
+  onUnload() {
+    // 如果订单还在创建中，不清除锁（让锁继续生效）
+    // 如果订单已创建完成或失败，锁已被清除
+    if (!this.data.orderCreating) {
+      wx.removeStorageSync('orderCreating');
     }
   }
 });

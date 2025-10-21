@@ -81,32 +81,70 @@ Page({
   async quickApprove(e) {
     const { id } = e.currentTarget.dataset;
     
-    wx.showLoading({ title: '处理中...' });
+    console.log('========================================');
+    console.log('🔘 [快速审核] quickApprove 被点击');
+    console.log('   订单ID:', id);
+    console.log('   事件对象:', e);
+    console.log('========================================');
+    
+    wx.showLoading({ title: '处理中...', mask: true });
 
     try {
-      const db = wx.cloud.database();
-      await db.collection('activity_orders').doc(id).update({
+      console.log('☁️ 调用云函数: adminApproveOrder');
+      
+      // 调用云函数处理审核（云函数有完全的数据库权限）
+      const result = await wx.cloud.callFunction({
+        name: 'adminApproveOrder',
         data: {
-          status: 'pending_confirm',
-          reviewedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          orderId: id,
+          action: 'approve'
         }
       });
+      
+      console.log('☁️ 云函数返回结果:', result);
+      
+      if (!result.result.success) {
+        console.error('❌ 云函数执行失败:', result.result.errMsg);
+        wx.hideLoading();
+        wx.showModal({
+          title: '审核失败',
+          content: result.result.errMsg || '操作失败，请重试',
+          showCancel: false
+        });
+        return;
+      }
+      
+      console.log('✅ 审核成功，新状态:', result.result.data.newStatus);
 
       wx.hideLoading();
       wx.showToast({
         title: '审核通过',
-        icon: 'success'
+        icon: 'success',
+        duration: 2000
       });
 
-      // 重新加载列表
-      this.loadPendingReviews();
+      console.log('🔄 重新加载订单列表...');
+      // 延迟一下再加载，确保数据已更新
+      setTimeout(() => {
+        this.loadPendingReviews();
+      }, 500);
+      
+      console.log('========================================');
+      console.log('✅ [快速审核] 执行完成');
+      console.log('========================================');
     } catch (e) {
-      console.error('审核失败:', e);
+      console.error('========================================');
+      console.error('❌ [快速审核] 执行失败');
+      console.error('错误信息:', e);
+      console.error('错误代码:', e.errCode);
+      console.error('错误消息:', e.errMsg);
+      console.error('========================================');
+      
       wx.hideLoading();
-      wx.showToast({
+      wx.showModal({
         title: '操作失败',
-        icon: 'error'
+        content: `审核失败：${e.errMsg || e.message}`,
+        showCancel: false
       });
     }
   },
@@ -146,9 +184,15 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: '处理中...' });
+    wx.showLoading({ title: '处理中...', mask: true });
 
     try {
+      console.log('========================================');
+      console.log('❌ [快速拒绝] 开始执行');
+      console.log('   订单ID:', id);
+      console.log('   拒绝原因:', rejectReason);
+      console.log('========================================');
+      
       const db = wx.cloud.database();
       const now = new Date().toISOString();
       
@@ -182,25 +226,48 @@ Page({
         // 不影响主流程继续执行
       }
       
-      // 注意：管理员拒绝不消耗用户的修改机会，不递增 rejectCount
-      await db.collection('activity_orders').doc(id).update({
+      // 调用云函数处理审核拒绝
+      console.log('☁️ 调用云函数: adminApproveOrder (reject)');
+      const result = await wx.cloud.callFunction({
+        name: 'adminApproveOrder',
         data: {
-          status: 'in_progress',
-          adminRejectReason: rejectReason,
-          adminRejectedAt: now,
-          updatedAt: now
-          // 不修改 rejectCount，只有用户拒绝才消耗修改机会
+          orderId: id,
+          action: 'reject',
+          rejectReason: rejectReason
         }
       });
+      
+      console.log('☁️ 云函数返回结果:', result);
+      
+      if (!result.result.success) {
+        console.error('❌ 云函数执行失败:', result.result.errMsg);
+        wx.hideLoading();
+        wx.showModal({
+          title: '拒绝失败',
+          content: result.result.errMsg || '操作失败，请重试',
+          showCancel: false
+        });
+        return;
+      }
+      
+      console.log('✅ 拒绝成功，新状态:', result.result.data.newStatus);
 
       wx.hideLoading();
       wx.showToast({
         title: '已拒绝',
-        icon: 'success'
+        icon: 'success',
+        duration: 2000
       });
 
-      // 重新加载列表
-      this.loadPendingReviews();
+      console.log('🔄 重新加载订单列表...');
+      // 延迟一下再加载，确保数据已更新
+      setTimeout(() => {
+        this.loadPendingReviews();
+      }, 500);
+      
+      console.log('========================================');
+      console.log('✅ [快速拒绝] 执行完成');
+      console.log('========================================');
     } catch (e) {
       console.error('操作失败:', e);
       wx.hideLoading();

@@ -41,9 +41,9 @@
         </view>
       </view>
 
-      <!-- 右侧：更多按钮 -->
-      <view class="card-right" bindtap="showActionSheet" data-studentid="{{item.studentId}}">
-        <text class="more-text">更多</text>
+      <!-- 右侧：管理按钮 -->
+      <view class="card-right" bindtap="manageRecords" data-studentid="{{item.studentId}}">
+        <text class="more-text">管理</text>
         <text class="more-icon">›</text>
       </view>
     </view>

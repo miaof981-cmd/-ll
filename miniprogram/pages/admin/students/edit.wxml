@@ -1,11 +1,32 @@
 <!--pages/admin/students/edit.wxml-->
 <view class="container">
   <view class="form-section">
+    <!-- 证件照（最上面） -->
+    <view class="photo-section-edit">
+      <view class="photo-upload" bindtap="uploadAvatar">
+        <image 
+          wx:if="{{formData.avatar}}" 
+          class="photo-preview" 
+          src="{{formData.avatar}}" 
+          mode="aspectFit"
+        />
+        <view wx:else class="photo-placeholder">
+          <text class="upload-icon">📷</text>
+          <text class="upload-text">点击上传证件照</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 基本信息 -->
     <view class="section-title">基本信息</view>
     
     <view class="form-group">
-      <text class="form-label">学生姓名 *</text>
+      <text class="form-label">学号</text>
+      <view class="form-value-readonly">{{studentId || '保存后自动生成'}}</view>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">姓名 *</text>
       <input 
         class="form-input" 
         placeholder="请输入学生姓名" 
@@ -13,6 +34,34 @@
         bindinput="onNameInput"
       />
     </view>
+
+    <view class="form-group">
+      <text class="form-label">性别 *</text>
+      <view class="radio-group">
+        <view class="radio-item" bindtap="selectGender" data-gender="男">
+          <view class="radio {{formData.gender === '男' ? 'checked' : ''}}"></view>
+          <text>男</text>
+        </view>
+        <view class="radio-item" bindtap="selectGender" data-gender="女">
+          <view class="radio {{formData.gender === '女' ? 'checked' : ''}}"></view>
+          <text>女</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">年龄 *</text>
+      <input 
+        class="form-input" 
+        type="number"
+        placeholder="请输入年龄" 
+        value="{{formData.age}}"
+        bindinput="onAgeInput"
+      />
+    </view>
+
+    <!-- 家长信息 -->
+    <view class="section-title">家长信息</view>
 
     <view class="form-group">
       <text class="form-label">家长姓名 *</text>
@@ -24,21 +73,38 @@
       />
     </view>
 
-    <!-- 录取通知书 -->
     <view class="form-group">
-      <text class="form-label">录取通知书 {{isEdit ? '' : '*'}}</text>
-      <view class="upload-box" bindtap="uploadAdmissionLetter">
-        <image 
-          wx:if="{{formData.admissionLetter}}" 
-          class="upload-preview" 
-          src="{{formData.admissionLetter}}" 
-          mode="widthFix"
-        />
-        <view wx:else class="upload-placeholder">
-          <text class="upload-icon">📄</text>
-          <text class="upload-text">点击上传录取通知书</text>
-        </view>
-      </view>
+      <text class="form-label">联系电话 *</text>
+      <input 
+        class="form-input" 
+        type="number"
+        placeholder="请输入联系电话" 
+        value="{{formData.parentPhone}}"
+        bindinput="onParentPhoneInput"
+      />
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">联系微信</text>
+      <input 
+        class="form-input" 
+        placeholder="请输入微信号" 
+        value="{{formData.parentWechat}}"
+        bindinput="onParentWechatInput"
+      />
+    </view>
+
+    <!-- 家长期许 -->
+    <view class="section-title">家长期许</view>
+
+    <view class="form-group">
+      <textarea 
+        class="form-textarea" 
+        placeholder="请输入对孩子的期许" 
+        value="{{formData.expectations}}"
+        bindinput="onExpectationsInput"
+        maxlength="200"
+      />
     </view>
 
     <!-- 初始档案（仅新建时） -->

@@ -6,24 +6,26 @@
       <text class="header-icon">📚</text>
       <text class="header-title">学生档案</text>
     </view>
-    <view class="header-right" wx:if="{{isAdmin}}">
-      <button class="btn-edit" bindtap="toggleEdit">
-        {{isEditing ? '完成' : '编辑'}}
-      </button>
-      <button class="btn-add" wx:if="{{isEditing}}" bindtap="showAddRecordDialog">
-        + 添加
-      </button>
-    </view>
-    <view class="header-action" wx:else bindtap="logout">
-      <text class="action-text">退出</text>
+    <!-- 管理员操作按钮 -->
+    <view wx:if="{{isAdmin}}" class="header-actions">
+      <view class="icon-btn" bindtap="showAddRecordDialog">
+        <text class="icon-btn-icon">+</text>
+      </view>
+      <view class="icon-btn delete" bindtap="deleteStudent">
+        <text class="icon-btn-icon">🗑️</text>
+      </view>
     </view>
   </view>
 
   <!-- 瀑布流档案卡片 -->
   <view wx:if="{{!loading}}" class="waterfall-container">
     <!-- 学籍档案卡片（复用预览页面样式） -->
-    <view wx:if="{{student}}" class="student-archive-card {{archiveExpanded ? 'expanded' : 'collapsed'}}" bindtap="toggleArchive">
-      <view class="archive-header">
+    <view wx:if="{{student}}" class="student-archive-card {{archiveExpanded ? 'expanded' : 'collapsed'}}">
+      <!-- 管理员编辑按钮 - 圆形铅笔图标 -->
+      <view wx:if="{{isAdmin}}" class="floating-edit-btn" catchtap="editStudentBasicInfo">
+        <text class="edit-icon">✏️</text>
+      </view>
+      <view class="archive-header" bindtap="toggleArchive">
         <view class="school-logo">🎓</view>
         <view class="school-info">
           <view class="school-name">次元学校 · 学籍档案</view>
@@ -124,17 +126,75 @@
       </view>
     </view>
 
+    <!-- 生活照相册卡片 -->
+    <view wx:if="{{student && (student.avatar || student.certificatePhoto || (student.lifePhotos && student.lifePhotos.length > 0))}}" class="archive-card life-photos-card">
+      <view class="card-header">
+        <view class="card-icon">📸</view>
+        <text class="card-type">生活照相册</text>
+        <text class="photo-count">({{displayPhotoCount}}张)</text>
+        <view class="edit-icon" catchtap="editLifePhotos">
+          <text>✏️</text>
+        </view>
+      </view>
+      <view class="card-body">
+        <view class="life-photos-grid">
+          <!-- 第一张：证件照（锁定）- 使用 avatar 字段 -->
+          <view 
+            wx:if="{{student.avatar || student.certificatePhoto}}"
+            class="life-photo-item locked"
+            bindtap="previewLifePhoto"
+            data-index="0"
+          >
+            <image class="life-photo-img" src="{{student.avatar || student.certificatePhoto}}" mode="aspectFill"/>
+            <view class="photo-lock-badge">
+              <text class="lock-icon">🔒</text>
+            </view>
+          </view>
+          
+          <!-- 第二张：生活照 -->
+          <view 
+            wx:if="{{displayPhotos[0]}}"
+            class="life-photo-item"
+            bindtap="previewLifePhoto"
+            data-index="1"
+          >
+            <image class="life-photo-img" src="{{displayPhotos[0]}}" mode="aspectFill"/>
+          </view>
+          
+          <!-- 第三张：生活照 或 更多标识 -->
+          <view 
+            wx:if="{{displayPhotos[1]}}"
+            class="life-photo-item {{hasMorePhotos ? 'more-photos' : ''}}"
+            bindtap="previewLifePhoto"
+            data-index="2"
+          >
+            <image class="life-photo-img" src="{{displayPhotos[1]}}" mode="aspectFill"/>
+            <!-- 如果有更多照片，显示遮罩 -->
+            <view wx:if="{{hasMorePhotos}}" class="more-overlay">
+              <text class="more-count">+{{morePhotoCount}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 成绩卡片 -->
     <view 
       wx:for="{{records.reportCards}}" 
       wx:key="_id" 
-      class="archive-card grade-card {{isEditing ? 'editing' : ''}}"
+      class="archive-card grade-card"
     >
       <view class="card-header">
         <view class="card-icon">📊</view>
         <text class="card-type">成绩报告</text>
-        <view class="card-delete" wx:if="{{isEditing}}" bindtap="deleteRecord" data-id="{{item._id}}" data-type="grade">
-          <text>×</text>
+        <!-- 管理员编辑按钮 -->
+        <view wx:if="{{isAdmin}}" class="card-actions">
+          <view class="card-edit-icon" bindtap="editRecord" data-id="{{item._id}}" data-type="grade" data-item="{{item}}">
+            <text>✏️</text>
+          </view>
+          <view class="card-delete-icon" bindtap="deleteRecord" data-id="{{item._id}}" data-type="grade">
+            <text>🗑️</text>
+          </view>
         </view>
       </view>
       <view class="card-body">
@@ -165,13 +225,19 @@
     <view 
       wx:for="{{records.punishments}}" 
       wx:key="_id" 
-      class="archive-card punishment-card {{isEditing ? 'editing' : ''}}"
+      class="archive-card punishment-card"
     >
       <view class="card-header">
         <view class="card-icon warning">⚠️</view>
         <text class="card-type">处罚记录</text>
-        <view class="card-delete" wx:if="{{isEditing}}" bindtap="deleteRecord" data-id="{{item._id}}" data-type="punishment">
-          <text>×</text>
+        <!-- 管理员编辑按钮 -->
+        <view wx:if="{{isAdmin}}" class="card-actions">
+          <view class="card-edit-icon" bindtap="editRecord" data-id="{{item._id}}" data-type="punishment" data-item="{{item}}">
+            <text>✏️</text>
+          </view>
+          <view class="card-delete-icon" bindtap="deleteRecord" data-id="{{item._id}}" data-type="punishment">
+            <text>🗑️</text>
+          </view>
         </view>
       </view>
       <view class="card-body">
@@ -190,21 +256,30 @@
     <view 
       wx:for="{{records.images}}" 
       wx:key="_id" 
-      class="archive-card image-card {{isEditing ? 'editing' : ''}}"
-      bindtap="{{isEditing ? '' : 'previewImage'}}"
+      class="archive-card image-card"
+      bindtap="previewImage"
       data-url="{{item.imageUrl}}"
     >
       <view class="card-header">
         <view class="card-icon">🖼️</view>
-        <text class="card-type">图片档案</text>
-        <view class="card-delete" wx:if="{{isEditing}}" bindtap="deleteRecord" data-id="{{item._id}}" data-type="image">
-          <text>×</text>
+        <text class="card-type">{{item.activityName || '图片档案'}}</text>
+        <!-- 管理员编辑按钮 -->
+        <view wx:if="{{isAdmin}}" class="card-actions">
+          <view class="card-edit-icon" catchtap="editRecord" data-id="{{item._id}}" data-type="image" data-item="{{item}}">
+            <text>✏️</text>
+          </view>
+          <view class="card-delete-icon" catchtap="deleteRecord" data-id="{{item._id}}" data-type="image">
+            <text>🗑️</text>
+          </view>
         </view>
       </view>
-      <image class="card-image" src="{{item.imageUrl}}" mode="widthFix" />
+      <!-- 图片容器，统一圆角边框 -->
+      <view class="image-container">
+        <image class="card-image" src="{{item.imageUrl}}" mode="aspectFill" />
+      </view>
       <view class="card-body">
         <text class="card-title">{{item.title}}</text>
-        <text class="card-desc">{{item.description}}</text>
+        <text wx:if="{{item.description}}" class="card-desc">{{item.description}}</text>
       </view>
       <view class="card-footer">
         <text class="card-date">📅 {{item.createdAt}}</text>
@@ -212,7 +287,7 @@
     </view>
 
     <!-- 空状态 -->
-    <view wx:if="{{records.reportCards.length === 0 && records.punishments.length === 0 && records.images.length === 0}}" class="empty-state">
+    <view wx:if="{{records.reportCards.length === 0 && records.punishments.length === 0 && records.images.length === 0 && (!student.lifePhotos || student.lifePhotos.length === 0)}}" class="empty-state">
       <view class="empty-icon">📋</view>
       <text class="empty-text">暂无档案记录</text>
     </view>

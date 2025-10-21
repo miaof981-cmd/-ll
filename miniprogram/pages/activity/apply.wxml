@@ -8,6 +8,25 @@
     </view>
   </view>
 
+  <!-- 选择摄影师（前置，避免被长列表遮挡） -->
+  <view class="section-card">
+    <view class="section-title">📸 选择摄影师</view>
+    <view wx:if="{{photographers.length === 0}}" class="no-data"><text>暂无摄影师</text></view>
+    <scroll-view wx:else class="photographers-scroll" scroll-x="true">
+      <view
+        wx:for="{{photographers}}"
+        wx:key="_id"
+        class="photographer-chip {{selectedPhotographer && selectedPhotographer._id === item._id ? 'selected' : ''}}"
+        bindtap="selectPhotographer"
+        data-photographer="{{item}}"
+      >
+        <image wx:if="{{item.avatar}}" class="chip-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+        <view wx:else class="chip-avatar placeholder">{{item.name.substring(0,1)}}</view>
+        <text class="chip-name">{{item.name}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
   <!-- 选择孩子 -->
   <view class="section-card">
     <view class="section-title">👶 选择孩子</view>
@@ -41,9 +60,11 @@
     </view>
   </view>
 
+  <!-- 已移除重复的摄影师块（顶部已展示） -->
+
   <!-- 生活照 -->
   <view wx:if="{{selectedChild}}" class="section-card">
-    <view class="section-title">📷 参考照片（生活照）</view>
+    <view class="section-title">📷 参考照片（生活照）<text class="optional-tag">选填</text></view>
     <view class="photo-hint">用于摄影师了解孩子，拍出更好的照片</view>
     
     <view class="life-photos">
@@ -78,34 +99,7 @@
     <view class="char-count">{{remark.length}}/200</view>
   </view>
 
-  <!-- 选择摄影师 -->
-  <view wx:if="{{selectedChild}}" class="section-card">
-    <view class="section-title">📸 选择摄影师</view>
-    
-    <view wx:if="{{photographers.length === 0}}" class="no-data">
-      <text>暂无摄影师</text>
-    </view>
-
-    <view wx:else class="photographers-list">
-      <view
-        wx:for="{{photographers}}"
-        wx:key="_id"
-        class="photographer-item {{selectedPhotographer && selectedPhotographer._id === item._id ? 'selected' : ''}}"
-        bindtap="selectPhotographer"
-        data-photographer="{{item}}"
-      >
-        <image wx:if="{{item.avatar}}" class="photographer-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
-        <view wx:else class="photographer-avatar-placeholder">{{item.name.substring(0,1)}}</view>
-        
-        <view class="photographer-info">
-          <text class="photographer-name">{{item.name}}</text>
-          <text wx:if="{{item.specialty}}" class="photographer-specialty">{{item.specialty}}</text>
-        </view>
-
-        <view wx:if="{{selectedPhotographer && selectedPhotographer._id === item._id}}" class="check-icon">✓</view>
-      </view>
-    </view>
-  </view>
+  
 
   <!-- 提交按钮 -->
   <view wx:if="{{selectedChild}}" class="submit-bar">

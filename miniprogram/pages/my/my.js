@@ -45,6 +45,15 @@ Page({
       console.log('  currentRole:', currentRole);
       console.log('  userRoles:', userRoles);
       
+      // 如果未登录，直接跳转到登录页面
+      if (!userInfo) {
+        console.log('❌ 未登录，跳转到登录页面');
+        wx.redirectTo({
+          url: '/pages/login/login'
+        });
+        return;
+      }
+      
       if (userInfo) {
         // 判断用户拥有的角色
         const isAdmin = userRoles.includes('admin');
@@ -101,9 +110,25 @@ Page({
       
       console.log('📡 开始加载孩子列表...');
       
+      // 获取当前用户的 openid
+      const userInfo = this.data.userInfo;
+      const currentOpenId = userInfo?._openid || userInfo?.openid;
+      
+      if (!currentOpenId) {
+        console.error('❌ 无法获取用户 openid');
+        this.setData({ children: [] });
+        return;
+      }
+      
+      console.log('👤 当前用户 openid:', currentOpenId);
+      
       // 从 students 集合查询当前用户的孩子
-      // 云数据库会自动根据权限过滤 _openid
-      const res = await db.collection('students').get();
+      // 必须明确使用 _openid 过滤，确保数据隔离
+      const res = await db.collection('students')
+        .where({
+          _openid: currentOpenId
+        })
+        .get();
       
       console.log('✅ 查询到的孩子数量:', res.data ? res.data.length : 0);
       
@@ -179,6 +204,14 @@ Page({
     const { studentid } = e.currentTarget.dataset;
     wx.navigateTo({
       url: `/pages/records/records?studentId=${studentid}`
+    });
+  },
+
+  // 编辑生活照
+  editPhotos(e) {
+    const { studentid } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/my/edit-photos?studentId=${studentid}`
     });
   },
 

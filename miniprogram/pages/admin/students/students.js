@@ -108,28 +108,6 @@ Page({
     }
   },
 
-  // 显示操作面板（iOS风格）
-  showActionSheet(e) {
-    const { studentid } = e.currentTarget.dataset;
-    
-    wx.showActionSheet({
-      itemList: ['查看档案', '编辑信息', '删除学生'],
-      success: (res) => {
-        switch(res.tapIndex) {
-          case 0: // 查看档案
-            this.viewRecords(studentid);
-            break;
-          case 1: // 编辑信息
-            this.editStudent(studentid);
-            break;
-          case 2: // 删除学生
-            this.deleteStudent(studentid);
-            break;
-        }
-      }
-    });
-  },
-
   // 添加学生
   addStudent() {
     wx.navigateTo({
@@ -137,17 +115,11 @@ Page({
     });
   },
 
-  // 编辑学生
-  editStudent(studentId) {
+  // 管理档案（直接进入档案页面）
+  manageRecords(e) {
+    const { studentid } = e.currentTarget.dataset;
     wx.navigateTo({
-      url: `/pages/admin/students/edit?studentId=${studentId}`
-    });
-  },
-
-  // 查看档案
-  viewRecords(studentId) {
-    wx.navigateTo({
-      url: `/pages/records/records?studentId=${studentId}`
+      url: `/pages/records/records?studentId=${studentid}`
     });
   },
 

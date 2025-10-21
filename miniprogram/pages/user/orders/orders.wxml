@@ -40,9 +40,10 @@
     >
       <!-- 订单状态 -->
       <view class="order-header">
-        <view class="order-time">{{item.createdAt}}</view>
-        <view class="order-status" style="color: {{item.statusColor}}">
-          {{item.statusIcon}} {{item.statusText}}
+        <view class="order-time">{{item.createdAtText}}</view>
+        <view class="order-status">
+          <text class="status-dot" style="background-color: {{item.statusColor}}"></text>
+          <text class="status-text" style="color: {{item.statusColor}}">{{item.statusText}}</text>
         </view>
       </view>
 

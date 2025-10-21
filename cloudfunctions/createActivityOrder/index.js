@@ -60,10 +60,17 @@ exports.main = async (event, context) => {
     
     const photographer = photographerRes.data;
     
+    // 生成订单号（格式：ACT + 时间戳 + 6位随机数）
+    const orderNo = 'ACT' + Date.now() + Math.random().toString(36).substring(2, 8).toUpperCase();
+    console.log('📝 生成订单号:', orderNo);
+    
     // 创建订单
     const orderRes = await db.collection('activity_orders').add({
       data: {
         _openid: wxContext.OPENID,
+        
+        // 订单编号
+        orderNo: orderNo,
         
         // 活动信息
         activityId,
@@ -86,7 +93,7 @@ exports.main = async (event, context) => {
         photographerAvatar: photographer.avatar || '',
         
         // 订单状态
-        status: 'waiting_shoot',
+        status: 'pending_payment',  // 待支付状态，必须完成支付后才能进入下一步
         reviewStatus: 'pending',
         
         // 作品信息（稍后上传）
@@ -96,10 +103,12 @@ exports.main = async (event, context) => {
         reviewedAt: null,
         confirmedAt: null,
         
-        // 价格信息
-        price: activity.price || 20,
-        paymentStatus: 'paid',  // 暂时默认已支付
-        paymentTime: new Date().toISOString(),
+        // 价格信息（锁定下单时的价格，不受活动价格变动影响）
+        price: activity.price !== undefined && activity.price !== null ? Number(activity.price) : 20,
+        lockedPrice: activity.price !== undefined && activity.price !== null ? Number(activity.price) : 20,  // 额外保存，用于审计
+        originalActivityPrice: activity.originalPrice || activity.price,  // 原价（如果有的话）
+        paymentStatus: 'unpaid',  // 未支付，必须通过微信支付回调才能改为 paid
+        paymentTime: null,  // 支付时间为空，支付成功后由回调函数填写
         
         // 时间戳
         createdAt: new Date().toISOString(),
@@ -114,10 +123,22 @@ exports.main = async (event, context) => {
       }
     });
     
-    return {
+    // 计算锁定的价格（与订单中保存的价格完全一致）
+    const lockedPrice = activity.price !== undefined && activity.price !== null ? Number(activity.price) : 20;
+    
+    const returnData = {
       success: true,
-      orderId: orderRes._id
+      orderId: orderRes._id,
+      orderNo: orderNo,  // 返回订单号，供前端调用支付时使用
+      price: lockedPrice  // 返回订单锁定价格（订单创建时的价格，不受活动价格变动影响）
     };
+    
+    console.log('========================================');
+    console.log('✅ 订单创建成功！');
+    console.log('   返回数据:', JSON.stringify(returnData, null, 2));
+    console.log('========================================');
+    
+    return returnData;
   } catch (err) {
     console.error('创建订单失败:', err);
     return {

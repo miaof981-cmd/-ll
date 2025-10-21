@@ -67,6 +67,16 @@
   color: white;
 }
 
+.test-btn.purple {
+  background: linear-gradient(135deg, #9775fa 0%, #7950f2 100%);
+  color: white;
+}
+
+.test-btn.danger {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+}
+
 .result-box {
   background: white;
   padding: 30rpx;

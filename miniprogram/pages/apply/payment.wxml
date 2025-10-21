@@ -77,30 +77,13 @@
     </view>
 
     <view class="payment-methods">
-      <view 
-        class="payment-method {{paymentMethod === 'wechat' ? 'selected' : ''}}"
-        bindtap="selectPaymentMethod"
-        data-method="wechat"
-      >
+      <view class="payment-method selected">
         <view class="method-icon">💚</view>
         <view class="method-info">
           <view class="method-name">微信支付</view>
-          <view class="method-desc">推荐使用</view>
-        </view>
-        <view class="method-check">{{paymentMethod === 'wechat' ? '✓' : ''}}</view>
-      </view>
-
-      <view 
-        class="payment-method {{paymentMethod === 'alipay' ? 'selected' : ''}}"
-        bindtap="selectPaymentMethod"
-        data-method="alipay"
-      >
-        <view class="method-icon">💙</view>
-        <view class="method-info">
-          <view class="method-name">支付宝</view>
           <view class="method-desc">安全便捷</view>
         </view>
-        <view class="method-check">{{paymentMethod === 'alipay' ? '✓' : ''}}</view>
+        <view class="method-check">✓</view>
       </view>
     </view>
   </view>

@@ -1,0 +1,119 @@
+<!--pages/my/edit-photos.wxml-->
+<view class="edit-photos-container">
+  <!-- 顶部标题栏 -->
+  <view class="header-bar">
+    <view class="header-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+      <text class="header-title">编辑生活照</text>
+    </view>
+    <view class="header-info">
+      <text class="student-name">{{student.name}}</text>
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="tip-box">
+    <view class="tip-icon">💡</view>
+    <view class="tip-content">
+      <text class="tip-text">你可以上传最多4张生活照</text>
+      <text class="tip-text">证件照自动添加为第1张，不可编辑</text>
+    </view>
+  </view>
+
+  <!-- 证件照区域 -->
+  <view wx:if="{{certificatePhoto}}" class="photos-section">
+    <view class="section-header">
+      <view class="section-title">证件照</view>
+      <view wx:if="{{isAdmin}}" class="photo-count editable">管理员可编辑</view>
+      <view wx:else class="photo-count locked">锁定</view>
+    </view>
+    
+    <view class="photos-grid single">
+      <view class="photo-card {{isAdmin ? '' : 'locked'}}">
+        <view class="photo-container" bindtap="previewPhoto" data-url="{{certificatePhoto}}">
+          <image class="photo-img" src="{{certificatePhoto}}" mode="aspectFill"/>
+          <view class="photo-overlay">
+            <text class="preview-text">点击预览</text>
+          </view>
+        </view>
+        <view class="photo-footer {{isAdmin ? '' : 'locked-footer'}}">
+          <!-- 管理员：可以替换证件照 -->
+          <view wx:if="{{isAdmin}}" class="footer-btn replace-btn full" bindtap="replaceCertificatePhoto">
+            <text class="btn-text">替换证件照</text>
+          </view>
+          <!-- 普通用户：锁定 -->
+          <view wx:else class="lock-badge">
+            <text class="lock-icon">🔒</text>
+            <text class="lock-text">证件照（不可编辑）</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 生活照区域 -->
+  <view class="photos-section">
+    <view class="section-header">
+      <view class="section-title">生活照片</view>
+      <view class="photo-count">{{lifePhotos.length}}/4 张</view>
+    </view>
+    
+    <view class="photos-grid">
+      <!-- 已有照片 -->
+      <view 
+        wx:for="{{lifePhotos}}" 
+        wx:key="index" 
+        class="photo-card"
+      >
+        <view class="photo-container" bindtap="previewPhoto" data-url="{{item}}">
+          <image class="photo-img" src="{{item}}" mode="aspectFill"/>
+          <view class="photo-overlay">
+            <text class="preview-text">点击预览</text>
+          </view>
+        </view>
+        <view class="photo-footer">
+          <view class="footer-btn replace-btn" bindtap="uploadPhoto" data-index="{{index}}">
+            <text class="btn-text">替换</text>
+          </view>
+          <view class="footer-btn delete-btn" bindtap="deletePhoto" data-index="{{index}}">
+            <text class="btn-text">删除</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 添加按钮（最多4张生活照） -->
+      <view 
+        wx:if="{{lifePhotos.length < 4}}" 
+        class="photo-card add-card"
+        bindtap="addPhoto"
+      >
+        <view class="add-container">
+          <view class="add-icon-large">+</view>
+          <view class="add-text">添加生活照</view>
+          <view class="add-hint">支持JPG、PNG格式</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 说明文字 -->
+  <view class="info-section">
+    <view class="info-title">使用说明</view>
+    <view class="info-item">
+      <text class="info-dot">•</text>
+      <text class="info-text">点击照片可以预览大图</text>
+    </view>
+    <view class="info-item">
+      <text class="info-dot">•</text>
+      <text class="info-text">生活照可以替换或删除</text>
+    </view>
+    <view class="info-item">
+      <text class="info-dot">•</text>
+      <text class="info-text">证件照为锁定状态，不可编辑</text>
+    </view>
+    <view class="info-item">
+      <text class="info-dot">•</text>
+      <text class="info-text">摄影师可以下载所有照片用于绘画参考</text>
+    </view>
+  </view>
+</view>

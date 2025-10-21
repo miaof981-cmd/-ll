@@ -202,17 +202,29 @@
 }
 
 /* ==================== 生活照片 ==================== */
-.life-photo {
-  width: 100%;
-  height: 400rpx;
-  border-radius: 16rpx;
-  overflow: hidden;
+/* 生活照片网格 */
+.life-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
   margin-top: 16rpx;
 }
 
+.life-photo-item {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
 .life-photo-img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 /* ==================== 期许内容 ==================== */

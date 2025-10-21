@@ -11,7 +11,29 @@ Page({
     loading: true,
     showRejectModal: false,
     rejectReason: '',
-    canGoBack: true // 是否可以返回
+    canGoBack: true, // 是否可以返回
+    // 支付倒计时
+    countdownText: '',
+    payDisabled: false,
+    _countdownTimer: null
+  },
+
+  // 工具：格式化为北京时间 YYYY-MM-DD HH:mm:ss
+  formatBeijing(ts) {
+    if (!ts) return '';
+    try {
+      const d = new Date(ts);
+      const pad = (n) => (n < 10 ? '0' + n : '' + n);
+      const year = d.getFullYear();
+      const month = pad(d.getMonth() + 1);
+      const day = pad(d.getDate());
+      const hour = pad(d.getHours());
+      const minute = pad(d.getMinutes());
+      const second = pad(d.getSeconds());
+      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    } catch (_) {
+      return ts;
+    }
   },
 
   onLoad(options) {
@@ -37,6 +59,69 @@ Page({
     this.setData({
       canGoBack: pages.length > 1
     });
+  },
+
+  // 启动/停止支付倒计时（仅待支付）
+  startPaymentCountdown(order) {
+    this.stopPaymentCountdown();
+    if (!order || order.status !== 'pending_payment') return;
+
+    const TIMEOUT_MS = 30 * 60 * 1000; // 30分钟
+    const created = new Date(order.createdAt).getTime();
+    const expireAt = created + TIMEOUT_MS;
+
+    const tick = async () => {
+      const now = Date.now();
+      let remainMs = expireAt - now;
+      if (remainMs <= 0) {
+        this.setData({ countdownText: '已超时', payDisabled: true });
+        this.stopPaymentCountdown();
+        // 自动关闭订单
+        try {
+          await this.autoCloseOrder();
+          // 重新加载，刷新状态
+          this.loadOrderDetail(this.data.orderId);
+        } catch (_) {
+        }
+        return;
+      }
+      const remainSec = Math.floor(remainMs / 1000);
+      const hh = Math.floor(remainSec / 3600);
+      const mm = Math.floor((remainSec % 3600) / 60);
+      const ss = remainSec % 60;
+      const pad = (n) => (n < 10 ? '0' + n : '' + n);
+      const text = hh > 0 ? `${pad(hh)}:${pad(mm)}:${pad(ss)}` : `${pad(mm)}:${pad(ss)}`;
+      this.setData({ countdownText: text, payDisabled: false });
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
+    this.setData({ _countdownTimer: timer });
+  },
+
+  stopPaymentCountdown() {
+    const t = this.data._countdownTimer;
+    if (t) {
+      clearInterval(t);
+      this.setData({ _countdownTimer: null });
+    }
+  },
+
+  async autoCloseOrder() {
+    try {
+      const db = wx.cloud.database();
+      const now = new Date().toISOString();
+      await db.collection('activity_orders').doc(this.data.orderId).update({
+        data: {
+          status: 'cancelled',
+          cancelReason: '支付超时自动关闭',
+          cancelledAt: now,
+          updatedAt: now
+        }
+      });
+    } catch (e) {
+      console.error('自动关闭订单失败:', e);
+    }
   },
   
   // 返回上一页
@@ -146,6 +231,16 @@ Page({
         console.error('❌ [用户订单] 查询历史记录失败:', e);
       }
 
+      // 兼容价格字段并补充展示时间
+      if (order.totalPrice === undefined && order.price !== undefined) {
+        order.totalPrice = order.price;
+      }
+      order.createdAtText = this.formatBeijing(order.createdAt);
+      order.updatedAtText = this.formatBeijing(order.updatedAt || order.createdAt);
+      order.submittedAtText = this.formatBeijing(order.submittedAt);
+      order.confirmedAtText = this.formatBeijing(order.confirmedAt);
+      order.rejectedAtText = this.formatBeijing(order.rejectedAt);
+
       // 添加状态信息
       order.statusText = orderStatus.getStatusText(order.status);
       order.statusColor = orderStatus.getStatusColor(order.status);
@@ -170,6 +265,9 @@ Page({
         loading: false
       });
 
+      // 启动倒计时（待支付）
+      this.startPaymentCountdown(order);
+
       wx.hideLoading();
     } catch (e) {
       console.error('加载订单详情失败:', e);
@@ -179,6 +277,10 @@ Page({
         icon: 'error'
       });
     }
+  },
+
+  onUnload() {
+    this.stopPaymentCountdown();
   },
 
   // 执行订单操作
@@ -206,10 +308,67 @@ Page({
 
   // 支付订单
   async payOrder() {
-    wx.showToast({
-      title: '支付功能开发中',
-      icon: 'none'
-    });
+    try {
+      const order = this.data.order;
+      if (!order || !order.orderNo) {
+        wx.showToast({ title: '订单信息异常', icon: 'none' });
+        return;
+      }
+
+      if (!order.totalPrice && order.price !== undefined) {
+        order.totalPrice = order.price;
+      }
+
+      const totalFee = Math.round(Number(order.totalPrice) * 100);
+      if (!(totalFee > 0)) {
+        wx.showToast({ title: '订单金额无效', icon: 'none' });
+        return;
+      }
+
+      wx.showLoading({ title: '拉起支付...', mask: true });
+
+      const { result } = await wx.cloud.callFunction({
+        name: 'unifiedOrder',
+        data: {
+          orderNo: order.orderNo,
+          totalFee: totalFee,
+          description: this.data.activityInfo?.title || '次元学校-证件照拍摄'
+        }
+      });
+
+      if (!result || !result.success) {
+        wx.hideLoading();
+        wx.showToast({ title: result?.errMsg || '统一下单失败', icon: 'none' });
+        return;
+      }
+
+      // 兼容不同返回结构
+      let payment = result.payment || result.result?.payment || result.result;
+      if (!payment || !payment.timeStamp) {
+        wx.hideLoading();
+        wx.showToast({ title: '支付参数缺失', icon: 'none' });
+        return;
+      }
+
+      wx.hideLoading();
+      await wx.requestPayment({
+        timeStamp: payment.timeStamp,
+        nonceStr: payment.nonceStr,
+        package: payment.package,
+        signType: payment.signType || 'MD5',
+        paySign: payment.paySign
+      });
+
+      wx.showToast({ title: '支付成功', icon: 'success' });
+      setTimeout(() => this.loadOrderDetail(this.data.orderId), 1200);
+    } catch (e) {
+      wx.hideLoading();
+      if (e && e.errMsg && e.errMsg.includes('cancel')) {
+        wx.showToast({ title: '已取消支付', icon: 'none' });
+      } else {
+        wx.showToast({ title: e.message || '支付失败', icon: 'none' });
+      }
+    }
   },
 
   // 取消订单
@@ -484,28 +643,26 @@ Page({
 
       console.log('✅ 订单状态已更新为 completed');
 
-      // 2. 检查是否是证件照订单，如果是则自动创建学生档案
+      // 2. 处理档案创建逻辑
       const order = this.data.order;
       const activity = this.data.activityInfo;
       
       console.log('========================================');
-      console.log('📋 检查是否需要创建学生档案...');
+      console.log('📋 开始处理档案创建...');
       console.log('   订单信息:');
       console.log('     - 学生姓名:', order?.studentName);
       console.log('     - 性别:', order?.gender);
       console.log('     - 年龄:', order?.age);
       console.log('     - 照片数量:', order?.photos?.length);
-      console.log('     - 第一张照片:', order?.photos?.[0]);
       console.log('   活动信息:');
       console.log('     - 活动ID:', activity?._id);
       console.log('     - 活动名称:', activity?.name);
       console.log('     - 活动类别:', activity?.category);
-      console.log('     - 类别类型:', typeof activity?.category);
       console.log('========================================');
       
-      // 判断是否是证件照订单（category === '证件照'）
+      // 2.1 如果是证件照订单，创建学生档案（学籍档案）
       if (activity?.category === '证件照' && order?.studentName) {
-        console.log('✅ 条件匹配！这是证件照订单，开始创建学生档案...');
+        console.log('✅ 这是证件照订单，开始创建学生档案...');
         
         try {
           // 2.1 检查该学生是否已有档案
@@ -532,10 +689,17 @@ Page({
             console.log('✅ 学号生成成功:', studentId);
             
             // 2.3 创建学生档案
+            // 将证件照添加到生活照数组（作为第5张，锁定）
+            const certificatePhoto = order.photos && order.photos.length > 0 ? order.photos[0] : '';
+            const lifePhotos = [...(order.lifePhotos || [])];
+            if (certificatePhoto) {
+              lifePhotos.push(certificatePhoto); // 证件照作为最后一张
+            }
+            
             const studentData = {
               studentId: studentId,
               name: order.studentName,
-              avatar: order.photos && order.photos.length > 0 ? order.photos[0] : '', // 使用证件照作为头像
+              avatar: certificatePhoto, // 使用证件照作为头像
               gender: order.gender || '',
               age: order.age || 0,
               class: order.class || '待分配',
@@ -543,6 +707,8 @@ Page({
               parentPhone: order.parentPhone || '',
               parentWechat: order.parentWechat || '', // 家长微信号
               expectations: order.remark || order.expectations || '', // 对孩子的期许
+              lifePhotos: lifePhotos, // 生活照 + 证件照
+              certificatePhoto: certificatePhoto, // 单独保存证件照，用于锁定
               createdAt: now,
               updatedAt: now,
               source: 'order', // 标记来源：订单自动创建
@@ -621,9 +787,62 @@ Page({
           });
         }
       } else {
-        console.log('⚠️ 条件不匹配，不创建档案');
-        console.log('   activity?.category === "证件照"?', activity?.category === '证件照');
-        console.log('   order?.studentName?', !!order?.studentName);
+        console.log('⚠️ 不是证件照订单，不创建学生档案');
+      }
+
+      // 2.2 为所有订单创建活动图片档案（如果有照片）
+      if (order?.photos && order.photos.length > 0 && order?.studentName) {
+        console.log('📸 开始创建活动图片档案...');
+        console.log('   照片数量:', order.photos.length);
+        
+        try {
+          // 查找学生（可能是刚创建的，也可能是已存在的）
+          const studentRes = await db.collection('students')
+            .where({ 
+              name: order.studentName,
+              _openid: order._openid 
+            })
+            .get();
+          
+          if (studentRes.data && studentRes.data.length > 0) {
+            const student = studentRes.data[0];
+            console.log('✅ 找到学生档案，学号:', student.studentId);
+            
+            // 为每张照片创建一个图片档案记录
+            for (let i = 0; i < order.photos.length; i++) {
+              const photo = order.photos[i];
+              const imageRecordData = {
+                studentId: student.studentId,
+                type: 'image', // 档案类型：图片
+                title: `${activity.name || '活动照片'} - ${i + 1}`,
+                imageUrl: photo,
+                activityName: activity.name || '未知活动',
+                activityId: activity._id,
+                orderId: this.data.orderId,
+                description: `来自活动：${activity.name || '未知活动'}`,
+                createdAt: now,
+                updatedAt: now,
+                source: 'order', // 来源：订单自动创建
+                status: 'active'
+              };
+              
+              await db.collection('student_records').add({
+                data: imageRecordData
+              });
+              
+              console.log(`✅ 图片档案 ${i + 1} 创建成功`);
+            }
+            
+            console.log('✅ 所有活动图片档案创建完成！');
+          } else {
+            console.log('⚠️ 未找到学生档案，跳过图片档案创建');
+          }
+        } catch (imageError) {
+          console.error('❌ 创建活动图片档案失败:', imageError);
+          // 图片档案创建失败不影响订单完成
+        }
+      } else {
+        console.log('⚠️ 订单无照片或无学生姓名，跳过图片档案创建');
       }
 
       wx.hideLoading();

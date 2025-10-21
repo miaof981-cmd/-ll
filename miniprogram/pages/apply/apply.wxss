@@ -1,9 +1,15 @@
 /* pages/apply/apply.wxss - 入学申请表单样式 */
 
+/* 全局盒模型 - WXSS不支持通配符，需要单独设置 */
+page {
+  box-sizing: border-box;
+}
+
 .apply-container {
   min-height: 100vh;
   background: linear-gradient(180deg, #f5f7fa 0%, #e8ecf1 100%);
   padding-bottom: 120rpx;
+  box-sizing: border-box;
 }
 
 /* ==================== 步骤进度条 ==================== */
@@ -102,6 +108,7 @@
   border-radius: 24rpx;
   padding: 40rpx 32rpx;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 
 .form-group-title {
@@ -152,6 +159,7 @@
   font-size: 28rpx;
   color: #1e293b;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -170,6 +178,7 @@
   font-size: 28rpx;
   color: #1e293b;
   line-height: 1.6;
+  box-sizing: border-box;
 }
 
 .char-count {
@@ -204,78 +213,83 @@ radio {
   transform: scale(1.1);
 }
 
-/* ==================== 照片上传 ==================== */
-.photo-upload {
+/* ==================== 照片上传（网格布局） ==================== */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
   margin-top: 16rpx;
 }
 
-.upload-btn {
-  width: 200rpx;
-  height: 200rpx;
-  border: 2rpx dashed #cbd5e1;
+.photo-item {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* 1:1 aspect ratio */
   border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.photo-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-delete {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.upload-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2rpx dashed #cbd5e1;
+  background: #f8fafc;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12rpx;
-  background: #f8fafc;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 16rpx;
 }
 
-.upload-btn:active {
+.upload-item:active {
   background: #e2e8f0;
   border-color: #1a56db;
 }
 
-.upload-icon {
-  font-size: 56rpx;
+.upload-item .upload-icon {
+  font-size: 48rpx;
+  margin-bottom: 8rpx;
 }
 
-.upload-text {
-  font-size: 24rpx;
+.upload-item .upload-text {
+  font-size: 20rpx;
   color: #64748b;
+  margin-bottom: 4rpx;
 }
 
-.photo-preview {
-  width: 200rpx;
-}
-
-.preview-image {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 16rpx;
-  display: block;
-}
-
-.photo-actions {
-  display: flex;
-  gap: 8rpx;
-  margin-top: 12rpx;
-}
-
-.action-btn {
-  flex: 1;
-  padding: 12rpx;
-  background: #e2e8f0;
-  border-radius: 8rpx;
-  text-align: center;
-  font-size: 22rpx;
-  color: #475569;
-  transition: all 0.2s ease;
-}
-
-.action-btn:active {
-  background: #cbd5e1;
-}
-
-.action-btn.delete {
-  background: #fee2e2;
-  color: #ef4444;
-}
-
-.action-btn.delete:active {
-  background: #fecaca;
+.upload-item .upload-count {
+  font-size: 18rpx;
+  color: #94a3b8;
 }
 
 /* ==================== 底部按钮 ==================== */
@@ -301,6 +315,7 @@ radio {
   border: none;
   box-shadow: 0 8rpx 20rpx rgba(26, 86, 219, 0.3);
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .btn-primary:active {

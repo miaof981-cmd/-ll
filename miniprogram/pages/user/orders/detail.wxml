@@ -12,7 +12,7 @@
       <view class="status-icon" style="color: {{order.statusColor}}">{{order.statusIcon}}</view>
       <view class="status-info">
         <text class="status-text" style="color: {{order.statusColor}}">{{order.statusText}}</text>
-        <text class="status-time">{{order.updatedAt || order.createdAt}}</text>
+        <text class="status-time">{{order.updatedAtText}}</text>
       </view>
     </view>
 
@@ -27,7 +27,7 @@
           <view class="timeline-content">
             <view class="timeline-header">
               <view class="timeline-title">✅ 确认完成</view>
-              <view class="timeline-time">{{order.confirmedAt}}</view>
+              <view class="timeline-time">{{order.confirmedAtText}}</view>
             </view>
             <view class="timeline-desc">订单已完成，感谢您的确认</view>
           </view>
@@ -39,7 +39,7 @@
           <view class="timeline-content">
             <view class="timeline-header">
               <view class="timeline-title">❌ 作品被拒绝</view>
-              <view class="timeline-time">{{order.rejectedAt}}</view>
+              <view class="timeline-time">{{order.rejectedAtText}}</view>
             </view>
             <view class="timeline-desc reject">拒绝原因：{{order.rejectReason}}</view>
             <view class="timeline-note">摄影师将重新拍摄</view>
@@ -52,7 +52,7 @@
           <view class="timeline-content">
             <view class="timeline-header">
               <view class="timeline-title">📸 提交作品</view>
-              <view class="timeline-time">{{order.submittedAt}}</view>
+              <view class="timeline-time">{{order.submittedAtText}}</view>
             </view>
             <view class="timeline-desc">摄影师已提交 {{order.photos.length}} 张照片</view>
             
@@ -156,7 +156,7 @@
           <view class="timeline-content">
             <view class="timeline-header">
               <view class="timeline-title">📝 订单创建</view>
-              <view class="timeline-time">{{order.createdAt}}</view>
+              <view class="timeline-time">{{order.createdAtText}}</view>
             </view>
             <view wx:if="{{order.remark}}" class="timeline-desc">备注：{{order.remark}}</view>
           </view>
@@ -206,7 +206,7 @@
         </view>
         <view class="info-row">
           <text class="label">下单时间</text>
-          <text class="value">{{order.createdAt}}</text>
+          <text class="value">{{order.createdAtText}}</text>
         </view>
         <view class="info-row">
           <text class="label">订单金额</text>
@@ -216,6 +216,7 @@
     </view>
 
     <!-- 操作按钮 -->
+    <!-- 待确认：确认/拒绝 -->
     <view wx:if="{{order.status === 'pending_confirm'}}" class="action-bar">
       <view class="confirm-actions">
         <button class="action-btn reject-btn" bindtap="rejectWork">
@@ -224,6 +225,15 @@
         <button class="action-btn confirm-btn" bindtap="confirmWork">
           ✅ 确认满意
         </button>
+      </view>
+    </view>
+
+    <!-- 待支付：立即支付/取消订单 + 倒计时 -->
+    <view wx:elif="{{order.status === 'pending_payment'}}" class="action-bar">
+      <view class="countdown-text">支付剩余时间：{{countdownText}}</view>
+      <view class="confirm-actions">
+        <button class="action-btn reject-btn" bindtap="cancelOrder">取消订单</button>
+        <button class="action-btn confirm-btn" bindtap="payOrder" disabled="{{payDisabled}}">立即支付</button>
       </view>
     </view>
   </view>

@@ -86,9 +86,11 @@
     </view>
 
     <!-- 生活照片 -->
-    <view class="section-title">生活照片</view>
-    <view class="life-photo">
-      <image class="life-photo-img" src="{{formData.childPhoto}}" mode="aspectFill" bindtap="previewLifePhoto"/>
+    <view class="section-title">生活照片（{{formData.lifePhotos.length}}张）</view>
+    <view class="life-photos-grid">
+      <view wx:for="{{formData.lifePhotos}}" wx:key="index" class="life-photo-item">
+        <image class="life-photo-img" src="{{item}}" mode="aspectFill" bindtap="previewLifePhoto" data-index="{{index}}"/>
+      </view>
     </view>
 
     <!-- 家长期许 -->

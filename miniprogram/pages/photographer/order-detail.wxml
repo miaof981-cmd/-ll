@@ -63,13 +63,14 @@
     </view>
 
     <!-- 参考照片（生活照） -->
-    <view class="reference-card" wx:if="{{order.lifePhotos && order.lifePhotos.length > 0}}">
+    <view class="reference-card">
       <view class="card-header">
         <text class="title">📷 参考照片（生活照）</text>
-        <text class="subtitle">共{{order.lifePhotos.length}}张</text>
+        <text class="subtitle" wx:if="{{order.lifePhotos && order.lifePhotos.length > 0}}">共{{order.lifePhotos.length}}张</text>
       </view>
 
-      <view class="photo-grid">
+      <!-- 有生活照的情况 -->
+      <view wx:if="{{order.lifePhotos && order.lifePhotos.length > 0}}" class="photo-grid">
         <image
           wx:for="{{order.lifePhotos}}"
           wx:key="index"
@@ -79,6 +80,13 @@
           bindtap="previewLifePhoto"
           data-index="{{index}}"
         ></image>
+      </view>
+
+      <!-- 没有生活照的情况 -->
+      <view wx:else class="empty-reference">
+        <text class="empty-icon">🤷</text>
+        <text class="empty-text">用户未上传参考照片</text>
+        <text class="empty-hint">可直接拍摄证件照</text>
       </view>
     </view>
 

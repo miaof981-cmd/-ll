@@ -2,6 +2,8 @@
 const ORDER_STATUS = {
   PENDING_PAYMENT: 'pending_payment',      // 待支付
   PAID: 'paid',                            // 已支付
+  PENDING_UPLOAD: 'pending_upload',        // 待上传（支付成功，等待摄影师上传）
+  WAITING_SHOOT: 'waiting_shoot',          // 等待拍摄（已支付，等待摄影师拍摄）
   IN_PROGRESS: 'in_progress',              // 进行中（拍摄中）
   PENDING_REVIEW: 'pending_review',        // 待管理员审核
   PENDING_CONFIRM: 'pending_confirm',      // 待用户确认
@@ -15,6 +17,8 @@ const ORDER_STATUS = {
 const STATUS_TEXT = {
   [ORDER_STATUS.PENDING_PAYMENT]: '待支付',
   [ORDER_STATUS.PAID]: '已支付',
+  [ORDER_STATUS.PENDING_UPLOAD]: '进行中',
+  [ORDER_STATUS.WAITING_SHOOT]: '待拍摄',
   [ORDER_STATUS.IN_PROGRESS]: '进行中',
   [ORDER_STATUS.PENDING_REVIEW]: '待审核',
   [ORDER_STATUS.PENDING_CONFIRM]: '待确认',
@@ -28,6 +32,8 @@ const STATUS_TEXT = {
 const STATUS_COLOR = {
   [ORDER_STATUS.PENDING_PAYMENT]: '#f59e0b',   // 橙色
   [ORDER_STATUS.PAID]: '#3b82f6',              // 蓝色
+  [ORDER_STATUS.PENDING_UPLOAD]: '#3b82f6',    // 蓝色
+  [ORDER_STATUS.WAITING_SHOOT]: '#3b82f6',     // 蓝色
   [ORDER_STATUS.IN_PROGRESS]: '#8b5cf6',       // 紫色
   [ORDER_STATUS.PENDING_REVIEW]: '#ec4899',    // 粉色
   [ORDER_STATUS.PENDING_CONFIRM]: '#f59e0b',   // 橙色
@@ -41,6 +47,8 @@ const STATUS_COLOR = {
 const STATUS_ICON = {
   [ORDER_STATUS.PENDING_PAYMENT]: '💰',
   [ORDER_STATUS.PAID]: '✅',
+  [ORDER_STATUS.PENDING_UPLOAD]: '📸',
+  [ORDER_STATUS.WAITING_SHOOT]: '⏰',
   [ORDER_STATUS.IN_PROGRESS]: '📸',
   [ORDER_STATUS.PENDING_REVIEW]: '🔍',
   [ORDER_STATUS.PENDING_CONFIRM]: '⏳',
@@ -54,6 +62,8 @@ const STATUS_ICON = {
 const USER_ACTIONS = {
   [ORDER_STATUS.PENDING_PAYMENT]: ['pay', 'cancel'],           // 支付、取消
   [ORDER_STATUS.PAID]: [],                                     // 无操作
+  [ORDER_STATUS.PENDING_UPLOAD]: [],                           // 无操作（等待摄影师上传）
+  [ORDER_STATUS.WAITING_SHOOT]: [],                            // 无操作（等待摄影师拍摄）
   [ORDER_STATUS.IN_PROGRESS]: [],                              // 无操作（等待摄影师）
   [ORDER_STATUS.PENDING_REVIEW]: [],                           // 无操作（等待管理员审核）
   [ORDER_STATUS.PENDING_CONFIRM]: ['confirm', 'reject'],       // 确认收货、拒绝
@@ -67,6 +77,8 @@ const USER_ACTIONS = {
 const ADMIN_ACTIONS = {
   [ORDER_STATUS.PENDING_PAYMENT]: ['cancel'],                  // 取消订单
   [ORDER_STATUS.PAID]: ['cancel'],                             // 取消订单（用户已支付但未开始）
+  [ORDER_STATUS.PENDING_UPLOAD]: ['cancel'],                   // 取消订单（支付后待上传）
+  [ORDER_STATUS.WAITING_SHOOT]: ['cancel'],                    // 取消订单（等待拍摄）
   [ORDER_STATUS.IN_PROGRESS]: [],                              // 无操作（等待摄影师提交）
   [ORDER_STATUS.PENDING_REVIEW]: ['approve', 'reject_review'], // 审核通过、审核拒绝
   [ORDER_STATUS.PENDING_CONFIRM]: [],                          // 无操作（等待用户确认）

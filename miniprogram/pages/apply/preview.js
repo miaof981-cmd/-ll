@@ -30,10 +30,11 @@ Page({
   },
 
   // 预览生活照片
-  previewLifePhoto() {
+  previewLifePhoto(e) {
+    const index = e.currentTarget.dataset.index || 0;
     wx.previewImage({
-      urls: [this.data.formData.childPhoto],
-      current: this.data.formData.childPhoto
+      urls: this.data.formData.lifePhotos,
+      current: this.data.formData.lifePhotos[index]
     });
   },
 

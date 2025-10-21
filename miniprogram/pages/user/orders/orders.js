@@ -9,11 +9,30 @@ Page({
       { id: 'all', name: '全部' },
       { id: orderStatus.ORDER_STATUS.PENDING_PAYMENT, name: '待支付' },
       { id: orderStatus.ORDER_STATUS.IN_PROGRESS, name: '进行中' },
-      { id: orderStatus.ORDER_STATUS.COMPLETED, name: '已完成' },
-      { id: orderStatus.ORDER_STATUS.AFTER_SALE, name: '售后中' }
+      { id: orderStatus.ORDER_STATUS.PENDING_REVIEW, name: '待审核' },
+      { id: orderStatus.ORDER_STATUS.PENDING_CONFIRM, name: '待确认' },
+      { id: orderStatus.ORDER_STATUS.COMPLETED, name: '已完成' }
     ],
     loading: true,
     userOpenId: ''
+  },
+
+  // 工具：格式化为北京时间 YYYY-MM-DD HH:mm:ss
+  formatBeijing(ts) {
+    if (!ts) return '';
+    try {
+      const d = new Date(ts);
+      const pad = (n) => (n < 10 ? '0' + n : '' + n);
+      const year = d.getFullYear();
+      const month = pad(d.getMonth() + 1);
+      const day = pad(d.getDate());
+      const hour = pad(d.getHours());
+      const minute = pad(d.getMinutes());
+      const second = pad(d.getSeconds());
+      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    } catch (_) {
+      return ts;
+    }
   },
 
   onLoad() {
@@ -53,7 +72,9 @@ Page({
         .orderBy('createdAt', 'desc')
         .get();
 
-      // 加载活动信息
+      const TIMEOUT_MS = 30 * 60 * 1000; // 30分钟
+
+      // 加载活动信息并处理超时取消
       const orders = await Promise.all(res.data.map(async (order) => {
         // 加载活动信息
         try {
@@ -90,11 +111,49 @@ Page({
           }
         }
 
-        // 添加状态信息
+        // 兼容价格字段
         order.statusText = orderStatus.getStatusText(order.status);
         order.statusColor = orderStatus.getStatusColor(order.status);
         order.statusIcon = orderStatus.getStatusIcon(order.status);
         order.userActions = orderStatus.getUserActions(order.status);
+        
+        // 添加价格字段映射（兼容不同字段名）
+        if (!order.totalPrice && order.price !== undefined) {
+          order.totalPrice = order.price;
+        }
+
+        // 显示北京时间
+        order.createdAtText = this.formatBeijing(order.createdAt);
+        order.updatedAtText = this.formatBeijing(order.updatedAt || order.createdAt);
+
+        // 列表级自动过期取消（仅待支付）
+        try {
+          if (order.status === orderStatus.ORDER_STATUS.PENDING_PAYMENT && order.createdAt) {
+            const created = new Date(order.createdAt).getTime();
+            if (!isNaN(created)) {
+              const expireAt = created + TIMEOUT_MS;
+              if (Date.now() >= expireAt) {
+                const nowISO = new Date().toISOString();
+                await db.collection('activity_orders').doc(order._id).update({
+                  data: {
+                    status: 'cancelled',
+                    cancelReason: '支付超时自动关闭',
+                    cancelledAt: nowISO,
+                    updatedAt: nowISO
+                  }
+                });
+                // 本地对象同步
+                order.status = 'cancelled';
+                order.statusText = orderStatus.getStatusText(order.status);
+                order.statusColor = orderStatus.getStatusColor(order.status);
+                order.statusIcon = orderStatus.getStatusIcon(order.status);
+                order.userActions = orderStatus.getUserActions(order.status);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('自动关闭超时订单失败(忽略继续):', e?.message || e);
+        }
 
         return order;
       }));
@@ -118,9 +177,26 @@ Page({
   // 切换状态筛选
   switchStatus(e) {
     const status = e.currentTarget.dataset.status;
-    const filteredOrders = status === 'all' 
-      ? this.data.orders 
-      : this.data.orders.filter(order => order.status === status);
+    // 将筛选器与状态集合严格关联：
+    // 进行中 = 待上传/待拍摄/进行中；其余一一对应
+    const FILTER_STATUS_MAP = {
+      all: null,
+      [orderStatus.ORDER_STATUS.PENDING_PAYMENT]: [orderStatus.ORDER_STATUS.PENDING_PAYMENT],
+      [orderStatus.ORDER_STATUS.IN_PROGRESS]: [
+        orderStatus.ORDER_STATUS.PAID,
+        orderStatus.ORDER_STATUS.PENDING_UPLOAD,
+        orderStatus.ORDER_STATUS.WAITING_SHOOT,
+        orderStatus.ORDER_STATUS.IN_PROGRESS
+      ],
+      [orderStatus.ORDER_STATUS.PENDING_REVIEW]: [orderStatus.ORDER_STATUS.PENDING_REVIEW],
+      [orderStatus.ORDER_STATUS.PENDING_CONFIRM]: [orderStatus.ORDER_STATUS.PENDING_CONFIRM],
+      [orderStatus.ORDER_STATUS.COMPLETED]: [orderStatus.ORDER_STATUS.COMPLETED]
+    };
+
+    const targetStatuses = FILTER_STATUS_MAP[status];
+    const filteredOrders = !targetStatuses
+      ? this.data.orders
+      : this.data.orders.filter(order => targetStatuses.includes(order.status));
 
     this.setData({
       activeStatus: status,
@@ -159,12 +235,81 @@ Page({
     }
   },
 
-  // 支付订单
+  // 支付订单（继续支付）
   async payOrder(orderId) {
-    wx.showToast({
-      title: '支付功能开发中',
-      icon: 'none'
-    });
+    const order = this.data.orders.find(o => o._id === orderId);
+    
+    if (!order) {
+      wx.showToast({
+        title: '订单不存在',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.showLoading({ title: '加载中...', mask: true });
+    
+    try {
+      console.log('💳 继续支付订单:', order.orderNo);
+      
+      // 调用统一下单云函数
+      const { result } = await wx.cloud.callFunction({
+        name: 'unifiedOrder',
+        data: {
+          orderNo: order.orderNo,
+          totalFee: Math.round(order.totalPrice * 100), // 转换为分
+          description: '次元学校-证件照拍摄'
+        }
+      });
+
+      console.log('📦 统一下单结果:', result);
+
+      if (!result.success) {
+        throw new Error(result.errMsg || '统一下单失败');
+      }
+
+      const paymentResult = result.result.payment;
+      
+      wx.hideLoading();
+      
+      // 调起微信支付
+      await wx.requestPayment({
+        timeStamp: paymentResult.timeStamp,
+        nonceStr: paymentResult.nonceStr,
+        package: paymentResult.package,
+        signType: paymentResult.signType,
+        paySign: paymentResult.paySign
+      });
+
+      console.log('✅ 支付成功');
+
+      wx.showToast({
+        title: '支付成功',
+        icon: 'success'
+      });
+
+      // 刷新订单列表
+      setTimeout(() => {
+        this.loadOrders();
+      }, 1500);
+
+    } catch (err) {
+      wx.hideLoading();
+      
+      console.error('❌ 支付失败:', err);
+      
+      if (err.errMsg === 'requestPayment:fail cancel') {
+        wx.showToast({
+          title: '支付已取消',
+          icon: 'none'
+        });
+      } else {
+        wx.showToast({
+          title: '支付失败',
+          icon: 'none'
+        });
+      }
+    }
   },
 
   // 取消订单
