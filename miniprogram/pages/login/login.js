@@ -4,16 +4,37 @@ Page({
     loading: false,
     hasAuthorized: false,
     avatarUrl: 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0', // 默认头像
-    nickName: ''
+    nickName: '',
+    isEditMode: false // 是否为编辑模式
   },
 
-  onLoad() {
+  onLoad(options) {
     console.log('📱 统一登录页加载');
-    this.checkLoginStatus();
+    
+    // 检查是否为编辑模式
+    if (options && options.mode === 'edit') {
+      console.log('🔧 进入编辑模式');
+      this.setData({ isEditMode: true });
+      
+      // 加载当前用户信息
+      const userInfo = wx.getStorageSync('unifiedUserInfo');
+      if (userInfo) {
+        console.log('加载用户信息:', userInfo);
+        this.setData({
+          avatarUrl: userInfo.avatarUrl || this.data.avatarUrl,
+          nickName: userInfo.nickName || ''
+        });
+      }
+    } else {
+      this.checkLoginStatus();
+    }
   },
 
   onShow() {
-    this.checkLoginStatus();
+    // 编辑模式下不检查登录状态（避免自动跳转）
+    if (!this.data.isEditMode) {
+      this.checkLoginStatus();
+    }
   },
   
   // 选择头像
@@ -143,15 +164,21 @@ Page({
         app.globalData.isAdmin = roles.includes('admin');
         
         wx.showToast({
-          title: '登录成功',
+          title: this.data.isEditMode ? '资料已更新' : '登录成功',
           icon: 'success'
         });
         
-        // 5. 所有人都跳转到"我的"页面
+        // 5. 根据模式决定跳转
         setTimeout(() => {
-          wx.switchTab({
-            url: '/pages/my/my'
-          });
+          if (this.data.isEditMode) {
+            // 编辑模式：返回上一页（我的页面）
+            wx.navigateBack();
+          } else {
+            // 登录模式：跳转到"我的"页面
+            wx.switchTab({
+              url: '/pages/my/my'
+            });
+          }
         }, 1500);
       } else {
         wx.showToast({

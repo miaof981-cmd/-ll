@@ -184,94 +184,22 @@ Page({
     });
   },
 
-  // 刷新用户信息（重新获取头像和昵称）
-  async refreshUserInfo() {
-    try {
-      console.log('========================================');
-      console.log('🔄 开始刷新用户信息...');
-      console.log('========================================');
-      
-      wx.showLoading({ title: '刷新中...' });
-      
-      // 1. 重新获取用户信息
-      console.log('📱 调用 wx.getUserProfile...');
-      const { userInfo } = await wx.getUserProfile({
-        desc: '更新用户资料'
-      });
-      
-      console.log('✅ 获取微信信息成功！');
-      console.log('  昵称:', userInfo.nickName);
-      console.log('  头像:', userInfo.avatarUrl ? '有' : '无');
-      console.log('  完整信息:', JSON.stringify(userInfo, null, 2));
-      
-      // 2. 调用云函数更新
-      console.log('☁️ 调用 unifiedLogin 云函数...');
-      const res = await wx.cloud.callFunction({
-        name: 'unifiedLogin',
-        data: { userInfo }
-      });
-      
-      console.log('☁️ 云函数返回结果:', JSON.stringify(res.result, null, 2));
-      
-      wx.hideLoading();
-      
-      if (res.result && res.result.success) {
-        const { user, roles } = res.result;
-        
-        console.log('✅ 云函数执行成功！');
-        console.log('👤 返回的用户信息:');
-        console.log('  昵称:', user.nickName);
-        console.log('  头像:', user.avatarUrl ? '有' : '无');
-        console.log('  openid:', user.openid || user._openid);
-        console.log('  角色:', roles.join(', '));
-        
-        // 3. 更新本地存储
-        console.log('💾 更新本地存储...');
-        wx.setStorageSync('unifiedUserInfo', user);
-        wx.setStorageSync('userRoles', roles);
-        
-        // 4. 刷新页面数据
-        console.log('🔄 刷新页面显示...');
-        this.checkLoginStatus();
-        
-        console.log('========================================');
-        console.log('✅ 刷新完成！');
-        console.log('========================================');
-        
-        wx.showToast({
-          title: '资料已更新',
-          icon: 'success'
-        });
-      } else {
-        console.error('❌ 云函数返回失败:', res.result);
-        wx.showToast({
-          title: '更新失败',
-          icon: 'error'
-        });
+  // 刷新用户信息（重新编辑头像和昵称）
+  refreshUserInfo() {
+    wx.showModal({
+      title: '更新资料',
+      content: '将跳转到登录页重新选择头像和编辑昵称',
+      confirmText: '去编辑',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          // 跳转到登录页，让用户重新编辑
+          wx.navigateTo({
+            url: '/pages/login/login?mode=edit'
+          });
+        }
       }
-    } catch (e) {
-      console.error('========================================');
-      console.error('❌ 刷新用户信息失败！');
-      console.error('错误信息:', e);
-      console.error('错误消息:', e.errMsg);
-      console.error('========================================');
-      
-      wx.hideLoading();
-      
-      if (e.errMsg && e.errMsg.includes('cancel')) {
-        console.log('⚠️ 用户取消了授权');
-        wx.showToast({
-          title: '已取消',
-          icon: 'none'
-        });
-      } else {
-        wx.showToast({
-          title: '刷新失败: ' + (e.errMsg || e.message),
-          icon: 'none',
-          duration: 3000
-        });
-      }
-    }
+    });
   },
 
   // 头像加载失败处理
