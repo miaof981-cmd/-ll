@@ -391,10 +391,14 @@ function confirmAddApplication() {
     return;
   }
   
-  // 获取管理员信息作为下单用户
-  const currentUser = Auth.getCurrentUser();
-  const userNickName = currentUser.name || '管理员';
-  const userAvatarUrl = currentUser.avatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+  // 获取用户输入的OpenID和微信信息
+  const userOpenId = document.getElementById('userOpenId').value.trim();
+  const inputNickName = document.getElementById('userNickName').value.trim();
+  const inputAvatarUrl = document.getElementById('userAvatarUrl').value.trim();
+  
+  // 优先使用用户输入的信息，如果没输入则使用默认值
+  const userNickName = inputNickName || '测试用户';
+  const userAvatarUrl = inputAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
   
   // 获取摄影师信息
   const photographer = Storage.getPhotographers().find(p => p.id === photographerId);
@@ -415,12 +419,18 @@ function confirmAddApplication() {
     expectations,
     photographerId,
     photographerName: photographer.name,
-    // 使用管理员的头像和名字
+    // 用户微信信息（用于订单列表显示）
     userNickName: userNickName,
     userAvatarUrl: userAvatarUrl,
     status: 'waiting_draw',
     lifePhoto: '' // 可以后续上传
   };
+  
+  // 如果输入了OpenID，也保存到订单中
+  if (userOpenId) {
+    application.userId = userOpenId;
+    application._openid = userOpenId;
+  }
   
   // 保存订单
   Storage.saveApplication(application);

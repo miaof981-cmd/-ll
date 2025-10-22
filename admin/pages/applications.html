@@ -218,10 +218,23 @@
                     <textarea id="expectations" class="form-control" rows="3" placeholder="请输入对孩子的期许（选填）"></textarea>
                 </div>
                 
-                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-                    <div style="font-size: 13px; color: #0369a1;">
-                        <strong>下单用户信息：</strong><br>
-                        将使用您（管理员）的头像和名字作为下单用户，方便在订单列表中识别。
+                <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <h4 style="font-size: 14px; margin-bottom: 12px; color: #9a3412;">下单用户信息</h4>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 13px;">用户OpenID（选填）</label>
+                        <input type="text" id="userOpenId" class="form-control" placeholder="输入用户的OpenID，留空则使用默认信息" style="font-size: 13px;">
+                        <small style="color: #92400e; font-size: 12px;">如果此用户在小程序中登录过，将自动使用其微信头像和昵称</small>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 13px;">微信昵称（选填）</label>
+                        <input type="text" id="userNickName" class="form-control" placeholder="留空则使用默认昵称" style="font-size: 13px;">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 13px;">微信头像URL（选填）</label>
+                        <input type="text" id="userAvatarUrl" class="form-control" placeholder="留空则使用默认头像" style="font-size: 13px;">
                     </div>
                 </div>
             </form>

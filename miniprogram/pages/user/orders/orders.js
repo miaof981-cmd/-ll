@@ -124,30 +124,43 @@ Page({
                 .where({ _openid: userId })
                 .get();
               
-              console.log('查询用户结果:', userRes.data);
+              console.log('========== 用户信息查询结果 ==========');
+              console.log('查询到的用户数量:', userRes.data.length);
+              if (userRes.data.length > 0) {
+                console.log('用户完整数据:', JSON.stringify(userRes.data[0], null, 2));
+              }
               
               if (userRes.data && userRes.data.length > 0) {
                 const user = userRes.data[0];
+                console.log('用户原始 nickName:', user.nickName);
+                console.log('用户原始 avatarUrl:', user.avatarUrl);
+                
                 order.userNickName = user.nickName || '微信用户';
                 
                 // 处理云存储URL
                 let avatarUrl = user.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+                console.log('处理前的 avatarUrl:', avatarUrl);
+                
                 if (avatarUrl.startsWith('cloud://')) {
                   try {
                     // 转换云存储URL为临时URL
                     const tempRes = await wx.cloud.getTempFileURL({
                       fileList: [avatarUrl]
                     });
+                    console.log('云存储转换结果:', tempRes);
                     if (tempRes.fileList && tempRes.fileList.length > 0) {
                       avatarUrl = tempRes.fileList[0].tempFileURL || avatarUrl;
                       console.log('云存储URL已转换:', avatarUrl);
                     }
                   } catch (err) {
-                    console.warn('转换云存储URL失败:', err);
+                    console.error('转换云存储URL失败:', err);
                   }
                 }
                 order.userAvatarUrl = avatarUrl;
-                console.log('用户信息已更新:', order.userNickName, order.userAvatarUrl);
+                console.log('最终设置的用户信息:');
+                console.log('  nickName:', order.userNickName);
+                console.log('  avatarUrl:', order.userAvatarUrl);
+                console.log('=====================================');
               } else {
                 console.log('未找到用户，使用默认值');
                 // 如果查不到用户，使用默认值

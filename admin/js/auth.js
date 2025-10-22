@@ -7,8 +7,7 @@ const Auth = {
       username: 'admin',
       password: 'admin123',
       role: 'admin',
-      name: '系统管理员',
-      avatar: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23ef4444" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="32"%3E管%3C/text%3E%3C/svg%3E'
+      name: '系统管理员'
     },
     photographer: {
       username: 'photographer',
