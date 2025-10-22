@@ -113,6 +113,36 @@ Page({
           }
         }
 
+        // 加载下单用户信息（如果订单中没有保存）
+        if (!order.userAvatarUrl || !order.userNickName) {
+          try {
+            const userId = order.userId || order._openid;
+            if (userId) {
+              const userRes = await db.collection('users')
+                .where({ _openid: userId })
+                .get();
+              
+              if (userRes.data && userRes.data.length > 0) {
+                const user = userRes.data[0];
+                order.userNickName = user.nickName || '微信用户';
+                order.userAvatarUrl = user.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+              } else {
+                // 如果查不到用户，使用默认值
+                order.userNickName = order.userNickName || '用户';
+                order.userAvatarUrl = order.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+              }
+            } else {
+              // 没有用户ID，使用默认值
+              order.userNickName = '用户';
+              order.userAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+            }
+          } catch (e) {
+            console.warn('加载用户信息失败:', e);
+            order.userNickName = order.userNickName || '用户';
+            order.userAvatarUrl = order.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+          }
+        }
+
         // 兼容价格字段
         order.statusText = orderStatus.getStatusText(order.status);
         order.statusColor = orderStatus.getStatusColor(order.status);
