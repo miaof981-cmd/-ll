@@ -286,3 +286,37 @@
   color: white;
 }
 
+/* 用户和摄影师信息行 */
+.user-photographer-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.user-info-mini,
+.photographer-info-mini {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 12rpx;
+  background: #f8f9fa;
+  border-radius: 20rpx;
+}
+
+.mini-avatar {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 2rpx solid #fff;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+.mini-name {
+  font-size: 22rpx;
+  color: #666;
+  max-width: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+

@@ -57,9 +57,22 @@
         ></image>
         <view class="order-info">
           <text class="activity-title">{{item.activityInfo ? item.activityInfo.title : '活动已删除'}}</text>
-          <text wx:if="{{item.photographerInfo}}" class="photographer-name">
-            📷 {{item.photographerInfo.name}}
-          </text>
+          
+          <!-- 摄影师和用户信息 -->
+          <view class="user-photographer-row">
+            <!-- 下单用户 -->
+            <view class="user-info-mini">
+              <image class="mini-avatar" src="{{item.userAvatarUrl}}" mode="aspectFill"></image>
+              <text class="mini-name">{{item.userNickName || '用户'}}</text>
+            </view>
+            
+            <!-- 摄影师 -->
+            <view wx:if="{{item.photographerInfo}}" class="photographer-info-mini">
+              <image class="mini-avatar" src="{{item.photographerInfo.avatar || item.photographerAvatar}}" mode="aspectFill"></image>
+              <text class="mini-name">{{item.photographerInfo.name}}</text>
+            </view>
+          </view>
+          
           <text class="order-price">¥{{item.totalPrice}}</text>
         </view>
       </view>
