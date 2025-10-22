@@ -129,7 +129,24 @@ Page({
               if (userRes.data && userRes.data.length > 0) {
                 const user = userRes.data[0];
                 order.userNickName = user.nickName || '微信用户';
-                order.userAvatarUrl = user.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+                
+                // 处理云存储URL
+                let avatarUrl = user.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+                if (avatarUrl.startsWith('cloud://')) {
+                  try {
+                    // 转换云存储URL为临时URL
+                    const tempRes = await wx.cloud.getTempFileURL({
+                      fileList: [avatarUrl]
+                    });
+                    if (tempRes.fileList && tempRes.fileList.length > 0) {
+                      avatarUrl = tempRes.fileList[0].tempFileURL || avatarUrl;
+                      console.log('云存储URL已转换:', avatarUrl);
+                    }
+                  } catch (err) {
+                    console.warn('转换云存储URL失败:', err);
+                  }
+                }
+                order.userAvatarUrl = avatarUrl;
                 console.log('用户信息已更新:', order.userNickName, order.userAvatarUrl);
               } else {
                 console.log('未找到用户，使用默认值');
@@ -150,6 +167,36 @@ Page({
           }
         } else {
           console.log('订单', order._id, '已有用户信息:', order.userNickName, order.userAvatarUrl);
+          
+          // 如果已有头像URL是云存储格式，也需要转换
+          if (order.userAvatarUrl && order.userAvatarUrl.startsWith('cloud://')) {
+            try {
+              const tempRes = await wx.cloud.getTempFileURL({
+                fileList: [order.userAvatarUrl]
+              });
+              if (tempRes.fileList && tempRes.fileList.length > 0) {
+                order.userAvatarUrl = tempRes.fileList[0].tempFileURL;
+                console.log('已有云存储URL已转换:', order.userAvatarUrl);
+              }
+            } catch (err) {
+              console.warn('转换已有云存储URL失败:', err);
+            }
+          }
+        }
+        
+        // 处理摄影师头像URL（如果是云存储格式）
+        if (order.photographerInfo && order.photographerInfo.avatar && order.photographerInfo.avatar.startsWith('cloud://')) {
+          try {
+            const tempRes = await wx.cloud.getTempFileURL({
+              fileList: [order.photographerInfo.avatar]
+            });
+            if (tempRes.fileList && tempRes.fileList.length > 0) {
+              order.photographerInfo.avatar = tempRes.fileList[0].tempFileURL;
+              console.log('摄影师云存储URL已转换');
+            }
+          } catch (err) {
+            console.warn('转换摄影师云存储URL失败:', err);
+          }
         }
 
         // 兼容价格字段
