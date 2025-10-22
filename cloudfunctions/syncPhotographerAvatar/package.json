@@ -1,0 +1,10 @@
+{
+  "name": "syncPhotographerAvatar",
+  "version": "1.0.0",
+  "description": "同步摄影师头像从users集合到photographers集合",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+
