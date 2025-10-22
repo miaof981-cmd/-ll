@@ -117,21 +117,28 @@ Page({
         if (!order.userAvatarUrl || !order.userNickName) {
           try {
             const userId = order.userId || order._openid;
+            console.log('订单', order._id, '缺少用户信息，尝试查询 userId:', userId);
+            
             if (userId) {
               const userRes = await db.collection('users')
                 .where({ _openid: userId })
                 .get();
               
+              console.log('查询用户结果:', userRes.data);
+              
               if (userRes.data && userRes.data.length > 0) {
                 const user = userRes.data[0];
                 order.userNickName = user.nickName || '微信用户';
                 order.userAvatarUrl = user.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+                console.log('用户信息已更新:', order.userNickName, order.userAvatarUrl);
               } else {
+                console.log('未找到用户，使用默认值');
                 // 如果查不到用户，使用默认值
                 order.userNickName = order.userNickName || '用户';
                 order.userAvatarUrl = order.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
               }
             } else {
+              console.log('订单没有 userId，使用默认值');
               // 没有用户ID，使用默认值
               order.userNickName = '用户';
               order.userAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
@@ -141,6 +148,8 @@ Page({
             order.userNickName = order.userNickName || '用户';
             order.userAvatarUrl = order.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
           }
+        } else {
+          console.log('订单', order._id, '已有用户信息:', order.userNickName, order.userAvatarUrl);
         }
 
         // 兼容价格字段

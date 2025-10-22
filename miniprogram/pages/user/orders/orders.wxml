@@ -62,13 +62,21 @@
           <view class="user-photographer-row">
             <!-- 下单用户 -->
             <view class="user-info-mini">
-              <image class="mini-avatar" src="{{item.userAvatarUrl}}" mode="aspectFill"></image>
+              <image 
+                class="mini-avatar" 
+                src="{{item.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" 
+                mode="aspectFill"
+              ></image>
               <text class="mini-name">{{item.userNickName || '用户'}}</text>
             </view>
             
             <!-- 摄影师 -->
             <view wx:if="{{item.photographerInfo}}" class="photographer-info-mini">
-              <image class="mini-avatar" src="{{item.photographerInfo.avatar || item.photographerAvatar}}" mode="aspectFill"></image>
+              <image 
+                class="mini-avatar" 
+                src="{{item.photographerInfo.avatar || item.photographerAvatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" 
+                mode="aspectFill"
+              ></image>
               <text class="mini-name">{{item.photographerInfo.name}}</text>
             </view>
           </view>
