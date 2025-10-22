@@ -119,7 +119,7 @@
 
       <view class="form-item">
         <text class="label">可选摄影师</text>
-        <button class="btn-select" bindtap="selectPhotographers">
+        <button class="btn-select" bindtap="openPhotographerPicker">
           选择摄影师（已选{{formData.photographerIds.length}}位）
         </button>
       </view>
@@ -169,6 +169,60 @@
     <button class="btn-save" bindtap="saveActivity">
       {{isEdit ? '保存修改' : '创建活动'}}
     </button>
+  </view>
+
+  <!-- 摄影师多选弹层 -->
+  <view wx:if="{{showPhotographerPicker}}" class="picker-mask" bindtap="closePhotographerPicker"></view>
+  <view wx:if="{{showPhotographerPicker}}" class="picker-panel" catchtouchmove>
+    <view class="picker-header">
+      <text class="picker-title">选择摄影师</text>
+      <button class="picker-btn-close" bindtap="closePhotographerPicker">✕</button>
+    </view>
+    
+    <view class="picker-toolbar">
+      <view class="picker-select-all" bindtap="toggleSelectAll">
+        <view class="checkbox {{isAllSelected ? 'checked' : ''}}">
+          <text wx:if="{{isAllSelected}}" class="checkbox-icon">✓</text>
+        </view>
+        <text class="select-all-text">全选</text>
+      </view>
+      <text class="picker-count">已选 {{tempSelectedPhotographerIds.length}} 人</text>
+    </view>
+
+    <view class="picker-search">
+      <input class="search-input" placeholder="搜索姓名" value="{{photographerKeyword}}" bindinput="onPhotographerSearch" />
+    </view>
+    
+    <scroll-view class="picker-list" scroll-y>
+      <view
+        wx:for="{{filteredPhotographers}}"
+        wx:key="_id"
+        class="picker-item {{tempSelectedPhotographerIds.includes(item._id) ? 'selected' : ''}}"
+        bindtap="togglePhotographer"
+        data-id="{{item._id}}"
+      >
+        <!-- 多选框 -->
+        <view class="checkbox {{tempSelectedPhotographerIds.includes(item._id) ? 'checked' : ''}}">
+          <text wx:if="{{tempSelectedPhotographerIds.includes(item._id)}}" class="checkbox-icon">✓</text>
+        </view>
+        
+        <!-- 头像 -->
+        <image wx:if="{{item.avatar}}" class="picker-avatar" src="{{item.avatar}}" mode="aspectFill" />
+        <view wx:else class="picker-avatar placeholder">{{item.name.substring(0,1)}}</view>
+        
+        <!-- 信息 -->
+        <view class="picker-info">
+          <text class="picker-name">{{item.name}}</text>
+          <text wx:if="{{item.specialty}}" class="picker-sub">{{item.specialty}}</text>
+        </view>
+      </view>
+      <view wx:if="{{hasMorePhotographers}}" class="picker-loadmore" bindtap="loadMorePhotographers">加载更多</view>
+    </scroll-view>
+
+    <view class="picker-footer">
+      <button class="picker-btn secondary" bindtap="closePhotographerPicker">取消</button>
+      <button class="picker-btn primary" bindtap="confirmPhotographerPicker">确定</button>
+    </view>
   </view>
 </view>
 

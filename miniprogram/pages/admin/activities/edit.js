@@ -31,7 +31,14 @@ Page({
     
     // 所有摄影师
     allPhotographers: [],
-    selectedPhotographers: []
+    selectedPhotographers: [],
+    // 多选弹层
+    showPhotographerPicker: false,
+    photographerKeyword: '',
+    filteredPhotographers: [],
+    tempSelectedPhotographerIds: [],
+    isAllSelected: false,
+    hasMorePhotographers: false
   },
 
   onLoad(options) {
@@ -107,7 +114,10 @@ Page({
   async loadPhotographers() {
     try {
       const photographers = await cloudDB.getPhotographers();
-      this.setData({ allPhotographers: photographers });
+      this.setData({ 
+        allPhotographers: photographers,
+        filteredPhotographers: photographers
+      });
     } catch (e) {
       console.error('加载摄影师失败:', e);
     }
@@ -255,6 +265,60 @@ Page({
         this.loadSelectedPhotographers(photographerIds);
       }
     });
+  },
+
+  // 打开多选弹层
+  openPhotographerPicker() {
+    const temp = [...(this.data.formData.photographerIds || [])];
+    this.setData({
+      showPhotographerPicker: true,
+      tempSelectedPhotographerIds: temp,
+      photographerKeyword: '',
+      filteredPhotographers: this.data.allPhotographers,
+      isAllSelected: temp.length > 0 && temp.length === this.data.allPhotographers.length
+    });
+  },
+
+  closePhotographerPicker() {
+    this.setData({ showPhotographerPicker: false });
+  },
+
+  onPhotographerSearch(e) {
+    const kw = (e.detail.value || '').trim();
+    const list = this.data.allPhotographers.filter(p => !kw || (p.name && p.name.includes(kw)));
+    this.setData({ photographerKeyword: kw, filteredPhotographers: list });
+  },
+
+  togglePhotographer(e) {
+    const id = e.currentTarget.dataset.id;
+    const temp = [...this.data.tempSelectedPhotographerIds];
+    const i = temp.indexOf(id);
+    if (i >= 0) temp.splice(i, 1); else temp.push(id);
+    this.setData({ 
+      tempSelectedPhotographerIds: temp,
+      isAllSelected: temp.length > 0 && temp.length === this.data.allPhotographers.length
+    });
+  },
+
+  toggleSelectAll() {
+    if (this.data.isAllSelected) {
+      this.setData({ tempSelectedPhotographerIds: [], isAllSelected: false });
+    } else {
+      const allIds = this.data.allPhotographers.map(p => p._id);
+      this.setData({ tempSelectedPhotographerIds: allIds, isAllSelected: true });
+    }
+  },
+
+  // 确认选择
+  async confirmPhotographerPicker() {
+    const ids = [...this.data.tempSelectedPhotographerIds];
+    this.setData({
+      'formData.photographerIds': ids,
+      showPhotographerPicker: false
+    });
+
+    // 同步预览列表
+    this.loadSelectedPhotographers(ids);
   },
 
   // 表单验证

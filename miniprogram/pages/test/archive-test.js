@@ -1751,6 +1751,304 @@ Page({
         icon: 'error'
       });
     }
+  },
+
+  // 测试24: 诊断订单归属问题
+  async diagnoseOrderOwnership() {
+    this.clearLogs();
+    this.addLog('========================================');
+    this.addLog('🔍 测试24: 诊断订单归属问题');
+    this.addLog('========================================');
+    
+    try {
+      const db = wx.cloud.database();
+      
+      // 1. 获取当前用户信息
+      this.addLog('\n📋 获取当前用户信息...');
+      const { result } = await wx.cloud.callFunction({
+        name: 'unifiedLogin'
+      });
+      
+      const currentOpenId = result.userInfo?._openid || result.userInfo?.openid || result._openid || result.openid;
+      const roles = result.roles || [];
+      
+      this.addLog(`✅ 当前用户OpenID: ${currentOpenId}`);
+      this.addLog(`✅ 当前用户角色: ${roles.join(', ')}`);
+      this.addLog(`✅ 角色数量: ${roles.length} 个`);
+      
+      // 特别强调多角色情况
+      if (roles.length > 1) {
+        this.addLog('\n🎯 检测到多角色用户！');
+        this.addLog('✅ 查询逻辑使用 openid，不是角色');
+        this.addLog('✅ 不管有几个角色，openid 永远相同');
+        this.addLog('✅ 所以查询结果不受角色影响');
+      }
+      
+      // 2. 查询所有订单
+      this.addLog('\n📋 查询数据库中所有订单...');
+      const allOrders = await db.collection('activity_orders')
+        .orderBy('createdAt', 'desc')
+        .limit(10)
+        .get();
+      
+      this.addLog(`✅ 找到 ${allOrders.data.length} 个订单\n`);
+      
+      // 3. 分析每个订单
+      allOrders.data.forEach((order, index) => {
+        this.addLog(`\n订单 ${index + 1}:`);
+        this.addLog(`  订单ID: ${order._id.substring(0, 20)}...`);
+        this.addLog(`  学生姓名: ${order.childName || order.studentName || '未知'}`);
+        this.addLog(`  订单状态: ${order.status}`);
+        this.addLog(`  创建时间: ${order.createdAt}`);
+        
+        // 检查 _openid
+        if (order._openid) {
+          this.addLog(`  _openid: ${order._openid.substring(0, 20)}...`);
+          if (order._openid === currentOpenId) {
+            this.addLog(`           ✅ 是当前用户`);
+          } else {
+            this.addLog(`           ❌ 不是当前用户`);
+          }
+        } else {
+          this.addLog(`  _openid: ❌ 不存在`);
+        }
+        
+        // 检查 userId
+        if (order.userId) {
+          this.addLog(`  userId: ${order.userId.substring(0, 20)}...`);
+          if (order.userId === currentOpenId) {
+            this.addLog(`         ✅ 是当前用户`);
+          } else {
+            this.addLog(`         ❌ 不是当前用户`);
+          }
+        } else {
+          this.addLog(`  userId: ❌ 不存在`);
+        }
+        
+        // 判断当前用户能否看到这个订单
+        const canSee = (order.userId === currentOpenId) || (order._openid === currentOpenId);
+        if (canSee) {
+          this.addLog(`  📍 查询结果: ✅ 当前用户能看到`);
+        } else {
+          this.addLog(`  📍 查询结果: ❌ 当前用户看不到`);
+        }
+      });
+      
+      // 4. 使用查询逻辑验证
+      this.addLog('\n========================================');
+      this.addLog('🔍 使用订单列表查询逻辑验证...');
+      this.addLog('========================================');
+      
+      const myOrders = await db.collection('activity_orders')
+        .where(db.command.or([
+          { userId: currentOpenId },
+          { _openid: currentOpenId }
+        ]))
+        .orderBy('createdAt', 'desc')
+        .get();
+      
+      this.addLog(`\n✅ 查询结果: 找到 ${myOrders.data.length} 个属于当前用户的订单`);
+      
+      if (myOrders.data.length > 0) {
+        this.addLog('\n我的订单列表:');
+        myOrders.data.forEach((order, index) => {
+          this.addLog(`  ${index + 1}. ${order.childName || order.studentName} - ${order.status}`);
+        });
+      } else {
+        this.addLog('\n❌ 没有找到任何订单！');
+        this.addLog('\n可能的原因:');
+        this.addLog('1. 所有订单的 _openid 和 userId 都不是当前用户');
+        this.addLog('2. 订单是用其他账号创建的');
+        this.addLog('3. 需要运行"测试23: 迁移订单userId字段"');
+      }
+      
+      this.addLog('\n========================================');
+      this.addLog('📊 诊断完成！');
+      this.addLog('========================================');
+      
+      this.setData({ testResult: `✅ 诊断完成，找到 ${myOrders.data.length} 个订单` });
+      
+    } catch (e) {
+      this.addLog('========================================');
+      this.addLog('❌ 诊断失败！');
+      this.addLog(`错误: ${e.message}`);
+      this.addLog('========================================');
+      
+      this.setData({ testResult: `❌ 失败: ${e.message}` });
+    }
+  },
+
+  // 测试23: 迁移订单userId字段
+  async migrateOrderUserId() {
+    this.clearLogs();
+    this.addLog('========================================');
+    this.addLog('🔄 测试23: 迁移订单userId字段');
+    this.addLog('========================================');
+    
+    const res = await wx.showModal({
+      title: '数据迁移确认',
+      content: '将为所有缺少userId字段的订单添加userId字段（userId = _openid）。这是一个安全操作，不会删除任何数据。',
+      confirmText: '开始迁移',
+      cancelText: '取消'
+    });
+    
+    if (!res.confirm) {
+      this.addLog('❌ 用户取消操作');
+      return;
+    }
+    
+    try {
+      const db = wx.cloud.database();
+      const _ = db.command;
+      
+      this.addLog('\n📋 查询需要迁移的订单...');
+      
+      // 查询所有订单（包括有userId和没有userId的）
+      const allOrders = await db.collection('activity_orders')
+        .get();
+      
+      this.addLog(`✅ 找到 ${allOrders.data.length} 个订单`);
+      
+      // 筛选出没有userId的订单
+      const ordersToMigrate = allOrders.data.filter(order => !order.userId);
+      
+      this.addLog(`\n需要迁移的订单: ${ordersToMigrate.length} 个`);
+      this.addLog(`已有userId的订单: ${allOrders.data.length - ordersToMigrate.length} 个`);
+      
+      if (ordersToMigrate.length === 0) {
+        this.addLog('\n✅ 所有订单都已有userId字段，无需迁移！');
+        this.setData({ testResult: '✅ 无需迁移' });
+        return;
+      }
+      
+      this.addLog('\n🔄 开始迁移...');
+      
+      let successCount = 0;
+      let failCount = 0;
+      
+      for (let i = 0; i < ordersToMigrate.length; i++) {
+        const order = ordersToMigrate[i];
+        try {
+          await db.collection('activity_orders')
+            .doc(order._id)
+            .update({
+              data: {
+                userId: order._openid  // 设置userId为当前的_openid
+              }
+            });
+          
+          successCount++;
+          
+          if ((i + 1) % 10 === 0) {
+            this.addLog(`   已处理 ${i + 1}/${ordersToMigrate.length} 个订单...`);
+          }
+        } catch (e) {
+          this.addLog(`   ❌ 订单 ${order._id} 迁移失败: ${e.message}`);
+          failCount++;
+        }
+      }
+      
+      this.addLog('\n========================================');
+      this.addLog('✅ 迁移完成！');
+      this.addLog(`   成功: ${successCount} 个`);
+      if (failCount > 0) {
+        this.addLog(`   失败: ${failCount} 个`);
+      }
+      this.addLog('========================================');
+      
+      // 验证迁移结果
+      this.addLog('\n🔍 验证迁移结果...');
+      const verifyRes = await db.collection('activity_orders')
+        .limit(5)
+        .get();
+      
+      verifyRes.data.forEach((order, index) => {
+        this.addLog(`\n订单 ${index + 1}:`);
+        this.addLog(`  订单ID: ${order._id.substring(0, 20)}...`);
+        this.addLog(`  _openid: ${order._openid ? '✅ 存在' : '❌ 不存在'}`);
+        this.addLog(`  userId: ${order.userId ? '✅ 存在' : '❌ 不存在'}`);
+        if (order.userId) {
+          this.addLog(`  userId == _openid: ${order.userId === order._openid ? '✅ 是' : '❌ 否'}`);
+        }
+      });
+      
+      this.setData({ 
+        testResult: `✅ 迁移完成！成功: ${successCount}, 失败: ${failCount}` 
+      });
+      
+    } catch (e) {
+      this.addLog('========================================');
+      this.addLog('❌ 迁移失败！');
+      this.addLog(`错误: ${e.message}`);
+      this.addLog('========================================');
+      
+      this.setData({ testResult: `❌ 失败: ${e.message}` });
+    }
+  },
+
+  // 测试22: 检查订单photos字段
+  async checkOrderPhotos() {
+    this.clearLogs();
+    this.addLog('========================================');
+    this.addLog('🔍 测试22: 检查订单photos字段');
+    this.addLog('========================================');
+    
+    try {
+      const db = wx.cloud.database();
+      
+      // 查询最新5个订单
+      this.addLog('\n📋 查询最新5个订单...');
+      const result = await db.collection('activity_orders')
+        .orderBy('createdAt', 'desc')
+        .limit(5)
+        .get();
+      
+      if (result.data.length === 0) {
+        this.addLog('❌ 没有订单数据！');
+        return;
+      }
+      
+      this.addLog(`✅ 找到 ${result.data.length} 个订单\n`);
+      
+      result.data.forEach((order, index) => {
+        this.addLog(`\n订单 ${index + 1}:`);
+        this.addLog(`  订单ID: ${order._id}`);
+        this.addLog(`  学生姓名: ${order.childName || order.studentName || '未知'}`);
+        this.addLog(`  订单状态: ${order.status}`);
+        this.addLog(`  支付状态: ${order.paymentStatus || '未知'}`);
+        
+        // 检查photos字段
+        if (!order.photos) {
+          this.addLog(`  photos字段: ❌ 不存在`);
+        } else if (Array.isArray(order.photos)) {
+          this.addLog(`  photos字段: ✅ 存在 (数组)`);
+          this.addLog(`  照片数量: ${order.photos.length}`);
+          if (order.photos.length > 0) {
+            this.addLog(`  第一张照片: ${order.photos[0].substring(0, 50)}...`);
+          }
+        } else {
+          this.addLog(`  photos字段: ⚠️ 存在但类型错误 (${typeof order.photos})`);
+        }
+        
+        // 检查其他相关字段
+        this.addLog(`  photographerNote: ${order.photographerNote || '无'}`);
+        this.addLog(`  submittedAt: ${order.submittedAt || '未提交'}`);
+        this.addLog(`  reviewStatus: ${order.reviewStatus || '未知'}`);
+      });
+      
+      this.addLog('\n========================================');
+      this.addLog('📊 检查完成！');
+      this.addLog('========================================');
+      
+      this.setData({ testResult: '✅ 检查完成，查看日志' });
+    } catch (e) {
+      this.addLog('========================================');
+      this.addLog('❌ 检查失败！');
+      this.addLog(`错误: ${e.message}`);
+      this.addLog('========================================');
+      
+      this.setData({ testResult: `❌ 失败: ${e.message}` });
+    }
   }
 });
 

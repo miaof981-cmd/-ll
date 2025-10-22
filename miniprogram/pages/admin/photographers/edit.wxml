@@ -71,10 +71,45 @@
       <view class="hint">💡 展示摄影师的作品风格，帮助家长选择</view>
     </view>
 
+    <!-- 参与活动总览与编辑 -->
+    <view class="form-item">
+      <text class="label">参与活动</text>
+      <button class="btn-select" bindtap="openActivityPicker">配置参与活动（已选{{selectedActivityIds.length}}个）</button>
+      <view wx:if="{{selectedActivities.length > 0}}" class="chips">
+        <view wx:for="{{selectedActivities}}" wx:key="_id" class="chip">{{item.title}}</view>
+      </view>
+    </view>
+
     <view class="form-actions">
       <button class="btn-cancel" bindtap="cancel">取消</button>
       <button class="btn-save" bindtap="save">保存</button>
     </view>
+  </view>
+  <!-- 活动多选弹层 -->
+  <view wx:if="{{showActivityPicker}}" class="picker-mask" bindtap="closeActivityPicker"></view>
+  <view wx:if="{{showActivityPicker}}" class="picker-panel" catchtouchmove>
+    <view class="picker-header">
+      <text class="picker-title">选择参与的活动</text>
+      <view class="picker-actions">
+        <button class="picker-btn" bindtap="toggleSelectAllActivities">{{isAllActivitySelected ? '全不选' : '全选'}}</button>
+        <button class="picker-btn primary" bindtap="confirmActivityPicker">确定</button>
+      </view>
+    </view>
+    <view class="picker-search">
+      <input class="search-input" placeholder="搜索活动标题" value="{{activityKeyword}}" bindinput="onActivitySearch" />
+    </view>
+    <scroll-view class="picker-list" scroll-y>
+      <view wx:for="{{filteredActivities}}" wx:key="_id" class="picker-item" bindtap="toggleActivity" data-id="{{item._id}}">
+        <image wx:if="{{item.coverImage}}" class="picker-avatar" src="{{item.coverImage}}" mode="aspectFill" />
+        <view wx:else class="picker-avatar placeholder">图</view>
+        <view class="picker-info">
+          <text class="picker-name">{{item.title}}</text>
+          <text class="picker-sub">¥{{item.price}}</text>
+        </view>
+        <view class="picker-check">{{ tempSelectedActivityIds.includes(item._id) ? '✓' : ''}}</view>
+      </view>
+      <view wx:if="{{hasMoreActivities}}" class="picker-loadmore" bindtap="loadMoreActivities">加载更多</view>
+    </scroll-view>
   </view>
 
   <!-- OpenID 帮助弹窗 -->

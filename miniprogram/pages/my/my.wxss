@@ -41,10 +41,31 @@
   gap: 16rpx;
 }
 
+.nickname-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
 .nickname {
   font-size: 36rpx;
   font-weight: 600;
   color: white;
+}
+
+.refresh-btn {
+  font-size: 32rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.refresh-btn:active {
+  background: rgba(255, 255, 255, 0.4);
+  transform: rotate(180deg);
 }
 
 .roles-badges {

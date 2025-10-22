@@ -300,37 +300,44 @@ Page({
     try {
       wx.showLoading({ title: '提交中...' });
 
-      const db = wx.cloud.database();
-      const _ = db.command;
-      await db.collection('activity_orders').doc(this.data.orderId).update({
+      console.log('📸 调用云函数提交作品');
+      console.log('   订单ID:', this.data.orderId);
+      console.log('   照片数量:', this.data.uploadedPhotos.length);
+
+      // 调用云函数提交作品（云函数内部进行权限校验）
+      const result = await wx.cloud.callFunction({
+        name: 'photographerSubmitWork',
         data: {
-          status: 'pending_review', // 待管理员审核
+          orderId: this.data.orderId,
           photos: this.data.uploadedPhotos,
-          photographerNote: this.data.photographerNote.trim() || '',
-          submittedAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          // 清除之前的拒绝原因（但保留 rejectCount 用于历史记录重建）
-          adminRejectReason: _.remove(),
-          adminRejectedAt: _.remove(),
-          rejectReason: _.remove(),
-          rejectedAt: _.remove()
-          // 注意：不删除 rejectCount，保留用于统计和历史记录
+          photographerNote: this.data.photographerNote.trim() || ''
         }
       });
 
       wx.hideLoading();
-      wx.showModal({
-        title: '提交成功',
-        content: '作品已提交，等待管理员审核通过后将展示给用户',
-        showCancel: false,
-        success: () => {
-          wx.navigateBack();
-        }
-      });
+
+      console.log('☁️ 云函数返回:', result);
+
+      if (result.result.success) {
+        wx.showModal({
+          title: '提交成功',
+          content: '作品已提交，等待管理员审核通过后将展示给用户',
+          showCancel: false,
+          success: () => {
+            wx.navigateBack();
+          }
+        });
+      } else {
+        throw new Error(result.result.error || '提交失败');
+      }
     } catch (e) {
-      console.error('提交失败:', e);
+      console.error('❌ 提交失败:', e);
       wx.hideLoading();
-      wx.showToast({ title: '提交失败', icon: 'none' });
+      wx.showToast({ 
+        title: e.message || '提交失败', 
+        icon: 'none',
+        duration: 3000
+      });
     }
   },
 

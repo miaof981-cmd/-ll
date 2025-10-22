@@ -68,6 +68,7 @@ exports.main = async (event, context) => {
     const orderRes = await db.collection('activity_orders').add({
       data: {
         _openid: wxContext.OPENID,
+        userId: wxContext.OPENID,  // 新增：订单归属用户（默认为创建者）
         
         // 订单编号
         orderNo: orderNo,

@@ -125,6 +125,7 @@ Page({
       console.log('✅ 生成订单号:', generatedOrderNo);
       
       const orderData = {
+        userId: userOpenId,  // 新增：订单归属用户
         orderNo: generatedOrderNo, // 订单号
         activityId: activityId,
         studentName: this.data.formData.childName,
@@ -198,7 +199,15 @@ Page({
       }
 
       // 调起微信支付
-      const paymentResult = result.result.payment;
+      // 云函数返回结构：{ success: true, payment: {...} }
+      const paymentResult = result.payment;
+      
+      if (!paymentResult || !paymentResult.timeStamp) {
+        console.error('❌ 支付参数缺失:', result);
+        throw new Error('支付参数格式错误');
+      }
+
+      console.log('💳 支付参数:', paymentResult);
       
       wx.hideLoading();
       

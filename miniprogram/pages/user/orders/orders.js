@@ -65,10 +65,12 @@ Page({
       console.log('用户OpenID:', userOpenId);
       
       // 查询当前用户的订单
+      // 使用 userId 字段查询（订单归属用户），兼容旧数据使用 _openid
       const res = await db.collection('activity_orders')
-        .where({
-          _openid: userOpenId
-        })
+        .where(db.command.or([
+          { userId: userOpenId },      // 新字段：订单归属用户
+          { _openid: userOpenId }      // 旧字段：兼容历史数据
+        ]))
         .orderBy('createdAt', 'desc')
         .get();
 
@@ -268,7 +270,15 @@ Page({
         throw new Error(result.errMsg || '统一下单失败');
       }
 
-      const paymentResult = result.result.payment;
+      // 云函数返回结构：{ success: true, payment: {...} }
+      const paymentResult = result.payment;
+      
+      if (!paymentResult || !paymentResult.timeStamp) {
+        console.error('❌ 支付参数缺失:', result);
+        throw new Error('支付参数格式错误');
+      }
+
+      console.log('💳 支付参数:', paymentResult);
       
       wx.hideLoading();
       

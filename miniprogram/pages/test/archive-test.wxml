@@ -68,6 +68,15 @@
     <button class="test-btn warning" bindtap="diagnosePaymentIssue">
       🔧 测试21: 诊断支付问题（完整分析）
     </button>
+    <button class="test-btn info" bindtap="checkOrderPhotos">
+      📸 测试22: 检查订单photos字段
+    </button>
+    <button class="test-btn primary" bindtap="migrateOrderUserId">
+      🔄 测试23: 迁移订单userId字段
+    </button>
+    <button class="test-btn success" bindtap="diagnoseOrderOwnership">
+      🔍 测试24: 诊断订单归属问题
+    </button>
   </view>
 
   <view wx:if="{{testResult}}" class="result-box">
@@ -103,6 +112,8 @@
     <view class="tip-item">• 测试9：批量将所有待审核订单改为待确认状态（修复审核无效问题）</view>
     <view class="tip-item">• 测试10：检查所有订单的生活照字段，统计有无参考图，测试云存储访问</view>
     <view class="tip-item">• 测试11：查看最近5个订单的生活照详细信息，包括URL和字段类型</view>
+    <view class="tip-item">• 测试23：迁移订单userId字段，统一订单归属</view>
+    <view class="tip-item">• 测试24：诊断订单归属问题，检查当前用户能看到哪些订单</view>
   </view>
 </view>
 

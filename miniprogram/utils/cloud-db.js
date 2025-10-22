@@ -55,6 +55,15 @@ async function savePhotographer(photographer) {
   
   try {
     const db = getDB();
+    const _ = db.command;
+    let oldActivityIds = [];
+    let photographerId = photographer._id;
+    if (photographerId) {
+      try {
+        const oldDoc = await db.collection('photographers').doc(photographerId).get();
+        oldActivityIds = (oldDoc && oldDoc.data && oldDoc.data.activityIds) ? oldDoc.data.activityIds : [];
+      } catch (_) {}
+    }
     
     if (photographer._id) {
       // 更新 - 需要排除 _id 字段
@@ -77,9 +86,30 @@ async function savePhotographer(photographer) {
         }
       });
       photographer._id = res._id;
+      photographerId = res._id;
       console.log('✅ 云端添加摄影师成功');
     }
     
+    // 双向同步：将摄影师参与活动写入 activities.photographerIds
+    try {
+      const newActivityIds = Array.isArray(photographer.activityIds) ? photographer.activityIds : [];
+      const toAdd = newActivityIds.filter(id => !oldActivityIds.includes(id));
+      const toRemove = oldActivityIds.filter(id => !newActivityIds.includes(id));
+
+      for (const actId of toAdd) {
+        await db.collection('activities').doc(actId).update({
+          data: { photographerIds: _.addToSet(photographerId) }
+        });
+      }
+      for (const actId of toRemove) {
+        await db.collection('activities').doc(actId).update({
+          data: { photographerIds: _.pull(photographerId) }
+        });
+      }
+    } catch (syncErr) {
+      console.warn('⚠️ 同步活动的摄影师关联失败（不影响主流程）:', syncErr);
+    }
+
     return photographer;
   } catch (e) {
     console.error('❌ 保存摄影师失败:', e);
@@ -884,6 +914,14 @@ async function saveActivity(activity) {
   
   try {
     const db = getDB();
+    const _ = db.command;
+    let oldPhotographerIds = [];
+    if (activity._id) {
+      try {
+        const oldDoc = await db.collection('activities').doc(activity._id).get();
+        oldPhotographerIds = (oldDoc && oldDoc.data && oldDoc.data.photographerIds) ? oldDoc.data.photographerIds : [];
+      } catch (_) {}
+    }
     
     if (activity._id) {
       // 更新
@@ -912,6 +950,26 @@ async function saveActivity(activity) {
       console.log('✅ 云端添加活动成功');
     }
     
+    // 双向同步：将活动关联同步到 photographers.activityIds
+    try {
+      const newPhotographerIds = Array.isArray(activity.photographerIds) ? activity.photographerIds : [];
+      const toAdd = newPhotographerIds.filter(id => !oldPhotographerIds.includes(id));
+      const toRemove = oldPhotographerIds.filter(id => !newPhotographerIds.includes(id));
+
+      for (const pid of toAdd) {
+        await db.collection('photographers').doc(pid).update({
+          data: { activityIds: _.addToSet(activity._id) }
+        });
+      }
+      for (const pid of toRemove) {
+        await db.collection('photographers').doc(pid).update({
+          data: { activityIds: _.pull(activity._id) }
+        });
+      }
+    } catch (syncErr) {
+      console.warn('⚠️ 同步摄影师的活动关联失败（不影响主流程）:', syncErr);
+    }
+
     return activity;
   } catch (e) {
     console.error('❌ 保存活动失败:', e);

@@ -2,7 +2,9 @@
 Page({
   data: {
     loading: false,
-    hasAuthorized: false
+    hasAuthorized: false,
+    avatarUrl: 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0', // 默认头像
+    nickName: ''
   },
 
   onLoad() {
@@ -12,6 +14,30 @@ Page({
 
   onShow() {
     this.checkLoginStatus();
+  },
+  
+  // 选择头像
+  onChooseAvatar(e) {
+    console.log('========================================');
+    console.log('📸 用户选择头像');
+    console.log('avatarUrl:', e.detail.avatarUrl);
+    console.log('========================================');
+    
+    this.setData({
+      avatarUrl: e.detail.avatarUrl
+    });
+  },
+
+  // 输入昵称
+  onNicknameInput(e) {
+    console.log('========================================');
+    console.log('✏️ 用户输入昵称');
+    console.log('nickName:', e.detail.value);
+    console.log('========================================');
+    
+    this.setData({
+      nickName: e.detail.value
+    });
   },
 
   // 检查登录状态
@@ -33,23 +59,54 @@ Page({
 
   // 微信授权登录
   async wechatLogin() {
+    const { avatarUrl, nickName } = this.data;
+    
+    // 验证昵称
+    if (!nickName || nickName.trim() === '') {
+      wx.showToast({
+        title: '请输入昵称',
+        icon: 'none'
+      });
+      return;
+    }
+    
     this.setData({ loading: true });
     
     try {
-      // 1. 获取用户信息
-      const { userInfo } = await wx.getUserProfile({
-        desc: '用于完善用户资料'
-      });
+      console.log('========================================');
+      console.log('🚀 开始微信登录流程...');
+      console.log('📸 头像:', avatarUrl);
+      console.log('✏️ 昵称:', nickName);
+      console.log('========================================');
       
-      console.log('✅ 获取微信信息成功:', userInfo.nickName);
+      wx.showLoading({ title: '上传头像中...' });
       
-      // 2. 调用云函数进行登录和角色识别
+      // 1. 上传头像到云存储
+      let uploadedAvatarUrl = avatarUrl;
+      if (avatarUrl && !avatarUrl.startsWith('http')) {
+        console.log('☁️ 上传头像到云存储...');
+        const uploadResult = await wx.cloud.uploadFile({
+          cloudPath: `avatars/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`,
+          filePath: avatarUrl
+        });
+        uploadedAvatarUrl = uploadResult.fileID;
+        console.log('✅ 头像上传成功:', uploadedAvatarUrl);
+      }
+      
+      // 2. 调用云函数进行登录
       wx.showLoading({ title: '登录中...' });
       
       const res = await wx.cloud.callFunction({
         name: 'unifiedLogin',
-        data: { userInfo }
+        data: { 
+          userInfo: {
+            nickName: nickName.trim(),
+            avatarUrl: uploadedAvatarUrl
+          }
+        }
       });
+      
+      console.log('☁️ unifiedLogin 返回:', res.result);
       
       wx.hideLoading();
       

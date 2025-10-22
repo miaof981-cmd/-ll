@@ -3,11 +3,11 @@
 .login-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 60rpx 48rpx;
+  padding: 120rpx 48rpx 60rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   overflow: hidden;
 }
@@ -122,6 +122,148 @@
   color: #64748b;
 }
 
+/* ==================== 头像昵称填写区域 ==================== */
+.profile-section {
+  margin-bottom: 32rpx;
+}
+
+.form-item {
+  margin-bottom: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.item-label {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #2d3748;
+  margin-bottom: 16rpx;
+}
+
+.required {
+  color: #f56565;
+  font-size: 32rpx;
+}
+
+/* 头像选择 - 纯净正圆，容器与图片完全一致 */
+.avatar-btn {
+  width: 160rpx !important;
+  height: 160rpx !important;
+  min-width: 160rpx !important;
+  min-height: 160rpx !important;
+  max-width: 160rpx !important;
+  max-height: 160rpx !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  line-height: 1;
+  outline: none !important;
+}
+
+.avatar-btn::after {
+  display: none !important;
+  border: none !important;
+}
+
+.avatar-btn::before {
+  display: none !important;
+  border: none !important;
+}
+
+.avatar-img {
+  width: 160rpx !important;
+  height: 160rpx !important;
+  border-radius: 50% !important;
+  display: block;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  outline: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.avatar-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40rpx;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 0 80rpx 80rpx;
+  pointer-events: none;
+}
+
+.change-text {
+  font-size: 22rpx;
+  color: white;
+  font-weight: 500;
+}
+
+/* 昵称输入 */
+.nickname-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 32rpx;
+  background: #f8fafc;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  color: #1e293b;
+  border: 2rpx solid #e2e8f0;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.nickname-input:focus {
+  background: white;
+  border-color: #667eea;
+  box-shadow: 0 0 0 6rpx rgba(102, 126, 234, 0.1);
+}
+
+.nickname-placeholder {
+  color: #94a3b8;
+  font-size: 28rpx;
+}
+
+/* 提示框 */
+.tips-box {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 24rpx 32rpx;
+  background: linear-gradient(135deg, #fef5e7 0%, #fef9f3 100%);
+  border-radius: 16rpx;
+  margin-bottom: 32rpx;
+  border-left: 4rpx solid #f59e0b;
+}
+
+.tips-icon {
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+
+.tips-text {
+  font-size: 26rpx;
+  color: #92400e;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
 /* ==================== 登录区域 ==================== */
 .login-section {
   margin-bottom: 32rpx;
@@ -130,14 +272,15 @@
 .btn-wechat-login {
   width: 100%;
   height: 96rpx;
-  background: linear-gradient(135deg, #07c160 0%, #06ae56 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 48rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(7, 193, 96, 0.3);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
   border: none;
   transition: all 0.3s;
+  line-height: 96rpx;
 }
 
 .btn-wechat-login::after {
@@ -146,39 +289,33 @@
 
 .btn-wechat-login:active {
   transform: scale(0.98);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.btn-content {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
+.btn-wechat-login[disabled] {
+  background: #cbd5e0 !important;
+  box-shadow: none !important;
+  opacity: 1;
 }
 
-.wechat-icon {
-  font-size: 48rpx;
+.btn-wechat-login[disabled] .btn-text {
+  color: #a0aec0 !important;
 }
 
 .btn-text {
   font-size: 32rpx;
   font-weight: 600;
   color: white;
+  line-height: 1;
 }
 
-.login-desc {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-  margin-top: 24rpx;
-}
-
-.desc-icon {
-  font-size: 28rpx;
-}
-
-.desc-text {
+/* ==================== 底部文字 ==================== */
+.footer-text {
+  margin-top: 40rpx;
+  text-align: center;
   font-size: 24rpx;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 1;
 }
 
 /* ==================== 分隔线 ==================== */

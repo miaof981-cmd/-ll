@@ -11,7 +11,17 @@ Page({
     referenceImages: [], // 参考作品图片
     showOpenidHelp: false,
     showBindQRCode: false,
-    bindToken: ''
+    bindToken: '',
+    // 活动多选
+    showActivityPicker: false,
+    activityKeyword: '',
+    allActivities: [],
+    filteredActivities: [],
+    selectedActivityIds: [],
+    tempSelectedActivityIds: [],
+    selectedActivities: [],
+    isAllActivitySelected: false,
+    hasMoreActivities: false
   },
 
   onLoad(options) {
@@ -38,8 +48,12 @@ Page({
           description: photographer.description || '',
           avatar: photographer.avatar || '',
           wechatOpenid: photographer.wechatOpenid || '',
-          referenceImages: photographer.referenceImages || []
+          referenceImages: photographer.referenceImages || [],
+          selectedActivityIds: photographer.activityIds || []
         });
+        // 预加载活动列表用于展示chips
+        await this.ensureActivitiesLoaded();
+        this.syncSelectedActivities();
       } else {
         wx.showToast({
           title: '摄影师不存在',
@@ -54,6 +68,71 @@ Page({
         icon: 'error'
       });
     }
+  },
+
+  async ensureActivitiesLoaded() {
+    if (this.data.allActivities.length > 0) return;
+    try {
+      const activities = await cloudDB.getActivities({ limit: 200 });
+      this.setData({ allActivities: activities, filteredActivities: activities });
+    } catch (e) {
+      console.error('加载活动列表失败:', e);
+    }
+  },
+
+  syncSelectedActivities() {
+    const map = new Map(this.data.allActivities.map(a => [a._id, a]));
+    const list = (this.data.selectedActivityIds || []).map(id => map.get(id)).filter(Boolean);
+    this.setData({ selectedActivities: list });
+  },
+
+  openActivityPicker: async function () {
+    await this.ensureActivitiesLoaded();
+    this.setData({
+      showActivityPicker: true,
+      activityKeyword: '',
+      filteredActivities: this.data.allActivities,
+      tempSelectedActivityIds: [...(this.data.selectedActivityIds || [])],
+      isAllActivitySelected: (this.data.selectedActivityIds || []).length > 0 && (this.data.selectedActivityIds || []).length === this.data.allActivities.length
+    });
+  },
+
+  closeActivityPicker() {
+    this.setData({ showActivityPicker: false });
+  },
+
+  onActivitySearch(e) {
+    const kw = (e.detail.value || '').trim();
+    const list = this.data.allActivities.filter(a => !kw || (a.title && a.title.includes(kw)));
+    this.setData({ activityKeyword: kw, filteredActivities: list });
+  },
+
+  toggleActivity(e) {
+    const id = e.currentTarget.dataset.id;
+    const temp = [...this.data.tempSelectedActivityIds];
+    const i = temp.indexOf(id);
+    if (i >= 0) temp.splice(i, 1); else temp.push(id);
+    this.setData({ 
+      tempSelectedActivityIds: temp,
+      isAllActivitySelected: temp.length > 0 && temp.length === this.data.allActivities.length
+    });
+  },
+
+  toggleSelectAllActivities() {
+    if (this.data.isAllActivitySelected) {
+      this.setData({ tempSelectedActivityIds: [], isAllActivitySelected: false });
+    } else {
+      this.setData({ tempSelectedActivityIds: this.data.allActivities.map(a => a._id), isAllActivitySelected: true });
+    }
+  },
+
+  confirmActivityPicker() {
+    const ids = [...this.data.tempSelectedActivityIds];
+    this.setData({
+      selectedActivityIds: ids,
+      showActivityPicker: false
+    });
+    this.syncSelectedActivities();
   },
 
   onNameInput(e) {
@@ -271,7 +350,7 @@ Page({
   },
 
   async save() {
-    const { id, name, specialty, description, avatar, wechatOpenid, referenceImages } = this.data;
+    const { id, name, specialty, description, avatar, wechatOpenid, referenceImages, selectedActivityIds } = this.data;
 
     if (!name) {
       wx.showToast({
@@ -293,7 +372,8 @@ Page({
         wechatOpenid: wechatOpenid || '',
         referenceImages: referenceImages || [],
         status: 'available',
-        orderCount: 0
+        orderCount: 0,
+        activityIds: selectedActivityIds || []
       };
 
       const result = await cloudDB.savePhotographer(photographerData);

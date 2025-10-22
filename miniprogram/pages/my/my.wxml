@@ -9,9 +9,12 @@
   <view wx:elif="{{isLoggedIn}}">
     <!-- 用户信息卡片 -->
     <view class="user-card">
-      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" binderror="onAvatarError"></image>
       <view class="user-info">
-        <text class="nickname">{{userInfo.nickName}}</text>
+        <view class="nickname-row">
+          <text class="nickname">{{userInfo.nickName || '微信用户'}}</text>
+          <text class="refresh-btn" bindtap="refreshUserInfo">🔄</text>
+        </view>
         <!-- 显示所有拥有的角色标签 -->
         <view class="roles-badges">
           <view wx:if="{{isAdmin}}" class="role-badge admin">

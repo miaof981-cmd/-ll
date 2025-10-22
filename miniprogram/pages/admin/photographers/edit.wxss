@@ -1,3 +1,26 @@
+.btn-select { margin-top: 12rpx; background: #f5f5f5; padding: 12rpx 16rpx; border-radius: 10rpx; }
+.chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 12rpx; }
+.chip { background: #f0f7ff; color: #1a56db; padding: 8rpx 12rpx; border-radius: 999rpx; font-size: 24rpx; }
+
+/* 复用活动选择弹层样式（与活动编辑页一致） */
+.picker-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; }
+.picker-panel { position: fixed; left: 0; right: 0; bottom: 0; height: 70vh; background: #fff; border-top-left-radius: 20rpx; border-top-right-radius: 20rpx; z-index: 1001; display: flex; flex-direction: column; }
+.picker-header { display: flex; justify-content: space-between; align-items: center; padding: 20rpx 24rpx; border-bottom: 1rpx solid #f0f0f0; }
+.picker-title { font-size: 30rpx; font-weight: 600; }
+.picker-actions { display: flex; gap: 16rpx; }
+.picker-btn { padding: 10rpx 20rpx; background: #f5f5f5; border-radius: 10rpx; }
+.picker-btn.primary { background: #1a56db; color: #fff; }
+.picker-search { padding: 16rpx 24rpx; }
+.search-input { background: #f7f7f7; border-radius: 12rpx; padding: 16rpx; font-size: 26rpx; }
+.picker-list { flex: 1; padding: 8rpx 16rpx; }
+.picker-item { display: flex; align-items: center; gap: 16rpx; padding: 16rpx; border-bottom: 1rpx solid #f5f5f5; }
+.picker-avatar { width: 72rpx; height: 72rpx; border-radius: 8rpx; background: #f0f0f0; }
+.picker-avatar.placeholder { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.picker-info { flex: 1; display: flex; flex-direction: column; }
+.picker-name { font-size: 28rpx; font-weight: 600; color: #333; }
+.picker-sub { font-size: 22rpx; color: #999; }
+.picker-check { width: 40rpx; text-align: right; color: #1a56db; font-weight: 700; }
+.picker-loadmore { text-align: center; padding: 20rpx; color: #1a56db; }
 .container {
   padding: var(--spacing-lg);
   background: var(--bg-secondary);
