@@ -99,12 +99,15 @@ async function identifyUserRoles(openid) {
 async function findOrCreateUser(openid, userInfo, roles) {
   // 确保 userInfo 存在，如果不存在则使用默认值
   const safeUserInfo = userInfo || {};
+  const DEFAULT_AVATAR = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+  
   const nickName = safeUserInfo.nickName || '微信用户';
-  const avatarUrl = safeUserInfo.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+  const avatarUrl = safeUserInfo.avatarUrl || DEFAULT_AVATAR;
   
   console.log('🔧 处理后的用户信息:');
   console.log('  nickName:', nickName);
   console.log('  avatarUrl:', avatarUrl);
+  console.log('  是否为默认头像:', avatarUrl === DEFAULT_AVATAR);
   
   // 查找现有用户
   const existingUser = await db.collection('users')
@@ -114,20 +117,43 @@ async function findOrCreateUser(openid, userInfo, roles) {
   if (existingUser.data && existingUser.data.length > 0) {
     // 更新用户信息和角色
     const userId = existingUser.data[0]._id;
+    const oldUser = existingUser.data[0];
+    
+    // 构建更新数据
+    const updateData = {
+      roles: roles  // 角色始终更新
+    };
+    
+    // 如果传入的是真实头像（不是默认头像），才更新头像
+    if (avatarUrl !== DEFAULT_AVATAR) {
+      updateData.avatarUrl = avatarUrl;
+      console.log('✅ 更新为新头像:', avatarUrl);
+    } else if (!oldUser.avatarUrl || oldUser.avatarUrl === DEFAULT_AVATAR) {
+      // 如果旧用户也没有头像或者是默认头像，才设置默认头像
+      updateData.avatarUrl = DEFAULT_AVATAR;
+      console.log('ℹ️ 保留默认头像');
+    } else {
+      // 否则保留旧头像
+      console.log('✅ 保留已有头像:', oldUser.avatarUrl);
+    }
+    
+    // 昵称始终更新（如果提供了非空昵称）
+    if (nickName && nickName !== '微信用户') {
+      updateData.nickName = nickName;
+    } else if (!oldUser.nickName) {
+      updateData.nickName = '微信用户';
+    }
+    
     await db.collection('users').doc(userId).update({
-      data: {
-        nickName: nickName,
-        avatarUrl: avatarUrl,
-        roles: roles
-      }
+      data: updateData
     });
     
     // 返回更新后的用户信息
     return {
-      ...existingUser.data[0],
-      nickName: nickName,               // ✅ 使用处理后的昵称
-      avatarUrl: avatarUrl,             // ✅ 使用处理后的头像
-      openid: openid,                   // ✅ 添加 openid 字段
+      ...oldUser,
+      nickName: updateData.nickName || oldUser.nickName,
+      avatarUrl: updateData.avatarUrl || oldUser.avatarUrl,
+      openid: openid,
       roles: roles
     };
   } else {
