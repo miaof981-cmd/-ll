@@ -85,14 +85,25 @@ function renderTasks(tasks) {
   
   container.innerHTML = tasks.map(task => {
     const statusColor = Utils.getStatusColor(task.status);
+    const userAvatar = task.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+    const userNickName = task.userNickName || '微信用户';
     
     return `
     <div class="task-card">
       <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
-        <div>
+        <div style="flex: 1;">
           <h3 style="font-size: 20px; margin-bottom: 8px;">订单 ${task.id}</h3>
-          <div style="color: var(--text-secondary); font-size: 14px;">
+          <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
             创建时间: ${Utils.formatDate(task.createdAt, 'YYYY-MM-DD HH:mm')}
+          </div>
+          
+          <!-- 下单用户信息 -->
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-secondary); border-radius: 8px; max-width: 240px;">
+            <img src="${userAvatar}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onerror="this.src='https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 2px;">下单用户</div>
+              <div style="font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${userNickName}</div>
+            </div>
           </div>
         </div>
         <span class="status-badge ${Utils.getStatusClass(task.status)}" style="background-color: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor};">

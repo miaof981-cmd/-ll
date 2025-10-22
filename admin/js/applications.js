@@ -75,38 +75,82 @@ function filterApplications() {
 
 function renderApplications() {
   const paginatedData = Utils.paginate(filteredApplications, currentPage, pageSize);
-  const tbody = document.getElementById('applicationsTableBody');
+  const container = document.getElementById('applicationsContainer');
   
   if (paginatedData.items.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-message">暂无申请订单</td></tr>';
+    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-tertiary); padding: 40px;">暂无申请订单</div>';
     document.getElementById('pagination').innerHTML = '';
     return;
   }
   
-  tbody.innerHTML = paginatedData.items.map(app => {
+  container.innerHTML = paginatedData.items.map(app => {
     const photographer = app.photographerId ? Storage.getPhotographers().find(p => p.id === app.photographerId) : null;
+    const userAvatar = app.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+    const userNickName = app.userNickName || '微信用户';
     
     return `
-      <tr>
-        <td>${app.id}</td>
-        <td>
-          <div>${app.childName}</div>
-          <small style="color: var(--text-tertiary);">${app.childGender || ''} ${app.childAge ? app.childAge + '岁' : ''}</small>
-        </td>
-        <td>
-          <div>${app.parentName}</div>
-          <small style="color: var(--text-tertiary);">${app.phone}</small>
-        </td>
-        <td>${photographer ? photographer.name : '<span style="color: var(--text-tertiary);">未分配</span>'}</td>
-        <td><span class="status-badge ${Utils.getStatusClass(app.status)}">${Utils.getStatusText(app.status)}</span></td>
-        <td>${Utils.formatRelativeTime(app.createdAt)}</td>
-        <td>
-          <button class="btn btn-sm btn-primary" onclick="viewDetail('${app.id}')">详情</button>
-          ${!app.photographerId ? `<button class="btn btn-sm btn-success" onclick="showAssignModal('${app.id}')">分配</button>` : ''}
-          <button class="btn btn-sm btn-secondary" onclick="showStatusModal('${app.id}')">状态</button>
+      <div class="card" style="padding: 20px; background: var(--bg-primary); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.3s; cursor: pointer;" onclick="viewDetail('${app.id}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
+        
+        <!-- 订单头部：订单号和状态 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+          <div>
+            <div style="font-size: 16px; font-weight: 600; color: var(--text-primary);">#${app.id}</div>
+            <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">${Utils.formatRelativeTime(app.createdAt)}</div>
+          </div>
+          <span class="status-badge ${Utils.getStatusClass(app.status)}">${Utils.getStatusText(app.status)}</span>
+        </div>
+        
+        <!-- 用户和摄影师信息 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <!-- 下单用户 -->
+          <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+            <img src="${userAvatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onerror="this.src='https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 2px;">下单用户</div>
+              <div style="font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${userNickName}</div>
+            </div>
+          </div>
+          
+          <!-- 摄影师 -->
+          <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+            ${photographer ? `
+              <img src="${photographer.avatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onerror="this.src='https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'">
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 2px;">摄影师</div>
+                <div style="font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${photographer.name}</div>
+              </div>
+            ` : `
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 18px;">?</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 2px;">摄影师</div>
+                <div style="font-size: 13px; color: var(--text-tertiary);">未分配</div>
+              </div>
+            `}
+          </div>
+        </div>
+        
+        <!-- 孩子和家长信息 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; font-size: 13px;">
+          <div>
+            <span style="color: var(--text-tertiary);">孩子：</span>
+            <span style="color: var(--text-primary); font-weight: 500;">${app.childName}</span>
+            <span style="color: var(--text-tertiary); margin-left: 4px;">${app.childGender || ''} ${app.childAge ? app.childAge + '岁' : ''}</span>
+          </div>
+          <div>
+            <span style="color: var(--text-tertiary);">家长：</span>
+            <span style="color: var(--text-primary); font-weight: 500;">${app.parentName}</span>
+            <span style="color: var(--text-tertiary); margin-left: 4px;">${app.phone}</span>
+          </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div style="display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-color);" onclick="event.stopPropagation()">
+          <button class="btn btn-sm btn-primary" onclick="viewDetail('${app.id}')" style="flex: 1;">详情</button>
+          ${!app.photographerId ? `<button class="btn btn-sm btn-success" onclick="showAssignModal('${app.id}')" style="flex: 1;">分配</button>` : ''}
+          <button class="btn btn-sm btn-secondary" onclick="showStatusModal('${app.id}')" style="flex: 1;">状态</button>
           <button class="btn btn-sm btn-danger" onclick="deleteApplication('${app.id}')">删除</button>
-        </td>
-      </tr>
+        </div>
+      </div>
     `;
   }).join('');
   

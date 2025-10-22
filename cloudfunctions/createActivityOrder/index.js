@@ -60,6 +60,22 @@ exports.main = async (event, context) => {
     
     const photographer = photographerRes.data;
     
+    // 获取用户信息（用于显示头像和昵称）
+    const userRes = await db.collection('users')
+      .where({ _openid: wxContext.OPENID })
+      .get();
+    
+    let userNickName = '微信用户';
+    let userAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+    
+    if (userRes.data && userRes.data.length > 0) {
+      const user = userRes.data[0];
+      userNickName = user.nickName || userNickName;
+      userAvatarUrl = user.avatarUrl || userAvatarUrl;
+    }
+    
+    console.log('👤 下单用户信息:', userNickName, userAvatarUrl);
+    
     // 生成订单号（格式：ACT + 时间戳 + 6位随机数）
     const orderNo = 'ACT' + Date.now() + Math.random().toString(36).substring(2, 8).toUpperCase();
     console.log('📝 生成订单号:', orderNo);
@@ -87,6 +103,10 @@ exports.main = async (event, context) => {
         parentPhone,
         parentWechat: parentWechat || '',
         expectations: expectations || '',
+        
+        // 下单用户微信信息（用于后台显示）
+        userNickName: userNickName,
+        userAvatarUrl: userAvatarUrl,
         
         // 摄影师信息
         photographerId,
