@@ -56,6 +56,7 @@
             <header class="content-header">
                 <h1>申请订单管理</h1>
                 <div class="header-actions">
+                    <button class="btn btn-success" onclick="showAddApplicationModal()">+ 创建订单</button>
                     <button class="btn btn-secondary" onclick="exportApplications()">导出数据</button>
                 </div>
             </header>
@@ -157,6 +158,77 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeStatusModal()">取消</button>
                 <button class="btn btn-primary" onclick="confirmStatusUpdate()">确认更新</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 创建订单模态框 -->
+    <div class="modal" id="addApplicationModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">创建测试订单</h2>
+                <button class="modal-close" onclick="closeAddApplicationModal()">&times;</button>
+            </div>
+            
+            <form id="applicationForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label>孩子姓名 <span style="color: red;">*</span></label>
+                    <input type="text" id="childName" class="form-control" placeholder="请输入孩子姓名" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>性别</label>
+                        <select id="childGender" class="form-control">
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="childAge" class="form-control" placeholder="年龄" min="1" max="100">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>家长姓名 <span style="color: red;">*</span></label>
+                    <input type="text" id="parentName" class="form-control" placeholder="请输入家长姓名" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>联系电话 <span style="color: red;">*</span></label>
+                    <input type="tel" id="parentPhone" class="form-control" placeholder="请输入联系电话" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>微信号</label>
+                    <input type="text" id="parentWechat" class="form-control" placeholder="请输入微信号（选填）">
+                </div>
+                
+                <div class="form-group">
+                    <label>选择摄影师 <span style="color: red;">*</span></label>
+                    <select id="applicationPhotographerSelect" class="form-control" required>
+                        <option value="">请选择摄影师</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>家长期许</label>
+                    <textarea id="expectations" class="form-control" rows="3" placeholder="请输入对孩子的期许（选填）"></textarea>
+                </div>
+                
+                <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                    <div style="font-size: 13px; color: #0369a1;">
+                        <strong>下单用户信息：</strong><br>
+                        将使用您（管理员）的头像和名字作为下单用户，方便在订单列表中识别。
+                    </div>
+                </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddApplicationModal()">取消</button>
+                <button class="btn btn-primary" onclick="confirmAddApplication()">创建订单</button>
             </div>
         </div>
     </div>

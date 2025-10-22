@@ -45,9 +45,15 @@ function loadApplications() {
 function loadPhotographers() {
   const photographers = Storage.getPhotographers();
   const select = document.getElementById('photographerSelect');
+  const appSelect = document.getElementById('applicationPhotographerSelect');
   
-  select.innerHTML = '<option value="">请选择摄影师</option>' + 
+  const options = '<option value="">请选择摄影师</option>' + 
     photographers.map(p => `<option value="${p.id}">${p.name} - ${p.specialty || '摄影师'}</option>`).join('');
+  
+  select.innerHTML = options;
+  if (appSelect) {
+    appSelect.innerHTML = options;
+  }
 }
 
 function searchApplications() {
@@ -333,5 +339,100 @@ function exportApplications() {
   });
   
   Utils.exportToCSV(data, '申请订单列表');
+}
+
+// 显示创建订单模态框
+function showAddApplicationModal() {
+  // 重置表单
+  document.getElementById('applicationForm').reset();
+  
+  // 加载摄影师列表
+  loadPhotographers();
+  
+  // 显示模态框
+  document.getElementById('addApplicationModal').classList.add('active');
+}
+
+// 关闭创建订单模态框
+function closeAddApplicationModal() {
+  document.getElementById('addApplicationModal').classList.remove('active');
+}
+
+// 确认创建订单
+function confirmAddApplication() {
+  // 获取表单数据
+  const childName = document.getElementById('childName').value.trim();
+  const childGender = document.getElementById('childGender').value;
+  const childAge = document.getElementById('childAge').value;
+  const parentName = document.getElementById('parentName').value.trim();
+  const parentPhone = document.getElementById('parentPhone').value.trim();
+  const parentWechat = document.getElementById('parentWechat').value.trim();
+  const photographerId = document.getElementById('applicationPhotographerSelect').value;
+  const expectations = document.getElementById('expectations').value.trim();
+  
+  // 验证必填字段
+  if (!childName) {
+    Utils.showToast('请输入孩子姓名', 'error');
+    return;
+  }
+  
+  if (!parentName) {
+    Utils.showToast('请输入家长姓名', 'error');
+    return;
+  }
+  
+  if (!parentPhone) {
+    Utils.showToast('请输入联系电话', 'error');
+    return;
+  }
+  
+  if (!photographerId) {
+    Utils.showToast('请选择摄影师', 'error');
+    return;
+  }
+  
+  // 获取管理员信息作为下单用户
+  const currentUser = Auth.getCurrentUser();
+  const userNickName = currentUser.name || '管理员';
+  const userAvatarUrl = currentUser.avatar || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+  
+  // 获取摄影师信息
+  const photographer = Storage.getPhotographers().find(p => p.id === photographerId);
+  
+  if (!photographer) {
+    Utils.showToast('摄影师不存在', 'error');
+    return;
+  }
+  
+  // 创建订单数据
+  const application = {
+    childName,
+    childGender,
+    childAge: childAge ? parseInt(childAge) : '',
+    parentName,
+    phone: parentPhone,
+    wechat: parentWechat,
+    expectations,
+    photographerId,
+    photographerName: photographer.name,
+    // 使用管理员的头像和名字
+    userNickName: userNickName,
+    userAvatarUrl: userAvatarUrl,
+    status: 'waiting_draw',
+    lifePhoto: '' // 可以后续上传
+  };
+  
+  // 保存订单
+  Storage.saveApplication(application);
+  
+  // 更新摄影师订单数
+  const currentOrders = photographer.orderCount || 0;
+  Storage.updatePhotographer(photographerId, {
+    orderCount: currentOrders + 1
+  });
+  
+  Utils.showToast('订单创建成功', 'success');
+  closeAddApplicationModal();
+  loadApplications();
 }
 
