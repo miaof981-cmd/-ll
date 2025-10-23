@@ -19,13 +19,17 @@ class AvatarManager {
       const stored = wx.getStorageSync(CACHE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
+        let validCount = 0;
         Object.entries(parsed).forEach(([openid, data]) => {
           // 只加载未过期的缓存
           if (Date.now() - data.timestamp < CACHE_DURATION) {
             this.memoryCache.set(openid, data);
+            validCount++;
           }
         });
-        console.log('📦 [头像管理器] 从本地存储加载', this.memoryCache.size, '个头像缓存');
+        if (validCount > 0) {
+          console.log('📦 [启动] 加载', validCount, '个头像缓存');
+        }
       }
     } catch (e) {
       console.warn('加载头像缓存失败:', e);
@@ -55,18 +59,16 @@ class AvatarManager {
       return DEFAULT_AVATAR;
     }
 
-    // 1. 检查内存缓存
+    // 1. 严格检查缓存
     const cached = this.memoryCache.get(openid);
     const now = Date.now();
 
     if (cached && (now - cached.timestamp) < CACHE_DURATION) {
-      console.log('💾 [头像管理器] 命中缓存:', openid.substring(0, 10) + '...');
+      // 缓存命中，静默返回（减少日志输出）
       return cached.avatarUrl;
     }
 
     // 2. 缓存未命中，查询数据库
-    console.log('🔍 [头像管理器] 查询数据库:', openid.substring(0, 10) + '...');
-    
     try {
       const db = wx.cloud.database();
       const res = await db.collection('users')
@@ -89,7 +91,8 @@ class AvatarManager {
 
         return finalUrl;
       } else {
-        console.warn('⚠️ [头像管理器] 未找到用户:', openid);
+        // 用户不存在也缓存默认头像（避免重复查询）
+        this.setCache(openid, DEFAULT_AVATAR);
         return DEFAULT_AVATAR;
       }
     } catch (error) {
@@ -121,7 +124,10 @@ class AvatarManager {
       }
     });
 
-    console.log(`📊 [头像管理器] 批量获取: 缓存命中 ${result.size}/${openids.length}, 需查询 ${needQuery.length}`);
+    // 只在需要查询时输出日志
+    if (needQuery.length > 0) {
+      console.log(`📊 [批量加载] 缓存命中 ${result.size}/${openids.length}, 查询 ${needQuery.length}`);
+    }
 
     // 2. 批量查询剩余的
     if (needQuery.length > 0) {
@@ -272,7 +278,8 @@ class AvatarManager {
    * 预加载头像（用于列表页优化）
    */
   async preloadAvatars(openids) {
-    console.log('🚀 [头像管理器] 预加载', openids.length, '个头像');
+    if (openids.length === 0) return;
+    // 静默预加载，日志由 getAvatarsBatch 输出
     await this.getAvatarsBatch(openids);
   }
 

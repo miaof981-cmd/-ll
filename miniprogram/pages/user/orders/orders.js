@@ -77,24 +77,70 @@ Page({
 
       const TIMEOUT_MS = 30 * 60 * 1000; // 30分钟
 
-      // 🔥 性能优化：批量预加载所有用户和摄影师头像
-      const allOpenIds = new Set();
+      // 🔥 性能优化：一次性批量查询所有用户和摄影师信息
+      console.log('📊 [性能优化] 开始批量查询用户信息');
+      
+      // 1. 收集所有唯一的OpenID
+      const allUserOpenIds = new Set();
+      const allPhotographerIds = new Set();
+      
       res.data.forEach(order => {
-        // 收集下单用户OpenID
         const userId = order.userId || order._openid;
-        if (userId) allOpenIds.add(userId);
+        if (userId) allUserOpenIds.add(userId);
+        if (order.photographerId) allPhotographerIds.add(order.photographerId);
+      });
+
+      // 2. 批量查询用户信息（头像+昵称）
+      const userInfoMap = new Map();
+      if (allUserOpenIds.size > 0) {
+        try {
+          const usersRes = await db.collection('users')
+            .where({
+              _openid: db.command.in([...allUserOpenIds])
+            })
+            .field({ _openid: true, avatarUrl: true, nickName: true })
+            .get();
+          
+          usersRes.data.forEach(user => {
+            userInfoMap.set(user._openid, {
+              nickName: user.nickName || '微信用户',
+              avatarUrl: user.avatarUrl
+            });
+          });
+          console.log('✅ [批量查询] 用户信息:', userInfoMap.size, '个');
+        } catch (e) {
+          console.error('批量查询用户失败:', e);
+        }
+      }
+
+      // 3. 批量查询摄影师信息
+      const photographerInfoMap = new Map();
+      if (allPhotographerIds.size > 0) {
+        try {
+          const photographersRes = await db.collection('photographers')
+            .where({
+              _id: db.command.in([...allPhotographerIds])
+            })
+            .get();
+          
+          photographersRes.data.forEach(photographer => {
+            photographerInfoMap.set(photographer._id, photographer);
+          });
+          console.log('✅ [批量查询] 摄影师信息:', photographerInfoMap.size, '个');
+        } catch (e) {
+          console.error('批量查询摄影师失败:', e);
+        }
+      }
+
+      // 4. 预加载所有头像到缓存（一次性）
+      const allAvatarOpenIds = new Set([...allUserOpenIds]);
+      photographerInfoMap.forEach(p => {
+        if (p._openid) allAvatarOpenIds.add(p._openid);
       });
       
-      console.log('🚀 [性能优化] 预加载', allOpenIds.size, '个用户头像');
-      
-      // 使用全局头像管理器预加载（自动缓存）
-      if (allOpenIds.size > 0) {
-        await avatarManager.preloadAvatars([...allOpenIds]);
+      if (allAvatarOpenIds.size > 0) {
+        await avatarManager.preloadAvatars([...allAvatarOpenIds]);
       }
-      
-      // 显示缓存统计
-      const stats = avatarManager.getCacheStats();
-      console.log('📊 [缓存统计]', stats);
 
       // 加载活动信息并处理超时取消
       const orders = await Promise.all(res.data.map(async (order) => {
@@ -111,54 +157,29 @@ Page({
           console.error('加载活动信息失败:', e);
         }
 
-        // 加载摄影师信息（头像由user-avatar组件自动处理）
+        // 🔥 从批量查询结果中获取摄影师信息（无需单独查询）
         if (order.photographerId) {
-          try {
-            const photographerRes = await db.collection('photographers')
-              .doc(order.photographerId)
-              .get();
-            
-            if (photographerRes.data) {
-              // 只保留基本信息，头像由组件根据_openid自动查询
-              order.photographerInfo = photographerRes.data;
-              console.log('✅ 加载摄影师信息:', order.photographerInfo.name, 'OpenID:', order.photographerInfo._openid);
-            }
-          } catch (e) {
-            console.warn('摄影师信息加载失败，使用订单中的信息:', order.photographerId);
-            // 使用订单中已有的摄影师信息
-            if (order.photographerName) {
-              order.photographerInfo = {
-                name: order.photographerName,
-                _id: order.photographerId
-              };
-            }
+          const photographer = photographerInfoMap.get(order.photographerId);
+          if (photographer) {
+            order.photographerInfo = photographer;
+          } else if (order.photographerName) {
+            // 兼容：使用订单中已有的摄影师信息
+            order.photographerInfo = {
+              name: order.photographerName,
+              _id: order.photographerId
+            };
           }
         }
 
-        // 加载下单用户昵称（头像由user-avatar组件自动处理）
-        if (!order.userNickName) {
-          try {
-            const userId = order.userId || order._openid;
-            console.log('订单', order._id, '缺少用户昵称，尝试查询 userId:', userId);
-            
-            if (userId) {
-              const userRes = await db.collection('users')
-                .where({ _openid: userId })
-                .field({ nickName: true })
-                .get();
-              
-              if (userRes.data && userRes.data.length > 0) {
-                order.userNickName = userRes.data[0].nickName || '微信用户';
-                console.log('✅ 加载用户昵称:', order.userNickName);
-              } else {
-                order.userNickName = '用户';
-              }
-            } else {
-              order.userNickName = '用户';
-            }
-          } catch (e) {
-            console.warn('加载用户昵称失败:', e);
-            order.userNickName = '用户';
+        // 🔥 从批量查询结果中获取用户昵称（无需单独查询）
+        const userId = order.userId || order._openid;
+        if (userId) {
+          const userInfo = userInfoMap.get(userId);
+          if (userInfo) {
+            order.userNickName = userInfo.nickName;
+            // 头像已在缓存中，组件会自动使用
+          } else {
+            order.userNickName = order.userNickName || '用户';
           }
         }
 
@@ -209,15 +230,8 @@ Page({
         return order;
       }));
 
-      // 🔥 预加载摄影师头像
-      const photographerOpenIds = orders
-        .filter(o => o.photographerInfo && o.photographerInfo._openid)
-        .map(o => o.photographerInfo._openid);
-      
-      if (photographerOpenIds.length > 0) {
-        await avatarManager.preloadAvatars([...new Set(photographerOpenIds)]);
-        console.log('✅ [性能优化] 预加载', photographerOpenIds.length, '个摄影师头像');
-      }
+      // 显示最终统计
+      console.log('✅ [完成] 加载', orders.length, '个订单');
 
       this.setData({
         orders,
