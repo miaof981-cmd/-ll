@@ -11,6 +11,7 @@
 const CACHE_KEY = 'image_url_cache_v1';
 const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2小时缓存（临时URL官方1小时有效期，我们设置2小时兜底）
 const BATCH_SIZE = 50; // 微信云存储 getTempFileURL API 限制
+const DEFAULT_IMAGE = '/images/placeholder.png'; // 默认占位图
 
 /**
  * 图片URL缓存管理类
@@ -19,6 +20,40 @@ class ImageUrlManager {
   constructor() {
     this.memoryCache = new Map(); // 内存缓存（最快）
     this.loadFromStorage(); // 启动时从本地存储加载
+  }
+
+  /**
+   * 校验 cloud:// URL 格式是否有效
+   * @param {string} url - cloud:// URL
+   * @returns {boolean} - 是否有效
+   */
+  isValidCloudUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    if (!url.startsWith('cloud://')) return false;
+    
+    // 检查是否包含环境ID（格式：cloud://env-id.xxxx-env-id-xxx/path）
+    const pattern = /^cloud:\/\/[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-]+\/[^\s]+$/;
+    if (!pattern.test(url)) {
+      console.warn('⚠️ [路径异常] 格式不正确:', url);
+      return false;
+    }
+    
+    // 检查是否有重复的环境ID前缀（常见错误）
+    if (url.includes('cloud://cloud://')) {
+      console.warn('⚠️ [路径异常] 重复前缀:', url);
+      return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * 校验 HTTPS URL 是否有效
+   * @param {string} url - HTTPS URL
+   * @returns {boolean} - 是否有效
+   */
+  isValidHttpsUrl(url) {
+    return url && typeof url === 'string' && (url.startsWith('https://') || url.startsWith('http://'));
   }
 
   /**
@@ -93,8 +128,17 @@ class ImageUrlManager {
     if (!cached) return null;
     
     const now = Date.now();
+    
+    // 检查是否过期
     if (cached.expireAt > now) {
-      return cached.httpsUrl;
+      // 验证缓存的 URL 是否有效（必须是 https://）
+      if (this.isValidHttpsUrl(cached.httpsUrl)) {
+        return cached.httpsUrl;
+      } else {
+        console.warn('⚠️ [缓存失效] 缓存的URL格式无效:', cached.httpsUrl);
+        this.memoryCache.delete(cloudUrl);
+        return null;
+      }
     }
     
     // 过期则删除
@@ -112,10 +156,32 @@ class ImageUrlManager {
       return {};
     }
 
-    // 1. 过滤出有效的 cloud:// URL
-    const validUrls = cloudUrls.filter(url => 
-      url && typeof url === 'string' && url.startsWith('cloud://')
-    );
+    // 1. 过滤出有效的 cloud:// URL 并进行路径校验
+    const validUrls = [];
+    const invalidUrls = [];
+    
+    cloudUrls.forEach(url => {
+      if (url && typeof url === 'string') {
+        if (!url.startsWith('cloud://')) {
+          // 不是 cloud:// 开头，可能是已转换的 https:// 或本地路径
+          if (this.isValidHttpsUrl(url) || url.startsWith('/')) {
+            // 已经是有效的URL，直接使用
+            validUrls.push(url);
+          }
+        } else {
+          // 是 cloud://，需要校验格式
+          if (this.isValidCloudUrl(url)) {
+            validUrls.push(url);
+          } else {
+            invalidUrls.push(url);
+          }
+        }
+      }
+    });
+
+    if (invalidUrls.length > 0) {
+      console.warn('⚠️ [路径异常] 跳过', invalidUrls.length, '个无效路径');
+    }
 
     if (validUrls.length === 0) {
       return {};
@@ -127,16 +193,22 @@ class ImageUrlManager {
     const uniqueUrls = [...new Set(validUrls)];
     console.log('📸 [图片转换] 去重后', uniqueUrls.length, '个唯一URL');
 
-    // 3. 分类：需要转换的 vs 已缓存的
+    // 3. 分类：需要转换的 vs 已缓存的 vs 非cloud的
     const urlMap = {};
     const needConvert = [];
 
     uniqueUrls.forEach(url => {
-      const cached = this.getCache(url);
-      if (cached) {
-        urlMap[url] = cached;
+      if (!url.startsWith('cloud://')) {
+        // 不是 cloud:// 开头的（https:// 或本地路径），直接使用
+        urlMap[url] = url;
       } else {
-        needConvert.push(url);
+        // 是 cloud://，检查缓存
+        const cached = this.getCache(url);
+        if (cached) {
+          urlMap[url] = cached;
+        } else {
+          needConvert.push(url);
+        }
       }
     });
 
@@ -167,12 +239,16 @@ class ImageUrlManager {
 
           if (res.fileList && res.fileList.length > 0) {
             res.fileList.forEach(file => {
-              if (file.tempFileURL && (file.tempFileURL.startsWith('https://') || file.tempFileURL.startsWith('http://'))) {
+              if (file.status === 0 && file.tempFileURL && this.isValidHttpsUrl(file.tempFileURL)) {
+                // 转换成功，使用临时URL
                 urlMap[file.fileID] = file.tempFileURL;
                 // 更新缓存
                 this.setCache(file.fileID, file.tempFileURL);
               } else {
-                console.warn('⚠️ [图片转换] 转换失败:', file.fileID);
+                // 转换失败，使用默认占位图
+                console.log('⚠️ [图片跳过] 文件不存在或无权限:', file.fileID.substring(0, 60) + '...');
+                urlMap[file.fileID] = DEFAULT_IMAGE;
+                // 不缓存失败结果，下次可以重试
               }
             });
           }
@@ -190,11 +266,16 @@ class ImageUrlManager {
   /**
    * 转换单个 cloud:// URL
    * @param {string} cloudUrl - cloud:// URL
-   * @returns {Promise<string>} - HTTPS URL 或原 URL
+   * @returns {Promise<string>} - HTTPS URL 或默认图
    */
   async convertSingle(cloudUrl) {
-    if (!cloudUrl || typeof cloudUrl !== 'string' || !cloudUrl.startsWith('cloud://')) {
-      return cloudUrl || '';
+    if (!cloudUrl || typeof cloudUrl !== 'string') {
+      return '';
+    }
+
+    // 如果不是 cloud://，直接返回
+    if (!cloudUrl.startsWith('cloud://')) {
+      return cloudUrl;
     }
 
     // 先查缓存
@@ -205,7 +286,7 @@ class ImageUrlManager {
 
     // 没有缓存则转换
     const urlMap = await this.convertBatch([cloudUrl]);
-    return urlMap[cloudUrl] || cloudUrl;
+    return urlMap[cloudUrl] || DEFAULT_IMAGE;
   }
 
   /**

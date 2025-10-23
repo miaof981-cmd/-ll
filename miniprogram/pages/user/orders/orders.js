@@ -271,26 +271,28 @@ Page({
           const urlMap = await imageUrlManager.convertBatch(allImageUrls);
           console.log('✅ [图片转换] 映射完成，共', Object.keys(urlMap).length, '个');
           
-          // 替换订单中的图片 URL
+          // 替换订单中的图片 URL（包括转换失败的默认图）
           orders.forEach(order => {
             // 替换活动封面
-            if (order.activityInfo?.coverImage && urlMap[order.activityInfo.coverImage]) {
+            if (order.activityInfo?.coverImage && urlMap.hasOwnProperty(order.activityInfo.coverImage)) {
               order.activityInfo.coverImage = urlMap[order.activityInfo.coverImage];
             }
             
             // 替换活动封面快照
-            if (order.activityCover && urlMap[order.activityCover]) {
+            if (order.activityCover && urlMap.hasOwnProperty(order.activityCover)) {
               order.activityCover = urlMap[order.activityCover];
             }
             
             // 替换孩子照片
-            if (order.childPhoto && urlMap[order.childPhoto]) {
+            if (order.childPhoto && urlMap.hasOwnProperty(order.childPhoto)) {
               order.childPhoto = urlMap[order.childPhoto];
             }
             
-            // 替换作品照片
+            // 替换作品照片（转换失败的会显示默认图）
             if (order.photos && Array.isArray(order.photos)) {
-              order.photos = order.photos.map(url => urlMap[url] || url);
+              order.photos = order.photos.map(url => 
+                urlMap.hasOwnProperty(url) ? urlMap[url] : url
+              );
             }
           });
           

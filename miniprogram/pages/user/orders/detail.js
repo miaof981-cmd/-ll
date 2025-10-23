@@ -311,30 +311,36 @@ Page({
           const urlMap = await imageUrlManager.convertBatch(urlsToConvert);
           console.log('✅ [图片转换] 映射完成，共', Object.keys(urlMap).length, '个');
           
-          // 替换订单照片
+          // 替换订单照片（转换失败的会显示默认图）
           if (order.photos) {
-            order.photos = order.photos.map(url => urlMap[url] || url);
+            order.photos = order.photos.map(url => 
+              urlMap.hasOwnProperty(url) ? urlMap[url] : url
+            );
           }
           
           // 替换生活照
           if (order.lifePhotos) {
-            order.lifePhotos = order.lifePhotos.map(url => urlMap[url] || url);
+            order.lifePhotos = order.lifePhotos.map(url => 
+              urlMap.hasOwnProperty(url) ? urlMap[url] : url
+            );
           }
           
           // 替换孩子照片
-          if (order.childPhoto && urlMap[order.childPhoto]) {
+          if (order.childPhoto && urlMap.hasOwnProperty(order.childPhoto)) {
             order.childPhoto = urlMap[order.childPhoto];
           }
           
           // 替换活动封面快照
-          if (order.activityCover && urlMap[order.activityCover]) {
+          if (order.activityCover && urlMap.hasOwnProperty(order.activityCover)) {
             order.activityCover = urlMap[order.activityCover];
           }
           
           // 替换历史记录照片
           historyPhotos.forEach(history => {
             if (history.photos) {
-              history.photos = history.photos.map(url => urlMap[url] || url);
+              history.photos = history.photos.map(url => 
+                urlMap.hasOwnProperty(url) ? urlMap[url] : url
+              );
             }
           });
           
