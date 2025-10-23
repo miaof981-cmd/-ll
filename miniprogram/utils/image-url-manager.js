@@ -189,28 +189,43 @@ class ImageUrlManager {
     // 1. 过滤出有效的 cloud:// URL 并进行路径校验
     const validUrls = [];
     const invalidUrls = [];
+    const emptyUrls = [];
     
     cloudUrls.forEach(url => {
-      if (url && typeof url === 'string') {
-        if (!url.startsWith('cloud://')) {
-          // 不是 cloud:// 开头，可能是已转换的 https:// 或本地路径
-          if (this.isValidHttpsUrl(url) || url.startsWith('/')) {
-            // 已经是有效的URL，直接使用
-            validUrls.push(url);
-          }
+      if (!url) {
+        emptyUrls.push('(空值)');
+        return;
+      }
+      
+      if (typeof url !== 'string') {
+        invalidUrls.push({ url, reason: '类型错误', type: typeof url });
+        return;
+      }
+      
+      if (!url.startsWith('cloud://')) {
+        // 不是 cloud:// 开头，可能是已转换的 https:// 或本地路径
+        if (this.isValidHttpsUrl(url) || url.startsWith('/')) {
+          // 已经是有效的URL，直接使用
+          validUrls.push(url);
         } else {
-          // 是 cloud://，需要校验格式
-          if (this.isValidCloudUrl(url)) {
-            validUrls.push(url);
-          } else {
-            invalidUrls.push(url);
-          }
+          invalidUrls.push({ url: url.substring(0, 50), reason: '格式无效' });
+        }
+      } else {
+        // 是 cloud://，需要校验格式
+        if (this.isValidCloudUrl(url)) {
+          validUrls.push(url);
+        } else {
+          invalidUrls.push({ url: url.substring(0, 60), reason: '云路径格式错误' });
         }
       }
     });
 
+    if (emptyUrls.length > 0) {
+      console.warn(`⚠️ [数据异常] 跳过 ${emptyUrls.length} 个空URL`);
+    }
+    
     if (invalidUrls.length > 0) {
-      this.log('warn', '⚠️ [路径异常] 跳过', invalidUrls.length, '个无效路径');
+      console.warn(`⚠️ [路径异常] 跳过 ${invalidUrls.length} 个无效路径:`, invalidUrls);
     }
 
     if (validUrls.length === 0) {
@@ -275,8 +290,21 @@ class ImageUrlManager {
                 this.setCache(file.fileID, file.tempFileURL);
                 convertSuccess++;
               } else {
-                // 转换失败，使用默认占位图
-                this.log('log', '⚠️ [图片跳过] 文件不存在或无权限:', file.fileID.substring(0, 60) + '...');
+                // 转换失败，记录详细原因
+                let failReason = '未知原因';
+                if (file.status === -1) {
+                  failReason = '文件不存在';
+                } else if (file.status === -2) {
+                  failReason = '无权限访问';
+                } else if (file.status === -3) {
+                  failReason = '云存储错误';
+                } else if (!file.tempFileURL) {
+                  failReason = '临时URL为空';
+                } else if (!this.isValidHttpsUrl(file.tempFileURL)) {
+                  failReason = 'URL格式错误';
+                }
+                
+                console.warn(`⚠️ [图片转换失败] ${failReason}:`, file.fileID.substring(0, 60) + '...');
                 urlMap[file.fileID] = DEFAULT_IMAGE;
                 convertFailed++;
                 // 不缓存失败结果，下次可以重试

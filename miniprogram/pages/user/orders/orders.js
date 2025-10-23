@@ -226,18 +226,30 @@ Page({
         if (activityMap.has(order.activityId)) {
           order.activityInfo = activityMap.get(order.activityId);
         } else if (this._deletedActivityIds.has(order.activityId)) {
-          // 已知不存在，使用快照
+          // 已知不存在，静默使用快照
           order.activityInfo = {
-            name: order.activityName || '未知活动',
+            name: order.activityName || '已归档活动',
             coverImage: order.activityCover || '',
             price: order.price || order.totalPrice || 0
           };
         } else {
           // 未查询到且非已知不存在，记录并使用快照
           this._deletedActivityIds.add(order.activityId);
-          console.warn(`⚠️ 活动 ${order.activityId} 不存在，使用快照信息`);
+          
+          // 判断是测试数据还是已删除活动
+          const isTestData = order.activityId && (
+            order.activityId.includes('test') || 
+            order.activityId.length < 20
+          );
+          
+          if (isTestData) {
+            console.warn(`⚠️ [测试订单] 检测到测试活动引用 "${order.activityId.substring(0, 30)}"，建议清理测试数据`);
+          } else {
+            console.warn(`⚠️ [活动缺失] 活动已下架或删除，ID: ${order.activityId.substring(0, 32)}...，已使用订单快照展示`);
+          }
+          
           order.activityInfo = {
-            name: order.activityName || '未知活动',
+            name: order.activityName || (isTestData ? '测试活动' : '已归档活动'),
             coverImage: order.activityCover || '',
             price: order.price || order.totalPrice || 0
           };
