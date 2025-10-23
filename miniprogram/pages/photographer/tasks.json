@@ -1,6 +1,9 @@
 {
   "navigationBarTitleText": "摄影师工作台",
   "enablePullDownRefresh": true,
-  "backgroundColor": "#f5f5f5"
+  "backgroundColor": "#f5f5f5",
+  "usingComponents": {
+    "user-avatar": "/components/user-avatar/user-avatar"
+  }
 }
 

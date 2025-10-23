@@ -2,6 +2,8 @@
   "navigationBarTitleText": "我的订单",
   "navigationBarBackgroundColor": "#1a56db",
   "navigationBarTextStyle": "white",
-  "usingComponents": {}
+  "usingComponents": {
+    "user-avatar": "/components/user-avatar/user-avatar"
+  }
 }
 

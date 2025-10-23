@@ -91,7 +91,7 @@ Page({
           console.error('加载活动信息失败:', e);
         }
 
-        // 加载摄影师信息
+        // 加载摄影师信息（头像由user-avatar组件自动处理）
         if (order.photographerId) {
           try {
             const photographerRes = await db.collection('photographers')
@@ -99,46 +99,9 @@ Page({
               .get();
             
             if (photographerRes.data) {
+              // 只保留基本信息，头像由组件根据_openid自动查询
               order.photographerInfo = photographerRes.data;
-              
-              // 🔥 关键修复：从 users 集合读取摄影师头像（头像跟着 OpenID 走）
-              if (photographerRes.data._openid) {
-                console.log('📸 查询摄影师的 users 头像, OpenID:', photographerRes.data._openid);
-                try {
-                  const photographerUserRes = await db.collection('users')
-                    .where({ _openid: photographerRes.data._openid })
-                    .get();
-                  
-                  if (photographerUserRes.data && photographerUserRes.data.length > 0) {
-                    const photographerUser = photographerUserRes.data[0];
-                    let photographerAvatar = photographerUser.avatarUrl || photographerRes.data.avatar;
-                    console.log('📸 摄影师原始头像:', photographerAvatar);
-                    
-                    // 如果是云存储URL，转换为临时URL
-                    if (photographerAvatar && photographerAvatar.startsWith('cloud://')) {
-                      try {
-                        const tempRes = await wx.cloud.getTempFileURL({
-                          fileList: [photographerAvatar]
-                        });
-                        if (tempRes.fileList && tempRes.fileList.length > 0) {
-                          photographerAvatar = tempRes.fileList[0].tempFileURL;
-                          console.log('📸 摄影师云存储URL已转换:', photographerAvatar);
-                        }
-                      } catch (err) {
-                        console.warn('转换摄影师云存储URL失败:', err);
-                      }
-                    }
-                    
-                    // 覆盖摄影师头像（使用 users 集合的统一头像）
-                    order.photographerInfo.avatar = photographerAvatar;
-                    console.log('✅ 摄影师最终头像:', order.photographerInfo.avatar);
-                  } else {
-                    console.warn('⚠️ 未找到摄影师的 users 记录');
-                  }
-                } catch (err) {
-                  console.warn('查询摄影师 users 头像失败:', err);
-                }
-              }
+              console.log('✅ 加载摄影师信息:', order.photographerInfo.name, 'OpenID:', order.photographerInfo._openid);
             }
           } catch (e) {
             console.warn('摄影师信息加载失败，使用订单中的信息:', order.photographerId);
@@ -152,87 +115,30 @@ Page({
           }
         }
 
-        // 加载下单用户信息（如果订单中没有保存）
-        if (!order.userAvatarUrl || !order.userNickName) {
+        // 加载下单用户昵称（头像由user-avatar组件自动处理）
+        if (!order.userNickName) {
           try {
             const userId = order.userId || order._openid;
-            console.log('订单', order._id, '缺少用户信息，尝试查询 userId:', userId);
+            console.log('订单', order._id, '缺少用户昵称，尝试查询 userId:', userId);
             
             if (userId) {
               const userRes = await db.collection('users')
                 .where({ _openid: userId })
+                .field({ nickName: true })
                 .get();
               
-              console.log('========== 用户信息查询结果 ==========');
-              console.log('查询到的用户数量:', userRes.data.length);
-              if (userRes.data.length > 0) {
-                console.log('用户完整数据:', JSON.stringify(userRes.data[0], null, 2));
-              }
-              
               if (userRes.data && userRes.data.length > 0) {
-                const user = userRes.data[0];
-                console.log('用户原始 nickName:', user.nickName);
-                console.log('用户原始 avatarUrl:', user.avatarUrl);
-                
-                order.userNickName = user.nickName || '微信用户';
-                
-                // 处理云存储URL
-                let avatarUrl = user.avatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
-                console.log('处理前的 avatarUrl:', avatarUrl);
-                
-                if (avatarUrl.startsWith('cloud://')) {
-                  try {
-                    // 转换云存储URL为临时URL
-                    const tempRes = await wx.cloud.getTempFileURL({
-                      fileList: [avatarUrl]
-                    });
-                    console.log('云存储转换结果:', tempRes);
-                    if (tempRes.fileList && tempRes.fileList.length > 0) {
-                      avatarUrl = tempRes.fileList[0].tempFileURL || avatarUrl;
-                      console.log('云存储URL已转换:', avatarUrl);
-                    }
-                  } catch (err) {
-                    console.error('转换云存储URL失败:', err);
-                  }
-                }
-                order.userAvatarUrl = avatarUrl;
-                console.log('最终设置的用户信息:');
-                console.log('  nickName:', order.userNickName);
-                console.log('  avatarUrl:', order.userAvatarUrl);
-                console.log('=====================================');
+                order.userNickName = userRes.data[0].nickName || '微信用户';
+                console.log('✅ 加载用户昵称:', order.userNickName);
               } else {
-                console.log('未找到用户，使用默认值');
-                // 如果查不到用户，使用默认值
-                order.userNickName = order.userNickName || '用户';
-                order.userAvatarUrl = order.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
+                order.userNickName = '用户';
               }
             } else {
-              console.log('订单没有 userId，使用默认值');
-              // 没有用户ID，使用默认值
               order.userNickName = '用户';
-              order.userAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
             }
           } catch (e) {
-            console.warn('加载用户信息失败:', e);
-            order.userNickName = order.userNickName || '用户';
-            order.userAvatarUrl = order.userAvatarUrl || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
-          }
-        } else {
-          console.log('订单', order._id, '已有用户信息:', order.userNickName, order.userAvatarUrl);
-          
-          // 如果已有头像URL是云存储格式，也需要转换
-          if (order.userAvatarUrl && order.userAvatarUrl.startsWith('cloud://')) {
-            try {
-              const tempRes = await wx.cloud.getTempFileURL({
-                fileList: [order.userAvatarUrl]
-              });
-              if (tempRes.fileList && tempRes.fileList.length > 0) {
-                order.userAvatarUrl = tempRes.fileList[0].tempFileURL;
-                console.log('已有云存储URL已转换:', order.userAvatarUrl);
-              }
-            } catch (err) {
-              console.warn('转换已有云存储URL失败:', err);
-            }
+            console.warn('加载用户昵称失败:', e);
+            order.userNickName = '用户';
           }
         }
 

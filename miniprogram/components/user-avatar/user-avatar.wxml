@@ -1,0 +1,11 @@
+<!--components/user-avatar/user-avatar.wxml - 统一头像组件-->
+<image 
+  class="user-avatar {{customClass}}" 
+  src="{{displayAvatar}}" 
+  mode="{{mode}}"
+  style="width: {{size}}rpx; height: {{size}}rpx; border-radius: {{round ? '50%' : borderRadius}}"
+  binderror="onAvatarError"
+  bindload="onAvatarLoad"
+  lazy-load="{{lazyLoad}}"
+></image>
+

@@ -9,7 +9,12 @@
   <view wx:elif="{{isLoggedIn}}">
     <!-- 用户信息卡片 -->
     <view class="user-card">
-      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" binderror="onAvatarError"></image>
+      <user-avatar 
+        openid="{{userInfo.openid || userInfo._openid}}"
+        size="140"
+        round="{{true}}"
+        custom-class="avatar"
+      ></user-avatar>
       <view class="user-info">
         <view class="nickname-row">
           <text class="nickname">{{userInfo.nickName || '微信用户'}}</text>
