@@ -173,6 +173,42 @@ Page({
           console.error('加载活动信息失败:', e);
         }
 
+        // 🔥 转换作品图片的 cloud:// URL 为临时 URL
+        if (order.photos && order.photos.length > 0) {
+          try {
+            // 收集所有需要转换的 cloud:// URL
+            const cloudUrls = order.photos.filter(url => 
+              url && typeof url === 'string' && url.startsWith('cloud://')
+            );
+            
+            if (cloudUrls.length > 0) {
+              // 批量转换
+              const tempRes = await wx.cloud.getTempFileURL({
+                fileList: cloudUrls
+              });
+              
+              if (tempRes.fileList && tempRes.fileList.length > 0) {
+                // 创建 URL 映射表
+                const urlMap = new Map();
+                tempRes.fileList.forEach(file => {
+                  urlMap.set(file.fileID, file.tempFileURL);
+                });
+                
+                // 替换原数组中的 URL
+                order.photos = order.photos.map(url => {
+                  if (url && url.startsWith('cloud://')) {
+                    return urlMap.get(url) || url; // 转换失败时保留原URL
+                  }
+                  return url;
+                });
+              }
+            }
+          } catch (err) {
+            console.warn('作品图片转换失败:', err);
+            // 转换失败时保留原数据，但图片可能无法显示
+          }
+        }
+
         // 🔥 从批量查询结果中获取摄影师信息（无需单独查询）
         if (order.photographerId) {
           const photographer = photographerInfoMap.get(order.photographerId);
@@ -562,12 +598,13 @@ Page({
   },
 
   /**
-   * 图片加载失败处理
+   * 图片加载失败处理（静默处理，避免控制台刷屏）
    */
   onImageError(e) {
-    console.warn('⚠️ 图片加载失败:', e.detail);
     // 图片加载失败时，会自动隐藏，不需要额外处理
-    // 如果需要显示占位图，可以在这里设置
+    // 静默失败，不输出日志，避免控制台刷屏
+    // 如果需要调试，可以取消下面的注释：
+    // console.warn('⚠️ 图片加载失败:', e.detail);
   }
 });
 
