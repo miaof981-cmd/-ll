@@ -79,7 +79,18 @@ Component({
 
       try {
         // 使用全局头像管理器获取头像
-        const avatarUrl = await avatarManager.getAvatar(newOpenId);
+        let avatarUrl = await avatarManager.getAvatar(newOpenId);
+        
+        // 🔥 防御性检查：如果还是 cloud:// 格式，强制转换或使用默认头像
+        if (avatarUrl && avatarUrl.startsWith('cloud://')) {
+          console.warn('⚠️ [头像组件] 检测到未转换的 cloud:// URL，尝试转换...');
+          try {
+            avatarUrl = await avatarManager.convertCloudUrl(avatarUrl);
+          } catch (e) {
+            console.error('❌ [头像组件] cloud:// 转换失败，使用默认头像');
+            avatarUrl = this.data.defaultAvatar;
+          }
+        }
         
         this.setData({
           displayAvatar: avatarUrl,

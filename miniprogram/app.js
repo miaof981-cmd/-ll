@@ -1,4 +1,6 @@
 // app.js
+const avatarCacheCleaner = require('./utils/clear-avatar-cache.js');
+
 App({
   onLaunch() {
     // 根据是否正确配置环境 ID 决定是否启用云开发
@@ -12,6 +14,11 @@ App({
       });
       this.globalData.useCloud = true;
       console.log('✅ 云开发初始化成功，环境ID:', envId);
+      
+      // 🔥 清理可能包含 cloud:// URL 的旧头像缓存
+      setTimeout(() => {
+        avatarCacheCleaner.cleanInvalidCache();
+      }, 1000);
       
       // 关闭云数据库实时推送（避免 sync-0 错误）
       try {
