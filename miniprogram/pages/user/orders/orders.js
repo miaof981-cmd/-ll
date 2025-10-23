@@ -1,5 +1,94 @@
 const orderStatus = require('../../../utils/order-status.js');
 const avatarManager = require('../../../utils/avatar-manager.js');
+const { toHttpsBatch } = require('../../../utils/cloud-url.js');
+
+/**
+ * 收集订单中所有的 cloud:// 图片 URL
+ */
+function collectCloudUrls(orders) {
+  const set = new Set();
+  
+  orders.forEach(order => {
+    // 活动封面
+    if (order.activityInfo?.coverImage?.startsWith('cloud://')) {
+      set.add(order.activityInfo.coverImage);
+    }
+    
+    // 作品图片
+    if (order.photos && Array.isArray(order.photos)) {
+      order.photos.forEach(url => {
+        if (url && typeof url === 'string' && url.startsWith('cloud://')) {
+          set.add(url);
+        }
+      });
+    }
+    
+    // 生活照
+    if (order.lifePhotos && Array.isArray(order.lifePhotos)) {
+      order.lifePhotos.forEach(url => {
+        if (url && typeof url === 'string' && url.startsWith('cloud://')) {
+          set.add(url);
+        }
+      });
+    }
+    
+    // 其他可能的图片字段
+    ['cover', 'latestPhoto', 'samplePhoto'].forEach(field => {
+      const url = order[field];
+      if (url && typeof url === 'string' && url.startsWith('cloud://')) {
+        set.add(url);
+      }
+    });
+  });
+  
+  return Array.from(set);
+}
+
+/**
+ * 批量转换订单中的所有 cloud:// URL 为 HTTPS
+ */
+async function hydrateOrderImages(orders) {
+  // 1. 收集所有需要转换的 URL
+  const cloudUrls = collectCloudUrls(orders);
+  
+  if (cloudUrls.length === 0) {
+    return orders;
+  }
+  
+  console.log(`🖼️ [图片转换] 发现 ${cloudUrls.length} 个云存储图片，开始批量转换...`);
+  
+  // 2. 批量转换
+  const urlMap = await toHttpsBatch(cloudUrls);
+  
+  // 3. 回写到订单数据
+  orders.forEach(order => {
+    // 活动封面
+    if (order.activityInfo?.coverImage && urlMap[order.activityInfo.coverImage]) {
+      order.activityInfo.coverImage = urlMap[order.activityInfo.coverImage];
+    }
+    
+    // 作品图片
+    if (order.photos && Array.isArray(order.photos)) {
+      order.photos = order.photos.map(url => urlMap[url] || url);
+    }
+    
+    // 生活照
+    if (order.lifePhotos && Array.isArray(order.lifePhotos)) {
+      order.lifePhotos = order.lifePhotos.map(url => urlMap[url] || url);
+    }
+    
+    // 其他字段
+    ['cover', 'latestPhoto', 'samplePhoto'].forEach(field => {
+      if (order[field] && urlMap[order[field]]) {
+        order[field] = urlMap[order[field]];
+      }
+    });
+  });
+  
+  console.log(`✅ [图片转换] 完成，转换了 ${Object.keys(urlMap).length} 个URL`);
+  
+  return orders;
+}
 
 Page({
   data: {
@@ -152,61 +241,10 @@ Page({
           
           if (activityRes.data) {
             order.activityInfo = activityRes.data;
-            
-            // 🔥 转换活动封面的 cloud:// URL 为临时 URL
-            if (order.activityInfo.coverImage && order.activityInfo.coverImage.startsWith('cloud://')) {
-              try {
-                const tempRes = await wx.cloud.getTempFileURL({
-                  fileList: [order.activityInfo.coverImage]
-                });
-                if (tempRes.fileList && tempRes.fileList.length > 0) {
-                  order.activityInfo.coverImage = tempRes.fileList[0].tempFileURL;
-                }
-              } catch (err) {
-                console.warn('活动封面转换失败:', err);
-                // 转换失败时使用默认图片
-                order.activityInfo.coverImage = '/images/default-activity.png';
-              }
-            }
+            // 图片 URL 转换将在后续统一批量处理
           }
         } catch (e) {
           console.error('加载活动信息失败:', e);
-        }
-
-        // 🔥 转换作品图片的 cloud:// URL 为临时 URL
-        if (order.photos && order.photos.length > 0) {
-          try {
-            // 收集所有需要转换的 cloud:// URL
-            const cloudUrls = order.photos.filter(url => 
-              url && typeof url === 'string' && url.startsWith('cloud://')
-            );
-            
-            if (cloudUrls.length > 0) {
-              // 批量转换
-              const tempRes = await wx.cloud.getTempFileURL({
-                fileList: cloudUrls
-              });
-              
-              if (tempRes.fileList && tempRes.fileList.length > 0) {
-                // 创建 URL 映射表
-                const urlMap = new Map();
-                tempRes.fileList.forEach(file => {
-                  urlMap.set(file.fileID, file.tempFileURL);
-                });
-                
-                // 替换原数组中的 URL
-                order.photos = order.photos.map(url => {
-                  if (url && url.startsWith('cloud://')) {
-                    return urlMap.get(url) || url; // 转换失败时保留原URL
-                  }
-                  return url;
-                });
-              }
-            }
-          } catch (err) {
-            console.warn('作品图片转换失败:', err);
-            // 转换失败时保留原数据，但图片可能无法显示
-          }
         }
 
         // 🔥 从批量查询结果中获取摄影师信息（无需单独查询）
@@ -285,9 +323,12 @@ Page({
       // 显示最终统计
       console.log('✅ [完成] 加载', orders.length, '个订单');
 
+      // 🔥 批量转换所有 cloud:// 图片 URL 为 HTTPS
+      const hydratedOrders = await hydrateOrderImages(orders);
+
       this.setData({
-        orders,
-        filteredOrders: orders,
+        orders: hydratedOrders,
+        filteredOrders: hydratedOrders,
         userOpenId,
         loading: false
       });
