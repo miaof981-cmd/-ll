@@ -1,5 +1,6 @@
 const orderStatus = require('../../../utils/order-status.js');
 const studentIdUtil = require('../../../utils/student-id.js');
+const imageUrlManager = require('../../../utils/image-url-manager.js');
 
 Page({
   data: {
@@ -189,11 +190,10 @@ Page({
           activityInfo = activityRes.data;
           console.log('✅ [用户订单] 活动信息加载成功:', activityInfo?.name, '类别:', activityInfo?.category);
           
-          // 🔥 转换活动封面 cloud:// URL
-          if (activityInfo && activityInfo.coverImage && activityInfo.coverImage.startsWith('cloud://')) {
+          // 🔥 转换活动封面 cloud:// URL（带2小时缓存）
+          if (activityInfo && activityInfo.coverImage) {
             try {
-              const cloudUrl = require('../../utils/cloud-url.js');
-              activityInfo.coverImage = await cloudUrl.toHttps(activityInfo.coverImage);
+              activityInfo.coverImage = await imageUrlManager.convertSingle(activityInfo.coverImage);
               console.log('✅ [图片转换] 活动封面转换成功');
             } catch (err) {
               console.warn('⚠️ [图片转换] 活动封面转换失败:', err);
@@ -268,44 +268,48 @@ Page({
       console.log('拒绝次数:', order.rejectCount);
       console.log('历史记录数量:', historyPhotos.length);
 
-      // 🔥 批量转换所有图片 URL (cloud:// -> https://)
+      // 🔥 批量转换所有图片 URL (cloud:// -> https://) 带2小时缓存
       try {
-        const cloudUrl = require('../../utils/cloud-url.js');
         const urlsToConvert = [];
         
         // 收集订单照片
         if (order.photos && Array.isArray(order.photos)) {
           order.photos.forEach(url => {
-            if (url && url.startsWith('cloud://')) {
-              urlsToConvert.push(url);
-            }
+            if (url) urlsToConvert.push(url);
           });
         }
         
         // 收集生活照
         if (order.lifePhotos && Array.isArray(order.lifePhotos)) {
           order.lifePhotos.forEach(url => {
-            if (url && url.startsWith('cloud://')) {
-              urlsToConvert.push(url);
-            }
+            if (url) urlsToConvert.push(url);
           });
+        }
+        
+        // 收集孩子照片
+        if (order.childPhoto) {
+          urlsToConvert.push(order.childPhoto);
+        }
+        
+        // 收集活动封面快照
+        if (order.activityCover) {
+          urlsToConvert.push(order.activityCover);
         }
         
         // 收集历史记录中的照片
         historyPhotos.forEach(history => {
           if (history.photos && Array.isArray(history.photos)) {
             history.photos.forEach(url => {
-              if (url && url.startsWith('cloud://')) {
-                urlsToConvert.push(url);
-              }
+              if (url) urlsToConvert.push(url);
             });
           }
         });
         
-        // 批量转换
+        // 批量转换（自动使用缓存）
         if (urlsToConvert.length > 0) {
-          console.log('📸 [图片转换] 开始批量转换', urlsToConvert.length, '张图片');
-          const urlMap = await cloudUrl.toHttpsBatch(urlsToConvert);
+          console.log('📸 [图片转换] 收集到', urlsToConvert.length, '张图片');
+          const urlMap = await imageUrlManager.convertBatch(urlsToConvert);
+          console.log('✅ [图片转换] 映射完成，共', Object.keys(urlMap).length, '个');
           
           // 替换订单照片
           if (order.photos) {
@@ -317,6 +321,16 @@ Page({
             order.lifePhotos = order.lifePhotos.map(url => urlMap[url] || url);
           }
           
+          // 替换孩子照片
+          if (order.childPhoto && urlMap[order.childPhoto]) {
+            order.childPhoto = urlMap[order.childPhoto];
+          }
+          
+          // 替换活动封面快照
+          if (order.activityCover && urlMap[order.activityCover]) {
+            order.activityCover = urlMap[order.activityCover];
+          }
+          
           // 替换历史记录照片
           historyPhotos.forEach(history => {
             if (history.photos) {
@@ -324,7 +338,7 @@ Page({
             }
           });
           
-          console.log('✅ [图片转换] 批量转换完成');
+          console.log('✅ [图片转换] 所有图片URL已更新');
         }
       } catch (err) {
         console.warn('⚠️ [图片转换] 批量转换失败:', err);

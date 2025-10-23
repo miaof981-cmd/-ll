@@ -1,5 +1,6 @@
 const orderStatus = require('../../../utils/order-status.js');
 const avatarManager = require('../../../utils/avatar-manager.js');
+const imageUrlManager = require('../../../utils/image-url-manager.js');
 
 Page({
   data: {
@@ -142,7 +143,7 @@ Page({
         await avatarManager.preloadAvatars([...allAvatarOpenIds]);
       }
 
-      // 加载活动信息并处理超时取消
+      // 加载活动信息（先不转换图片）
       const orders = await Promise.all(res.data.map(async (order) => {
         // 加载活动信息
         try {
@@ -152,61 +153,9 @@ Page({
           
           if (activityRes.data) {
             order.activityInfo = activityRes.data;
-            
-            // 🔥 转换活动封面的 cloud:// URL 为临时 URL
-            if (order.activityInfo.coverImage && order.activityInfo.coverImage.startsWith('cloud://')) {
-              try {
-                const tempRes = await wx.cloud.getTempFileURL({
-                  fileList: [order.activityInfo.coverImage]
-                });
-                if (tempRes.fileList && tempRes.fileList.length > 0) {
-                  order.activityInfo.coverImage = tempRes.fileList[0].tempFileURL;
-                }
-              } catch (err) {
-                console.warn('活动封面转换失败:', err);
-                // 转换失败时使用默认图片
-                order.activityInfo.coverImage = '/images/default-activity.png';
-              }
-            }
           }
         } catch (e) {
           console.error('加载活动信息失败:', e);
-        }
-
-        // 🔥 转换作品图片的 cloud:// URL 为临时 URL
-        if (order.photos && order.photos.length > 0) {
-          try {
-            // 收集所有需要转换的 cloud:// URL
-            const cloudUrls = order.photos.filter(url => 
-              url && typeof url === 'string' && url.startsWith('cloud://')
-            );
-            
-            if (cloudUrls.length > 0) {
-              // 批量转换
-              const tempRes = await wx.cloud.getTempFileURL({
-                fileList: cloudUrls
-              });
-              
-              if (tempRes.fileList && tempRes.fileList.length > 0) {
-                // 创建 URL 映射表
-                const urlMap = new Map();
-                tempRes.fileList.forEach(file => {
-                  urlMap.set(file.fileID, file.tempFileURL);
-                });
-                
-                // 替换原数组中的 URL
-                order.photos = order.photos.map(url => {
-                  if (url && url.startsWith('cloud://')) {
-                    return urlMap.get(url) || url; // 转换失败时保留原URL
-                  }
-                  return url;
-                });
-              }
-            }
-          } catch (err) {
-            console.warn('作品图片转换失败:', err);
-            // 转换失败时保留原数据，但图片可能无法显示
-          }
         }
 
         // 🔥 从批量查询结果中获取摄影师信息（无需单独查询）
@@ -284,6 +233,74 @@ Page({
 
       // 显示最终统计
       console.log('✅ [完成] 加载', orders.length, '个订单');
+
+      // 🔥 批量转换所有订单中的图片 URL（带2小时缓存）
+      console.log('📸 [图片转换] 开始收集所有图片 URL...');
+      const allImageUrls = [];
+      
+      // 收集所有需要转换的 cloud:// URL
+      orders.forEach(order => {
+        // 1. 活动封面（activityInfo 中）
+        if (order.activityInfo?.coverImage) {
+          allImageUrls.push(order.activityInfo.coverImage);
+        }
+        
+        // 2. 活动封面（订单快照中）
+        if (order.activityCover) {
+          allImageUrls.push(order.activityCover);
+        }
+        
+        // 3. 孩子照片
+        if (order.childPhoto) {
+          allImageUrls.push(order.childPhoto);
+        }
+        
+        // 4. 作品照片数组
+        if (order.photos && Array.isArray(order.photos)) {
+          order.photos.forEach(url => {
+            if (url) allImageUrls.push(url);
+          });
+        }
+      });
+
+      console.log('📸 [图片转换] 收集到', allImageUrls.length, '个图片URL');
+
+      // 批量转换（自动使用缓存，2小时有效期）
+      if (allImageUrls.length > 0) {
+        try {
+          const urlMap = await imageUrlManager.convertBatch(allImageUrls);
+          console.log('✅ [图片转换] 映射完成，共', Object.keys(urlMap).length, '个');
+          
+          // 替换订单中的图片 URL
+          orders.forEach(order => {
+            // 替换活动封面
+            if (order.activityInfo?.coverImage && urlMap[order.activityInfo.coverImage]) {
+              order.activityInfo.coverImage = urlMap[order.activityInfo.coverImage];
+            }
+            
+            // 替换活动封面快照
+            if (order.activityCover && urlMap[order.activityCover]) {
+              order.activityCover = urlMap[order.activityCover];
+            }
+            
+            // 替换孩子照片
+            if (order.childPhoto && urlMap[order.childPhoto]) {
+              order.childPhoto = urlMap[order.childPhoto];
+            }
+            
+            // 替换作品照片
+            if (order.photos && Array.isArray(order.photos)) {
+              order.photos = order.photos.map(url => urlMap[url] || url);
+            }
+          });
+          
+          console.log('✅ [图片转换] 所有订单图片URL已更新');
+        } catch (err) {
+          console.error('❌ [图片转换] 批量转换失败:', err);
+        }
+      } else {
+        console.log('ℹ️ [图片转换] 无需转换的图片');
+      }
 
       this.setData({
         orders,
