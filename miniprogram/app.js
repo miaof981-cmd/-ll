@@ -1,6 +1,5 @@
 // app.js
 const avatarCacheCleaner = require('./utils/clear-avatar-cache.js');
-const { cleanExpiredCache } = require('./utils/cloud-url.js');
 
 App({
   onLaunch() {
@@ -19,8 +18,6 @@ App({
       // 🔥 清理可能包含 cloud:// URL 的旧头像缓存
       setTimeout(() => {
         avatarCacheCleaner.cleanInvalidCache();
-        // 清理过期的云存储 URL 缓存（活动封面、作品图片等）
-        cleanExpiredCache();
       }, 1000);
       
       // 关闭云数据库实时推送（避免 sync-0 错误）

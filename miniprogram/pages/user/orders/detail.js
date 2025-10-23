@@ -188,6 +188,17 @@ Page({
           const activityRes = await db.collection('activities').doc(order.activityId).get();
           activityInfo = activityRes.data;
           console.log('✅ [用户订单] 活动信息加载成功:', activityInfo?.name, '类别:', activityInfo?.category);
+          
+          // 🔥 转换活动封面 cloud:// URL
+          if (activityInfo && activityInfo.coverImage && activityInfo.coverImage.startsWith('cloud://')) {
+            try {
+              const cloudUrl = require('../../utils/cloud-url.js');
+              activityInfo.coverImage = await cloudUrl.toHttps(activityInfo.coverImage);
+              console.log('✅ [图片转换] 活动封面转换成功');
+            } catch (err) {
+              console.warn('⚠️ [图片转换] 活动封面转换失败:', err);
+            }
+          }
         } catch (e) {
           console.error('❌ [用户订单] 加载活动信息失败:', e);
           console.error('   订单的 activityId:', order.activityId);
@@ -256,6 +267,68 @@ Page({
       console.log('订单信息:', order);
       console.log('拒绝次数:', order.rejectCount);
       console.log('历史记录数量:', historyPhotos.length);
+
+      // 🔥 批量转换所有图片 URL (cloud:// -> https://)
+      try {
+        const cloudUrl = require('../../utils/cloud-url.js');
+        const urlsToConvert = [];
+        
+        // 收集订单照片
+        if (order.photos && Array.isArray(order.photos)) {
+          order.photos.forEach(url => {
+            if (url && url.startsWith('cloud://')) {
+              urlsToConvert.push(url);
+            }
+          });
+        }
+        
+        // 收集生活照
+        if (order.lifePhotos && Array.isArray(order.lifePhotos)) {
+          order.lifePhotos.forEach(url => {
+            if (url && url.startsWith('cloud://')) {
+              urlsToConvert.push(url);
+            }
+          });
+        }
+        
+        // 收集历史记录中的照片
+        historyPhotos.forEach(history => {
+          if (history.photos && Array.isArray(history.photos)) {
+            history.photos.forEach(url => {
+              if (url && url.startsWith('cloud://')) {
+                urlsToConvert.push(url);
+              }
+            });
+          }
+        });
+        
+        // 批量转换
+        if (urlsToConvert.length > 0) {
+          console.log('📸 [图片转换] 开始批量转换', urlsToConvert.length, '张图片');
+          const urlMap = await cloudUrl.toHttpsBatch(urlsToConvert);
+          
+          // 替换订单照片
+          if (order.photos) {
+            order.photos = order.photos.map(url => urlMap[url] || url);
+          }
+          
+          // 替换生活照
+          if (order.lifePhotos) {
+            order.lifePhotos = order.lifePhotos.map(url => urlMap[url] || url);
+          }
+          
+          // 替换历史记录照片
+          historyPhotos.forEach(history => {
+            if (history.photos) {
+              history.photos = history.photos.map(url => urlMap[url] || url);
+            }
+          });
+          
+          console.log('✅ [图片转换] 批量转换完成');
+        }
+      } catch (err) {
+        console.warn('⚠️ [图片转换] 批量转换失败:', err);
+      }
 
       this.setData({
         order,

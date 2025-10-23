@@ -618,6 +618,27 @@ async function getBanners() {
       .orderBy('order', 'asc')
       .get();
     console.log('✅ 云端获取轮播图成功:', res.data.length);
+    
+    // 🔥 转换所有 cloud:// URL 为 HTTPS URL
+    try {
+      const cloudUrl = require('./cloud-url.js');
+      const urlsToConvert = res.data
+        .map(banner => banner.imageUrl)
+        .filter(url => url && url.startsWith('cloud://'));
+      
+      if (urlsToConvert.length > 0) {
+        const urlMap = await cloudUrl.toHttpsBatch(urlsToConvert);
+        res.data.forEach(banner => {
+          if (banner.imageUrl && urlMap[banner.imageUrl]) {
+            banner.imageUrl = urlMap[banner.imageUrl];
+          }
+        });
+        console.log('✅ 轮播图 URL 转换完成');
+      }
+    } catch (err) {
+      console.warn('⚠️ 轮播图 URL 转换失败:', err);
+    }
+    
     return res.data;
   } catch (e) {
     console.error('❌ 获取轮播图失败:', e);
