@@ -3,16 +3,26 @@
  * 
  * 核心功能：
  * 1. 将 cloud:// URL 转换为临时 HTTPS URL
- * 2. 缓存转换结果（2小时有效期）
+ * 2. 缓存转换结果（12小时有效期）
  * 3. 批量转换优化（最多50个一批）
  * 4. 自动过期刷新
+ * 5. 懒加载支持
  */
 
-const CACHE_KEY = 'image_url_cache_v1';
-const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2小时缓存（临时URL官方1小时有效期，我们设置2小时兜底）
-const BATCH_SIZE = 50; // 微信云存储 getTempFileURL API 限制
-// 默认占位图（使用 base64 内联 SVG，避免文件路径问题）
-const DEFAULT_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295Lit4oCmPC90ZXh0Pjwvc3ZnPg==';
+// 配置项
+const CONFIG = {
+  CACHE_KEY: 'image_url_cache_v2',
+  CACHE_DURATION: 12 * 60 * 60 * 1000, // 12小时缓存（可根据需求调整）
+  BATCH_SIZE: 50, // 微信云存储 getTempFileURL API 限制
+  DEBUG_MODE: false, // 调试模式：true=详细日志，false=简洁日志
+  DEFAULT_IMAGE: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295Lit4oCmPC90ZXh0Pjwvc3ZnPg=='
+};
+
+// 兼容旧变量名
+const CACHE_KEY = CONFIG.CACHE_KEY;
+const CACHE_DURATION = CONFIG.CACHE_DURATION;
+const BATCH_SIZE = CONFIG.BATCH_SIZE;
+const DEFAULT_IMAGE = CONFIG.DEFAULT_IMAGE;
 
 /**
  * 图片URL缓存管理类
@@ -21,6 +31,25 @@ class ImageUrlManager {
   constructor() {
     this.memoryCache = new Map(); // 内存缓存（最快）
     this.loadFromStorage(); // 启动时从本地存储加载
+  }
+
+  /**
+   * 条件日志输出（仅在调试模式下输出详细日志）
+   * @param {string} level - 日志级别：'log', 'warn', 'error'
+   * @param  {...any} args - 日志内容
+   */
+  log(level, ...args) {
+    if (CONFIG.DEBUG_MODE || level === 'error') {
+      console[level](...args);
+    }
+  }
+
+  /**
+   * 简洁日志输出（总是显示）
+   * @param  {...any} args - 日志内容
+   */
+  logAlways(...args) {
+    console.log(...args);
   }
 
   /**
@@ -77,11 +106,11 @@ class ImageUrlManager {
         });
         
         if (validCount > 0) {
-          console.log('📦 [图片缓存] 加载', validCount, '个有效缓存');
+          this.log('log', '📦 [图片缓存] 加载', validCount, '个有效缓存');
         }
       }
     } catch (e) {
-      console.warn('⚠️ [图片缓存] 加载失败:', e);
+      this.log('warn', '⚠️ [图片缓存] 加载失败:', e);
     }
   }
 
@@ -181,22 +210,23 @@ class ImageUrlManager {
     });
 
     if (invalidUrls.length > 0) {
-      console.warn('⚠️ [路径异常] 跳过', invalidUrls.length, '个无效路径');
+      this.log('warn', '⚠️ [路径异常] 跳过', invalidUrls.length, '个无效路径');
     }
 
     if (validUrls.length === 0) {
       return {};
     }
 
-    console.log('📸 [图片转换] 开始处理', validUrls.length, '个图片URL');
+    this.log('log', '📸 [图片转换] 开始处理', validUrls.length, '个图片URL');
 
     // 2. 去重
     const uniqueUrls = [...new Set(validUrls)];
-    console.log('📸 [图片转换] 去重后', uniqueUrls.length, '个唯一URL');
+    this.log('log', '📸 [图片转换] 去重后', uniqueUrls.length, '个唯一URL');
 
     // 3. 分类：需要转换的 vs 已缓存的 vs 非cloud的
     const urlMap = {};
     const needConvert = [];
+    let cacheHits = 0;
 
     uniqueUrls.forEach(url => {
       if (!url.startsWith('cloud://')) {
@@ -207,19 +237,17 @@ class ImageUrlManager {
         const cached = this.getCache(url);
         if (cached) {
           urlMap[url] = cached;
+          cacheHits++;
         } else {
           needConvert.push(url);
         }
       }
     });
 
-    console.log('✅ [图片缓存] 命中', uniqueUrls.length - needConvert.length, '个');
-    
-    if (needConvert.length > 0) {
-      console.log('🔄 [图片转换] 需要转换', needConvert.length, '个');
-    }
-
     // 4. 批量转换需要更新的URL
+    let convertSuccess = 0;
+    let convertFailed = 0;
+    
     if (needConvert.length > 0) {
       try {
         // 按批次转换（每批最多50个）
@@ -228,11 +256,11 @@ class ImageUrlManager {
           chunks.push(needConvert.slice(i, i + BATCH_SIZE));
         }
 
-        console.log('📦 [图片转换] 分', chunks.length, '批处理');
+        this.log('log', '📦 [图片转换] 分', chunks.length, '批处理');
 
         for (let i = 0; i < chunks.length; i++) {
           const chunk = chunks[i];
-          console.log(`🔄 [批次 ${i + 1}/${chunks.length}] 转换 ${chunk.length} 个`);
+          this.log('log', `🔄 [批次 ${i + 1}/${chunks.length}] 转换 ${chunk.length} 个`);
           
           const res = await wx.cloud.getTempFileURL({
             fileList: chunk
@@ -245,21 +273,29 @@ class ImageUrlManager {
                 urlMap[file.fileID] = file.tempFileURL;
                 // 更新缓存
                 this.setCache(file.fileID, file.tempFileURL);
+                convertSuccess++;
               } else {
                 // 转换失败，使用默认占位图
-                console.log('⚠️ [图片跳过] 文件不存在或无权限:', file.fileID.substring(0, 60) + '...');
+                this.log('log', '⚠️ [图片跳过] 文件不存在或无权限:', file.fileID.substring(0, 60) + '...');
                 urlMap[file.fileID] = DEFAULT_IMAGE;
+                convertFailed++;
                 // 不缓存失败结果，下次可以重试
               }
             });
           }
         }
-
-        console.log('✅ [图片转换] 完成，共转换', Object.keys(urlMap).length, '个');
       } catch (error) {
-        console.error('❌ [图片转换] 批量转换失败:', error);
+        this.log('error', '❌ [图片转换] 批量转换失败:', error);
       }
     }
+
+    // 输出简洁的统计信息（总是显示）
+    this.logAlways(
+      '✅ 使用缓存:', cacheHits, '张 |',
+      '🔄 转换新图:', convertSuccess, '张 |',
+      '⚠️ 转换失败:', convertFailed, '张 |',
+      '✅ 总计:', Object.keys(urlMap).length, '张'
+    );
 
     return urlMap;
   }

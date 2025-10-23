@@ -142,6 +142,19 @@
         </view>
       </view>
     </view>
+
+    <!-- 加载更多提示 -->
+    <view wx:if="{{!loading && filteredOrders.length > 0}}" class="load-more-tip">
+      <view wx:if="{{loadingMore}}" class="loading-text">
+        <text>加载中...</text>
+      </view>
+      <view wx:elif="{{hasMore}}" class="has-more-text">
+        <text>上拉加载更多</text>
+      </view>
+      <view wx:else class="no-more-text">
+        <text>已全部加载</text>
+      </view>
+    </view>
   </view>
 </view>
 

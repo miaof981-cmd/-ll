@@ -16,8 +16,18 @@ Page({
       { id: orderStatus.ORDER_STATUS.COMPLETED, name: '已完成' }
     ],
     loading: true,
-    userOpenId: ''
+    userOpenId: '',
+    // 分页配置
+    pageSize: 20, // 每页加载订单数
+    currentPage: 1,
+    hasMore: true,
+    loadingMore: false
   },
+
+  // 节流标记
+  _loadingOrders: false,
+  _lastLoadTime: 0,
+  _throttleDelay: 500, // 节流延迟（毫秒）
 
   // 工具：格式化为北京时间 YYYY-MM-DD HH:mm:ss
   formatBeijing(ts) {
@@ -38,15 +48,44 @@ Page({
   },
 
   onLoad() {
-    this.loadOrders();
+    this.loadOrders(true);
   },
 
   onShow() {
-    this.loadOrders();
+    // 避免短时间内重复加载（从其他页面返回时）
+    const now = Date.now();
+    if (now - this._lastLoadTime < 3000) {
+      console.log('⏸️ 距离上次加载不足3秒，跳过重复加载');
+      return;
+    }
+    this.loadOrders(true);
   },
 
-  async loadOrders() {
-    this.setData({ loading: true });
+  /**
+   * 加载订单（支持节流和分页）
+   * @param {boolean} reset - 是否重置为首页
+   */
+  async loadOrders(reset = false) {
+    // 节流控制：防止短时间内重复触发
+    const now = Date.now();
+    if (this._loadingOrders) {
+      console.log('⏸️ 正在加载中，跳过重复请求');
+      return;
+    }
+    
+    if (now - this._lastLoadTime < this._throttleDelay) {
+      console.log('⏸️ 节流中，请稍后');
+      return;
+    }
+
+    this._loadingOrders = true;
+    this._lastLoadTime = now;
+
+    if (reset) {
+      this.setData({ loading: true, currentPage: 1, hasMore: true });
+    } else {
+      this.setData({ loadingMore: true });
+    }
 
     try {
       const db = wx.cloud.database();
@@ -56,17 +95,19 @@ Page({
         name: 'unifiedLogin'
       });
       
-      console.log('登录结果:', result);
-      
       const userOpenId = result.userInfo?._openid || result.userInfo?.openid || result._openid || result.openid;
       
       if (!userOpenId) {
         throw new Error('无法获取用户OpenID');
       }
       
-      console.log('用户OpenID:', userOpenId);
+      // 分页参数
+      const { pageSize, currentPage } = this.data;
+      const skip = (currentPage - 1) * pageSize;
       
-      // 查询当前用户的订单
+      console.log(`📄 [分页加载] 第${currentPage}页，每页${pageSize}条，跳过${skip}条`);
+      
+      // 查询当前用户的订单（支持分页）
       // 使用 userId 字段查询（订单归属用户），兼容旧数据使用 _openid
       const res = await db.collection('activity_orders')
         .where(db.command.or([
@@ -74,14 +115,16 @@ Page({
           { _openid: userOpenId }      // 旧字段：兼容历史数据
         ]))
         .orderBy('createdAt', 'desc')
+        .skip(skip)
+        .limit(pageSize)
         .get();
+
+      // 判断是否还有更多数据
+      const hasMore = res.data.length === pageSize;
 
       const TIMEOUT_MS = 30 * 60 * 1000; // 30分钟
 
-      // 🔥 性能优化：一次性批量查询所有用户和摄影师信息
-      console.log('📊 [性能优化] 开始批量查询用户信息');
-      
-      // 1. 收集所有唯一的OpenID
+      // 🔥 性能优化：批量查询用户和摄影师信息
       const allUserOpenIds = new Set();
       const allPhotographerIds = new Set();
       
@@ -91,7 +134,7 @@ Page({
         if (order.photographerId) allPhotographerIds.add(order.photographerId);
       });
 
-      // 2. 批量查询用户信息（头像+昵称）
+      // 批量查询用户信息（头像+昵称）
       const userInfoMap = new Map();
       if (allUserOpenIds.size > 0) {
         try {
@@ -108,13 +151,12 @@ Page({
               avatarUrl: user.avatarUrl
             });
           });
-          console.log('✅ [批量查询] 用户信息:', userInfoMap.size, '个');
         } catch (e) {
-          console.error('批量查询用户失败:', e);
+          console.error('❌ 批量查询用户失败:', e);
         }
       }
 
-      // 3. 批量查询摄影师信息
+      // 批量查询摄影师信息
       const photographerInfoMap = new Map();
       if (allPhotographerIds.size > 0) {
         try {
@@ -127,13 +169,12 @@ Page({
           photographersRes.data.forEach(photographer => {
             photographerInfoMap.set(photographer._id, photographer);
           });
-          console.log('✅ [批量查询] 摄影师信息:', photographerInfoMap.size, '个');
         } catch (e) {
-          console.error('批量查询摄影师失败:', e);
+          console.error('❌ 批量查询摄影师失败:', e);
         }
       }
 
-      // 4. 预加载所有头像到缓存（一次性）
+      // 预加载所有头像到缓存
       const allAvatarOpenIds = new Set([...allUserOpenIds]);
       photographerInfoMap.forEach(p => {
         if (p._openid) allAvatarOpenIds.add(p._openid);
@@ -231,11 +272,14 @@ Page({
         return order;
       }));
 
-      // 显示最终统计
-      console.log('✅ [完成] 加载', orders.length, '个订单');
+      // 显示加载进度
+      if (orders.length > 0) {
+        console.log(`✅ [加载完成] 第${currentPage}页，本次加载 ${orders.length} 条订单`);
+      } else {
+        console.log('ℹ️ [加载完成] 无更多订单');
+      }
 
-      // 🔥 批量转换所有订单中的图片 URL（带2小时缓存）
-      console.log('📸 [图片转换] 开始收集所有图片 URL...');
+      // 🔥 批量转换所有订单中的图片 URL（带12小时缓存）
       const allImageUrls = [];
       
       // 收集所有需要转换的 cloud:// URL
@@ -296,28 +340,64 @@ Page({
             }
           });
           
-          console.log('✅ [图片转换] 所有订单图片URL已更新');
         } catch (err) {
           console.error('❌ [图片转换] 批量转换失败:', err);
         }
-      } else {
-        console.log('ℹ️ [图片转换] 无需转换的图片');
       }
 
+      // 分页数据合并或替换
+      const existingOrders = reset ? [] : this.data.orders;
+      const newOrders = [...existingOrders, ...orders];
+
       this.setData({
-        orders,
-        filteredOrders: orders,
+        orders: newOrders,
+        filteredOrders: newOrders,
         userOpenId,
-        loading: false
+        loading: false,
+        loadingMore: false,
+        hasMore,
+        currentPage: reset ? 1 : currentPage
       });
+
+      console.log(`📊 [订单列表] 总计 ${newOrders.length} 条，${hasMore ? '可加载更多' : '已全部加载'}`);
     } catch (e) {
-      console.error('加载订单失败:', e);
-      this.setData({ loading: false });
+      console.error('❌ 加载订单失败:', e);
+      this.setData({ loading: false, loadingMore: false });
       wx.showToast({
         title: '加载失败',
         icon: 'error'
       });
+    } finally {
+      this._loadingOrders = false; // 解除节流标记
     }
+  },
+
+  /**
+   * 加载更多订单（分页）
+   */
+  loadMoreOrders() {
+    if (!this.data.hasMore || this.data.loadingMore) {
+      return;
+    }
+    
+    const nextPage = this.data.currentPage + 1;
+    this.setData({ currentPage: nextPage });
+    this.loadOrders(false);
+  },
+
+  /**
+   * 下拉刷新
+   */
+  onPullDownRefresh() {
+    this.loadOrders(true);
+    wx.stopPullDownRefresh();
+  },
+
+  /**
+   * 触底加载更多
+   */
+  onReachBottom() {
+    this.loadMoreOrders();
   },
 
   // 切换状态筛选

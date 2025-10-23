@@ -320,3 +320,24 @@
   white-space: nowrap;
 }
 
+/* 加载更多提示 */
+.load-more-tip {
+  text-align: center;
+  padding: 32rpx 0;
+  font-size: 26rpx;
+  color: #999;
+}
+
+.loading-text {
+  color: #1a56db;
+}
+
+.has-more-text {
+  color: #666;
+}
+
+.no-more-text {
+  color: #ccc;
+  font-size: 24rpx;
+}
+
