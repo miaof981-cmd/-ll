@@ -11,7 +11,8 @@
 const CACHE_KEY = 'image_url_cache_v1';
 const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2小时缓存（临时URL官方1小时有效期，我们设置2小时兜底）
 const BATCH_SIZE = 50; // 微信云存储 getTempFileURL API 限制
-const DEFAULT_IMAGE = '/images/placeholder.png'; // 默认占位图
+// 默认占位图（使用 base64 内联 SVG，避免文件路径问题）
+const DEFAULT_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjIwIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+5Yqg6L295Lit4oCmPC90ZXh0Pjwvc3ZnPg==';
 
 /**
  * 图片URL缓存管理类
