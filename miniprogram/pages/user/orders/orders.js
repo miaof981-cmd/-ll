@@ -1,4 +1,5 @@
 const orderStatus = require('../../../utils/order-status.js');
+const avatarManager = require('../../../utils/avatar-manager.js');
 
 Page({
   data: {
@@ -75,6 +76,25 @@ Page({
         .get();
 
       const TIMEOUT_MS = 30 * 60 * 1000; // 30分钟
+
+      // 🔥 性能优化：批量预加载所有用户和摄影师头像
+      const allOpenIds = new Set();
+      res.data.forEach(order => {
+        // 收集下单用户OpenID
+        const userId = order.userId || order._openid;
+        if (userId) allOpenIds.add(userId);
+      });
+      
+      console.log('🚀 [性能优化] 预加载', allOpenIds.size, '个用户头像');
+      
+      // 使用全局头像管理器预加载（自动缓存）
+      if (allOpenIds.size > 0) {
+        await avatarManager.preloadAvatars([...allOpenIds]);
+      }
+      
+      // 显示缓存统计
+      const stats = avatarManager.getCacheStats();
+      console.log('📊 [缓存统计]', stats);
 
       // 加载活动信息并处理超时取消
       const orders = await Promise.all(res.data.map(async (order) => {
@@ -188,6 +208,16 @@ Page({
 
         return order;
       }));
+
+      // 🔥 预加载摄影师头像
+      const photographerOpenIds = orders
+        .filter(o => o.photographerInfo && o.photographerInfo._openid)
+        .map(o => o.photographerInfo._openid);
+      
+      if (photographerOpenIds.length > 0) {
+        await avatarManager.preloadAvatars([...new Set(photographerOpenIds)]);
+        console.log('✅ [性能优化] 预加载', photographerOpenIds.length, '个摄影师头像');
+      }
 
       this.setData({
         orders,

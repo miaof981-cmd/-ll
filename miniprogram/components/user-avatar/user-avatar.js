@@ -1,4 +1,6 @@
 // components/user-avatar/user-avatar.js - 统一头像组件
+const avatarManager = require('../../utils/avatar-manager.js');
+
 Component({
   /**
    * 组件的属性列表
@@ -66,48 +68,25 @@ Component({
    */
   methods: {
     /**
-     * 根据OpenID加载头像（核心方法）
+     * 根据OpenID加载头像（使用全局管理器）
      */
     async loadAvatarByOpenId(newOpenId, oldOpenId) {
       if (!newOpenId || newOpenId === oldOpenId) {
         return;
       }
 
-      console.log('🔍 [头像组件] 根据OpenID查询头像:', newOpenId);
-      
       this.setData({ loading: true });
 
       try {
-        const db = wx.cloud.database();
-        const res = await db.collection('users')
-          .where({ _openid: newOpenId })
-          .field({ avatarUrl: true, nickName: true })
-          .get();
-
-        if (res.data && res.data.length > 0) {
-          const user = res.data[0];
-          let avatarUrl = user.avatarUrl;
-          
-          console.log('✅ [头像组件] 查询到用户头像:', avatarUrl);
-
-          // 处理云存储URL
-          if (avatarUrl && avatarUrl.startsWith('cloud://')) {
-            avatarUrl = await this.convertCloudUrl(avatarUrl);
-          }
-
-          this.setData({
-            displayAvatar: avatarUrl || this.data.defaultAvatar,
-            loading: false
-          });
-        } else {
-          console.warn('⚠️ [头像组件] 未找到用户，使用默认头像');
-          this.setData({
-            displayAvatar: this.data.defaultAvatar,
-            loading: false
-          });
-        }
+        // 使用全局头像管理器获取头像
+        const avatarUrl = await avatarManager.getAvatar(newOpenId);
+        
+        this.setData({
+          displayAvatar: avatarUrl,
+          loading: false
+        });
       } catch (error) {
-        console.error('❌ [头像组件] 查询头像失败:', error);
+        console.error('❌ [头像组件] 加载失败:', error);
         this.setData({
           displayAvatar: this.data.defaultAvatar,
           loading: false
@@ -131,40 +110,23 @@ Component({
         return;
       }
 
-      console.log('🔍 [头像组件] 处理传入的avatarUrl:', newUrl);
-
       // 处理云存储URL
       if (newUrl.startsWith('cloud://')) {
-        const convertedUrl = await this.convertCloudUrl(newUrl);
-        this.setData({
-          displayAvatar: convertedUrl || this.data.defaultAvatar
-        });
+        try {
+          const convertedUrl = await avatarManager.convertCloudUrl(newUrl);
+          this.setData({
+            displayAvatar: convertedUrl || this.data.defaultAvatar
+          });
+        } catch (e) {
+          this.setData({
+            displayAvatar: this.data.defaultAvatar
+          });
+        }
       } else {
         this.setData({
           displayAvatar: newUrl
         });
       }
-    },
-
-    /**
-     * 转换云存储URL为临时URL
-     */
-    async convertCloudUrl(cloudUrl) {
-      try {
-        console.log('☁️ [头像组件] 转换云存储URL:', cloudUrl);
-        const res = await wx.cloud.getTempFileURL({
-          fileList: [cloudUrl]
-        });
-
-        if (res.fileList && res.fileList.length > 0) {
-          const tempUrl = res.fileList[0].tempFileURL;
-          console.log('✅ [头像组件] 云存储URL已转换:', tempUrl);
-          return tempUrl;
-        }
-      } catch (error) {
-        console.error('❌ [头像组件] 转换云存储URL失败:', error);
-      }
-      return cloudUrl;
     },
 
     /**
