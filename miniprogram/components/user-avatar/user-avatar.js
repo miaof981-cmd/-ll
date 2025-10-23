@@ -144,7 +144,7 @@ Component({
      * 头像加载成功时的处理
      */
     onAvatarLoad(e) {
-      console.log('✅ [头像组件] 头像加载成功');
+      // 静默加载成功，不输出日志（避免控制台刷屏）
       this.triggerEvent('load', { detail: e.detail });
     }
   },

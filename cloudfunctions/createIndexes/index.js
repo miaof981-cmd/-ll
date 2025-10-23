@@ -108,6 +108,50 @@ exports.main = async (event, context) => {
       }
     }
 
+    // 6. banners 集合：_openid + order 索引
+    console.log('📊 创建 banners 索引...');
+    try {
+      await db.collection('banners').createIndex({
+        keys: {
+          _openid: 1,
+          order: 1
+        },
+        name: 'idx_openid_order',
+        unique: false
+      });
+      results.push({ collection: 'banners', index: 'idx_openid_order', status: 'success' });
+      console.log('✅ banners 索引创建成功');
+    } catch (e) {
+      if (e.message.includes('already exists')) {
+        results.push({ collection: 'banners', index: 'idx_openid_order', status: 'exists' });
+        console.log('ℹ️ banners 索引已存在');
+      } else {
+        console.warn('⚠️ banners 索引创建失败:', e.message);
+      }
+    }
+
+    // 7. announcements 集合：_openid + createdAt 索引
+    console.log('📊 创建 announcements 索引...');
+    try {
+      await db.collection('announcements').createIndex({
+        keys: {
+          _openid: 1,
+          createdAt: -1
+        },
+        name: 'idx_openid_time',
+        unique: false
+      });
+      results.push({ collection: 'announcements', index: 'idx_openid_time', status: 'success' });
+      console.log('✅ announcements 索引创建成功');
+    } catch (e) {
+      if (e.message.includes('already exists')) {
+        results.push({ collection: 'announcements', index: 'idx_openid_time', status: 'exists' });
+        console.log('ℹ️ announcements 索引已存在');
+      } else {
+        console.warn('⚠️ announcements 索引创建失败:', e.message);
+      }
+    }
+
     console.log('✅ 索引创建完成！');
     
     return {
