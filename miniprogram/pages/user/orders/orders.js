@@ -100,6 +100,45 @@ Page({
             
             if (photographerRes.data) {
               order.photographerInfo = photographerRes.data;
+              
+              // 🔥 关键修复：从 users 集合读取摄影师头像（头像跟着 OpenID 走）
+              if (photographerRes.data._openid) {
+                console.log('📸 查询摄影师的 users 头像, OpenID:', photographerRes.data._openid);
+                try {
+                  const photographerUserRes = await db.collection('users')
+                    .where({ _openid: photographerRes.data._openid })
+                    .get();
+                  
+                  if (photographerUserRes.data && photographerUserRes.data.length > 0) {
+                    const photographerUser = photographerUserRes.data[0];
+                    let photographerAvatar = photographerUser.avatarUrl || photographerRes.data.avatar;
+                    console.log('📸 摄影师原始头像:', photographerAvatar);
+                    
+                    // 如果是云存储URL，转换为临时URL
+                    if (photographerAvatar && photographerAvatar.startsWith('cloud://')) {
+                      try {
+                        const tempRes = await wx.cloud.getTempFileURL({
+                          fileList: [photographerAvatar]
+                        });
+                        if (tempRes.fileList && tempRes.fileList.length > 0) {
+                          photographerAvatar = tempRes.fileList[0].tempFileURL;
+                          console.log('📸 摄影师云存储URL已转换:', photographerAvatar);
+                        }
+                      } catch (err) {
+                        console.warn('转换摄影师云存储URL失败:', err);
+                      }
+                    }
+                    
+                    // 覆盖摄影师头像（使用 users 集合的统一头像）
+                    order.photographerInfo.avatar = photographerAvatar;
+                    console.log('✅ 摄影师最终头像:', order.photographerInfo.avatar);
+                  } else {
+                    console.warn('⚠️ 未找到摄影师的 users 记录');
+                  }
+                } catch (err) {
+                  console.warn('查询摄影师 users 头像失败:', err);
+                }
+              }
             }
           } catch (e) {
             console.warn('摄影师信息加载失败，使用订单中的信息:', order.photographerId);
@@ -194,21 +233,6 @@ Page({
             } catch (err) {
               console.warn('转换已有云存储URL失败:', err);
             }
-          }
-        }
-        
-        // 处理摄影师头像URL（如果是云存储格式）
-        if (order.photographerInfo && order.photographerInfo.avatar && order.photographerInfo.avatar.startsWith('cloud://')) {
-          try {
-            const tempRes = await wx.cloud.getTempFileURL({
-              fileList: [order.photographerInfo.avatar]
-            });
-            if (tempRes.fileList && tempRes.fileList.length > 0) {
-              order.photographerInfo.avatar = tempRes.fileList[0].tempFileURL;
-              console.log('摄影师云存储URL已转换');
-            }
-          } catch (err) {
-            console.warn('转换摄影师云存储URL失败:', err);
           }
         }
 
