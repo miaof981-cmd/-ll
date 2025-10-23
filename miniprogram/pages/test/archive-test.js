@@ -100,11 +100,27 @@ Page({
       const db = wx.cloud.database();
       const now = new Date().toISOString();
 
-      // 1. 创建测试订单（状态：pending_confirm）
+      // 1. 查询活动信息，获取最新价格
+      this.addLog('📊 正在查询活动信息...');
+      const activityId = '43d365dc68ee129202af48e635a3651e';
+      const activityRes = await db.collection('activities')
+        .doc(activityId)
+        .get();
+
+      if (!activityRes.data) {
+        this.addLog('❌ 活动不存在，无法创建订单');
+        wx.showToast({ title: '活动不存在', icon: 'error' });
+        return;
+      }
+
+      const activityPrice = activityRes.data.price || 0.01;
+      this.addLog(`✅ 活动价格：¥${activityPrice}`);
+
+      // 2. 创建测试订单（状态：pending_confirm）
       this.addLog('📝 创建待确认订单...');
       const orderData = {
         orderNo: 'TEST' + Date.now(),
-        activityId: '43d365dc68ee129202af48e635a3651e', // 证件照活动ID
+        activityId: activityId, // 证件照活动ID
         studentName: '待确认学生_' + Date.now(),
         parentName: '测试家长',
         parentPhone: '13800138000',
@@ -127,7 +143,7 @@ Page({
         ],
         remark: '测试订单-请手动确认',
         expectations: '希望孩子健康快乐成长，学业进步！', // 添加家长期许
-        totalPrice: 22,
+        totalPrice: activityPrice,  // ✅ 使用活动的最新价格，不硬编码
         status: 'pending_confirm', // 待确认状态
         paymentMethod: 'wechat',
         rejectCount: 0,
@@ -195,11 +211,27 @@ Page({
       const db = wx.cloud.database();
       const now = new Date().toISOString();
 
-      // 1. 先创建一个测试订单
+      // 1. 查询活动信息，获取最新价格
+      this.addLog('📊 正在查询活动信息...');
+      const activityId = '43d365dc68ee129202af48e635a3651e';
+      const activityRes = await db.collection('activities')
+        .doc(activityId)
+        .get();
+
+      if (!activityRes.data) {
+        this.addLog('❌ 活动不存在，无法创建订单');
+        wx.showToast({ title: '活动不存在', icon: 'error' });
+        return;
+      }
+
+      const activityPrice = activityRes.data.price || 0.01;
+      this.addLog(`✅ 活动价格：¥${activityPrice}`);
+
+      // 2. 创建测试订单
       this.addLog('📝 创建测试订单...');
       const orderData = {
         orderNo: 'TEST' + Date.now(),
-        activityId: '43d365dc68ee129202af48e635a3651e', // 证件照活动ID
+        activityId: activityId, // 证件照活动ID
         studentName: '测试学生_' + Date.now(),
         parentName: '测试家长',
         parentPhone: '13800138000',
@@ -211,7 +243,7 @@ Page({
         lifePhotos: [],
         photos: ['cloud://test-photo-1.png', 'cloud://test-photo-2.png'],
         remark: '测试订单',
-        totalPrice: 20,
+        totalPrice: activityPrice,  // ✅ 使用活动的最新价格
         status: 'pending_confirm',
         paymentMethod: 'wechat',
         rejectCount: 0,
@@ -226,14 +258,9 @@ Page({
 
       this.addLog(`✅ 测试订单创建成功: ${orderRes._id}`);
 
-      // 2. 获取活动信息
-      this.addLog('📡 获取活动信息...');
-      const activityRes = await db.collection('activities')
-        .doc(orderData.activityId)
-        .get();
-
+      // 3. 显示活动信息（重用之前查询的数据）
       const activity = activityRes.data;
-      this.addLog(`✅ 活动名称: ${activity.name}`);
+      this.addLog(`✅ 活动名称: ${activity.title || activity.name}`);
       this.addLog(`   活动类别: ${activity.category}`);
 
       // 3. 模拟确认收货
