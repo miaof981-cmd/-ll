@@ -104,14 +104,29 @@ Page({
       
       // 1. 上传头像到云存储
       let uploadedAvatarUrl = avatarUrl;
-      if (avatarUrl && !avatarUrl.startsWith('http')) {
+      // 如果不是云存储URL（cloud://），则需要上传到云存储
+      // 包括：http://tmp/（微信临时文件）、http://usr/（本地文件）、相对路径等
+      if (avatarUrl && !avatarUrl.startsWith('cloud://')) {
         console.log('☁️ 上传头像到云存储...');
-        const uploadResult = await wx.cloud.uploadFile({
-          cloudPath: `avatars/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`,
-          filePath: avatarUrl
-        });
-        uploadedAvatarUrl = uploadResult.fileID;
-        console.log('✅ 头像上传成功:', uploadedAvatarUrl);
+        console.log('原始路径:', avatarUrl);
+        try {
+          const uploadResult = await wx.cloud.uploadFile({
+            cloudPath: `avatars/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`,
+            filePath: avatarUrl
+          });
+          uploadedAvatarUrl = uploadResult.fileID;
+          console.log('✅ 头像上传成功:', uploadedAvatarUrl);
+        } catch (uploadError) {
+          console.error('❌ 头像上传失败:', uploadError);
+          wx.showToast({
+            title: '头像上传失败',
+            icon: 'none'
+          });
+          this.setData({ loading: false });
+          return;
+        }
+      } else {
+        console.log('✅ 头像已在云存储，跳过上传:', avatarUrl);
       }
       
       // 2. 调用云函数进行登录
