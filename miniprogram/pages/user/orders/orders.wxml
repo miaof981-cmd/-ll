@@ -50,10 +50,11 @@
       <!-- 活动信息 -->
       <view class="order-content">
         <image 
-          wx:if="{{item.activityInfo}}" 
+          wx:if="{{item.activityInfo && item.activityInfo.coverImage}}" 
           class="activity-cover" 
           src="{{item.activityInfo.coverImage}}" 
           mode="aspectFill"
+          binderror="onImageError"
         ></image>
         <view class="order-info">
           <text class="activity-title">{{item.activityInfo ? item.activityInfo.title : '活动已删除'}}</text>
@@ -97,6 +98,7 @@
             class="photo-thumb"
             src="{{item}}"
             mode="aspectFill"
+            binderror="onImageError"
           ></image>
           <view wx:if="{{item.photos.length > 3}}" class="more-photos">
             <text>+{{item.photos.length - 3}}</text>

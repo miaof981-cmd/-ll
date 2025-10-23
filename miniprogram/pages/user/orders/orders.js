@@ -152,6 +152,22 @@ Page({
           
           if (activityRes.data) {
             order.activityInfo = activityRes.data;
+            
+            // 🔥 转换活动封面的 cloud:// URL 为临时 URL
+            if (order.activityInfo.coverImage && order.activityInfo.coverImage.startsWith('cloud://')) {
+              try {
+                const tempRes = await wx.cloud.getTempFileURL({
+                  fileList: [order.activityInfo.coverImage]
+                });
+                if (tempRes.fileList && tempRes.fileList.length > 0) {
+                  order.activityInfo.coverImage = tempRes.fileList[0].tempFileURL;
+                }
+              } catch (err) {
+                console.warn('活动封面转换失败:', err);
+                // 转换失败时使用默认图片
+                order.activityInfo.coverImage = '/images/default-activity.png';
+              }
+            }
           }
         } catch (e) {
           console.error('加载活动信息失败:', e);
@@ -543,6 +559,15 @@ Page({
         icon: 'error'
       });
     }
+  },
+
+  /**
+   * 图片加载失败处理
+   */
+  onImageError(e) {
+    console.warn('⚠️ 图片加载失败:', e.detail);
+    // 图片加载失败时，会自动隐藏，不需要额外处理
+    // 如果需要显示占位图，可以在这里设置
   }
 });
 
