@@ -92,15 +92,28 @@ Component({
           }
         }
         
-        this.setData({
-          displayAvatar: avatarUrl,
-          loading: false
+        // 使用 wx.nextTick 确保在正确的时机更新
+        wx.nextTick(() => {
+          try {
+            this.setData({
+              displayAvatar: avatarUrl,
+              loading: false
+            });
+          } catch (e) {
+            console.warn('⚠️ [头像组件] setData 失败，组件可能已销毁');
+          }
         });
       } catch (error) {
         console.error('❌ [头像组件] 加载失败:', error);
-        this.setData({
-          displayAvatar: this.data.defaultAvatar,
-          loading: false
+        wx.nextTick(() => {
+          try {
+            this.setData({
+              displayAvatar: this.data.defaultAvatar,
+              loading: false
+            });
+          } catch (e) {
+            console.warn('⚠️ [头像组件] setData 失败，组件可能已销毁');
+          }
         });
       }
     },
@@ -115,9 +128,13 @@ Component({
       }
 
       if (!newUrl || newUrl === oldUrl) {
-        this.setData({
-          displayAvatar: this.data.defaultAvatar
-        });
+        try {
+          this.setData({
+            displayAvatar: this.data.defaultAvatar
+          });
+        } catch (e) {
+          console.warn('⚠️ [头像组件] setData 失败');
+        }
         return;
       }
 
@@ -125,17 +142,35 @@ Component({
       if (newUrl.startsWith('cloud://')) {
         try {
           const convertedUrl = await avatarManager.convertCloudUrl(newUrl);
-          this.setData({
-            displayAvatar: convertedUrl || this.data.defaultAvatar
+          wx.nextTick(() => {
+            try {
+              this.setData({
+                displayAvatar: convertedUrl || this.data.defaultAvatar
+              });
+            } catch (e) {
+              console.warn('⚠️ [头像组件] setData 失败');
+            }
           });
         } catch (e) {
-          this.setData({
-            displayAvatar: this.data.defaultAvatar
+          wx.nextTick(() => {
+            try {
+              this.setData({
+                displayAvatar: this.data.defaultAvatar
+              });
+            } catch (err) {
+              console.warn('⚠️ [头像组件] setData 失败');
+            }
           });
         }
       } else {
-        this.setData({
-          displayAvatar: newUrl
+        wx.nextTick(() => {
+          try {
+            this.setData({
+              displayAvatar: newUrl
+            });
+          } catch (e) {
+            console.warn('⚠️ [头像组件] setData 失败');
+          }
         });
       }
     },
@@ -145,9 +180,15 @@ Component({
      */
     onAvatarError(e) {
       console.warn('⚠️ [头像组件] 头像加载失败:', e.detail);
-      this.setData({
-        displayAvatar: this.data.defaultAvatar
-      });
+      
+      try {
+        this.setData({
+          displayAvatar: this.data.defaultAvatar
+        });
+      } catch (err) {
+        console.warn('⚠️ [头像组件] setData 失败');
+      }
+      
       this.triggerEvent('error', { error: e.detail });
     },
 

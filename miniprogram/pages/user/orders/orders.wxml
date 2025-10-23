@@ -64,7 +64,7 @@
             <!-- 下单用户 -->
             <view class="user-info-mini">
               <user-avatar 
-                openid="{{item.userId || item._openid}}"
+                openid="{{item.userId || item._openid || ''}}"
                 size="60"
                 round="{{true}}"
                 custom-class="mini-avatar"
@@ -75,7 +75,7 @@
             <!-- 摄影师 -->
             <view wx:if="{{item.photographerInfo}}" class="photographer-info-mini">
               <user-avatar 
-                openid="{{item.photographerInfo._openid}}"
+                openid="{{item.photographerInfo._openid || ''}}"
                 size="60"
                 round="{{true}}"
                 custom-class="mini-avatar"
