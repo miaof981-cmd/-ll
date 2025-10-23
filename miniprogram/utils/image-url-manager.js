@@ -179,12 +179,16 @@ class ImageUrlManager {
   /**
    * 批量转换 cloud:// URL 为 HTTPS URL
    * @param {Array<string>} cloudUrls - cloud:// URL 数组
+   * @param {Map} urlSourceMap - URL来源映射表（可选，用于失败时追踪）
    * @returns {Promise<Object>} - { 'cloud://xxx': 'https://xxx', ... }
    */
-  async convertBatch(cloudUrls = []) {
+  async convertBatch(cloudUrls = [], urlSourceMap = null) {
     if (!Array.isArray(cloudUrls) || cloudUrls.length === 0) {
       return {};
     }
+    
+    // 保存来源信息供后续使用
+    this._urlSourceMap = urlSourceMap;
 
     // 1. 过滤出有效的 cloud:// URL 并进行路径校验
     const validUrls = [];
@@ -292,6 +296,12 @@ class ImageUrlManager {
               } else {
                 // 转换失败，记录详细原因
                 let failReason = '未知原因';
+                const debugInfo = {
+                  fileID: file.fileID.substring(0, 80) + '...',
+                  status: file.status,
+                  errMsg: file.errMsg || 'none'
+                };
+                
                 if (file.status === -1) {
                   failReason = '文件不存在';
                 } else if (file.status === -2) {
@@ -300,11 +310,20 @@ class ImageUrlManager {
                   failReason = '云存储错误';
                 } else if (!file.tempFileURL) {
                   failReason = '临时URL为空';
+                  debugInfo.warning = 'status=0但tempFileURL为空，文件可能已被删除';
                 } else if (!this.isValidHttpsUrl(file.tempFileURL)) {
                   failReason = 'URL格式错误';
+                  debugInfo.invalidUrl = file.tempFileURL;
                 }
                 
-                console.warn(`⚠️ [图片转换失败] ${failReason}:`, file.fileID.substring(0, 60) + '...');
+                console.warn(`⚠️ [图片转换失败] ${failReason}:`, debugInfo);
+                
+                // 输出来源信息（如果有）
+                if (this._urlSourceMap && this._urlSourceMap.has(file.fileID)) {
+                  const source = this._urlSourceMap.get(file.fileID);
+                  console.warn(`   📍 来源: 订单 ${source.orderId}, 字段 ${source.field}, 创建时间 ${source.createdAt}`);
+                }
+                
                 urlMap[file.fileID] = DEFAULT_IMAGE;
                 convertFailed++;
                 // 不缓存失败结果，下次可以重试

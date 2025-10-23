@@ -337,28 +337,66 @@ Page({
 
       // 🚀 性能优化：并发批量转换图片 URL（提升70%）
       const allImageUrls = [];
+      const urlSourceMap = new Map(); // 追踪URL来源，便于问题定位
       
-      // 收集所有需要转换的 cloud:// URL
+      // 收集所有需要转换的 cloud:// URL（增强验证，过滤空值）
       orders.forEach(order => {
+        const orderId = order._id || 'unknown';
+        const orderDate = order.createdAt || 'unknown';
+        
         // 1. 活动封面（activityInfo 中）
-        if (order.activityInfo?.coverImage) {
-          allImageUrls.push(order.activityInfo.coverImage);
+        if (order.activityInfo?.coverImage && 
+            typeof order.activityInfo.coverImage === 'string' &&
+            order.activityInfo.coverImage.trim()) {
+          const url = order.activityInfo.coverImage.trim();
+          allImageUrls.push(url);
+          urlSourceMap.set(url, {
+            orderId,
+            field: 'activityInfo.coverImage',
+            createdAt: orderDate
+          });
         }
         
         // 2. 活动封面（订单快照中）
-        if (order.activityCover) {
-          allImageUrls.push(order.activityCover);
+        if (order.activityCover && 
+            typeof order.activityCover === 'string' &&
+            order.activityCover.trim()) {
+          const url = order.activityCover.trim();
+          allImageUrls.push(url);
+          urlSourceMap.set(url, {
+            orderId,
+            field: 'activityCover',
+            createdAt: orderDate
+          });
         }
         
         // 3. 孩子照片
-        if (order.childPhoto) {
-          allImageUrls.push(order.childPhoto);
+        if (order.childPhoto && 
+            typeof order.childPhoto === 'string' &&
+            order.childPhoto.trim()) {
+          const url = order.childPhoto.trim();
+          allImageUrls.push(url);
+          urlSourceMap.set(url, {
+            orderId,
+            field: 'childPhoto',
+            createdAt: orderDate
+          });
         }
         
-        // 4. 作品照片数组
+        // 4. 作品照片数组（严格过滤空值）
         if (order.photos && Array.isArray(order.photos)) {
-          order.photos.forEach(url => {
-            if (url) allImageUrls.push(url);
+          order.photos.forEach((url, index) => {
+            if (url && typeof url === 'string' && url.trim()) {
+              const cleanUrl = url.trim();
+              allImageUrls.push(cleanUrl);
+              urlSourceMap.set(cleanUrl, {
+                orderId,
+                field: `photos[${index}]`,
+                createdAt: orderDate
+              });
+            } else if (url === '' || url === null || url === undefined) {
+              console.warn(`⚠️ [数据清理] 订单 ${orderId} 的 photos[${index}] 为空值，已跳过`);
+            }
           });
         }
       });
@@ -368,7 +406,8 @@ Page({
       // 并发批量转换（每批10张，多批并行）
       if (allImageUrls.length > 0) {
         try {
-          const urlMap = await imageUrlManager.convertBatch(allImageUrls);
+          // 传递来源信息，便于失败时追踪到具体订单和字段
+          const urlMap = await imageUrlManager.convertBatch(allImageUrls, urlSourceMap);
           
           const stats = {
             total: allImageUrls.length,
