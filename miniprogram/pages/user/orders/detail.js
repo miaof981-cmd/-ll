@@ -162,14 +162,6 @@ Page({
     }
   },
 
-  // 查看摄影师详情
-  viewPhotographer() {
-    if (this.data.order && this.data.order.photographerId) {
-      wx.navigateTo({
-        url: `/pages/photographer/detail?id=${this.data.order.photographerId}`
-      });
-    }
-  },
 
   async loadOrderDetail(orderId) {
     wx.showLoading({ title: '加载中...' });

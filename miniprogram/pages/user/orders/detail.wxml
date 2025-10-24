@@ -183,21 +183,6 @@
 
       <view class="divider"></view>
 
-      <!-- 摄影师信息 -->
-      <view wx:if="{{photographerInfo}}" class="detail-section">
-        <view class="photographer-info-compact" bindtap="viewPhotographer">
-          <image wx:if="{{photographerInfo.avatarUrl}}" class="photographer-avatar-small" src="{{photographerInfo.avatarUrl}}" mode="aspectFill"></image>
-          <view wx:else class="photographer-avatar-small placeholder">{{photographerInfo.name.substring(0,1)}}</view>
-          <view class="photographer-text">
-            <text class="photographer-name-small">{{photographerInfo.name}}</text>
-            <text class="photographer-specialty-small">{{photographerInfo.specialty || '专业摄影师'}}</text>
-          </view>
-          <view class="photographer-arrow">→</view>
-        </view>
-      </view>
-
-      <view class="divider"></view>
-
       <!-- 订单信息 -->
       <view class="detail-section">
         <view class="info-row">
@@ -211,6 +196,15 @@
         <view class="info-row">
           <text class="label">订单金额</text>
           <text class="value price">¥{{order.totalPrice}}</text>
+        </view>
+        <!-- 摄影师信息（弱化显示） -->
+        <view wx:if="{{photographerInfo}}" class="info-row photographer-row">
+          <text class="label">摄影师</text>
+          <view class="photographer-inline">
+            <image wx:if="{{photographerInfo.avatarUrl}}" class="photographer-avatar-mini" src="{{photographerInfo.avatarUrl}}" mode="aspectFill"></image>
+            <view wx:else class="photographer-avatar-mini placeholder">{{photographerInfo.name.substring(0,1)}}</view>
+            <text class="photographer-name-mini">{{photographerInfo.name}}</text>
+          </view>
         </view>
       </view>
     </view>
