@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: #f5f5f5;
   padding: 24rpx;
-  padding-bottom: 120rpx;
+  padding-bottom: 200rpx; /* 增加底部留白，让用户可以看到卡片圆角 */
   position: relative;
 }
 
@@ -420,9 +420,9 @@
 
 /* 摄影师信息（内联弱化版） */
 .photographer-row {
-  border-top: 1rpx solid #f0f0f0;
-  padding-top: 24rpx;
-  margin-top: 24rpx;
+  /* 不需要 border-top，因为上一个 info-row 已有 border-bottom */
+  padding-top: 16rpx;
+  margin-top: 8rpx;
 }
 
 .photographer-inline {
