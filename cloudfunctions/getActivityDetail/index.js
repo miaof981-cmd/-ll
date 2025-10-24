@@ -42,8 +42,11 @@ exports.main = async (event, context) => {
     let photographers = [];
     try {
       if (activity.photographerIds && activity.photographerIds.length > 0) {
+        // 🔥 先对 photographerIds 去重，避免重复ID
+        const uniqueIds = [...new Set(activity.photographerIds)];
+        
         const photographersRes = await db.collection('photographers')
-          .where({ _id: db.command.in(activity.photographerIds) })
+          .where({ _id: db.command.in(uniqueIds) })
           .limit(100)
           .get();
         photographers = photographersRes.data || [];
@@ -57,6 +60,20 @@ exports.main = async (event, context) => {
           .get();
         photographers = fallbackRes.data || [];
       }
+      
+      // 🔥 最后再根据 _openid 去重，防止数据库中有重复记录
+      const seenOpenIds = new Set();
+      photographers = photographers.filter(p => {
+        if (!p._openid) return true; // 保留没有 openid 的记录
+        if (seenOpenIds.has(p._openid)) {
+          console.warn(`⚠️ 发现重复摄影师: ${p.name} (openid: ${p._openid})`);
+          return false; // 过滤掉重复的
+        }
+        seenOpenIds.add(p._openid);
+        return true;
+      });
+      
+      console.log(`✅ 加载摄影师列表成功，共 ${photographers.length} 位（已去重）`);
     } catch (e) {
       console.error('加载摄影师列表失败:', e);
       photographers = [];
