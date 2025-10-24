@@ -24,13 +24,33 @@ exports.main = async (event, context) => {
       
       // 添加摄影师
       case 'add':
-        return await db.collection('photographers').add({
+        // 🔥 检查 _openid 是否已存在，防止重复创建
+        if (data._openid) {
+          const existing = await db.collection('photographers')
+            .where({ _openid: data._openid })
+            .get();
+          
+          if (existing.data && existing.data.length > 0) {
+            console.warn(`⚠️ 重复创建摄影师被阻止: ${data.name}, openid: ${data._openid}`);
+            return {
+              success: false,
+              error: `该用户已是摄影师（姓名：${existing.data[0].name}），无法重复添加`,
+              existingPhotographer: existing.data[0]
+            };
+          }
+        }
+        
+        // 没有重复，可以添加
+        const addResult = await db.collection('photographers').add({
           data: {
             ...data,
             createdAt: db.serverDate(),
             updatedAt: db.serverDate()
           }
         });
+        
+        console.log(`✅ 创建摄影师成功: ${data.name}`);
+        return addResult;
       
       // 更新摄影师
       case 'update':

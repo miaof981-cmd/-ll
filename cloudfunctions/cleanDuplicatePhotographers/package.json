@@ -1,0 +1,10 @@
+{
+  "name": "cleanDuplicatePhotographers",
+  "version": "1.0.0",
+  "description": "清理重复的摄影师记录",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+

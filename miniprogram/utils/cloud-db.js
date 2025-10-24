@@ -75,6 +75,18 @@ async function savePhotographer(photographer) {
       });
       console.log('✅ 云端更新摄影师成功');
     } else {
+      // 🔥 新增前检查 _openid 是否已存在，防止重复创建
+      if (photographer._openid) {
+        const existing = await db.collection('photographers')
+          .where({ _openid: photographer._openid })
+          .get();
+        
+        if (existing.data && existing.data.length > 0) {
+          console.warn('⚠️ 该OpenID已存在摄影师记录:', existing.data[0]);
+          throw new Error(`该用户已是摄影师（姓名：${existing.data[0].name}），无法重复添加`);
+        }
+      }
+      
       // 新增
       const addData = { ...photographer };
       delete addData._id; // 确保没有 _id 字段
