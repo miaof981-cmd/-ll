@@ -211,8 +211,34 @@ Page({
       let photographerInfo = null;
       if (order.photographerId) {
         try {
+          // 从 photographers 集合获取基本信息（name, status等）
           const photographerRes = await db.collection('photographers').doc(order.photographerId).get();
           photographerInfo = photographerRes.data;
+          
+          // 🔥 统一从 users 集合获取最新头像
+          if (photographerInfo && photographerInfo._openid) {
+            try {
+              const userRes = await db.collection('users')
+                .where({ _openid: photographerInfo._openid })
+                .get();
+              
+              if (userRes.data && userRes.data.length > 0) {
+                const userData = userRes.data[0];
+                // 使用 users 集合的 avatarUrl，而不是 photographers 集合的 avatar
+                photographerInfo.avatarUrl = userData.avatarUrl || photographerInfo.avatar || '';
+                console.log('✅ [订单详情] 从 users 集合获取摄影师头像:', userData.avatarUrl);
+              } else {
+                console.warn('⚠️ [订单详情] 未找到摄影师的 users 记录，使用 photographers 的 avatar');
+                photographerInfo.avatarUrl = photographerInfo.avatar || '';
+              }
+            } catch (userErr) {
+              console.error('❌ [订单详情] 从 users 集合查询摄影师头像失败:', userErr);
+              photographerInfo.avatarUrl = photographerInfo.avatar || '';
+            }
+          } else {
+            console.warn('⚠️ [订单详情] 摄影师没有 _openid，使用 photographers 的 avatar');
+            photographerInfo.avatarUrl = photographerInfo.avatar || '';
+          }
         } catch (e) {
           console.error('加载摄影师信息失败:', e);
         }

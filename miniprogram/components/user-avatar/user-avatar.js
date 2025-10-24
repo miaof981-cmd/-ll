@@ -68,7 +68,7 @@ Component({
    */
   methods: {
     /**
-     * 根据OpenID加载头像（使用全局管理器）
+     * 根据OpenID加载头像（优先从 globalData 获取）
      */
     async loadAvatarByOpenId(newOpenId, oldOpenId) {
       if (!newOpenId || newOpenId === oldOpenId) {
@@ -78,8 +78,21 @@ Component({
       this.setData({ loading: true });
 
       try {
-        // 使用全局头像管理器获取头像
-        let avatarUrl = await avatarManager.getAvatar(newOpenId);
+        // 🔥 优先从 globalData 获取当前用户头像
+        const app = getApp();
+        const globalUserInfo = app.globalData.userInfo;
+        const globalOpenId = globalUserInfo?._openid || globalUserInfo?.openid;
+        
+        let avatarUrl = null;
+        
+        // 如果是当前登录用户，直接使用 globalData 的头像
+        if (globalOpenId && globalOpenId === newOpenId && globalUserInfo?.avatarUrl) {
+          avatarUrl = globalUserInfo.avatarUrl;
+          console.log('✅ [头像组件] 从 globalData 获取当前用户头像');
+        } else {
+          // 否则使用全局头像管理器从数据库查询
+          avatarUrl = await avatarManager.getAvatar(newOpenId);
+        }
         
         // 🔥 防御性检查：如果还是 cloud:// 格式，强制转换或使用默认头像
         if (avatarUrl && avatarUrl.startsWith('cloud://')) {

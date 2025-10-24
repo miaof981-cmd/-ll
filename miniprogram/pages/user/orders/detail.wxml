@@ -186,7 +186,7 @@
       <!-- 摄影师信息 -->
       <view wx:if="{{photographerInfo}}" class="detail-section">
         <view class="photographer-info-compact" bindtap="viewPhotographer">
-          <image wx:if="{{photographerInfo.avatar}}" class="photographer-avatar-small" src="{{photographerInfo.avatar}}" mode="aspectFill"></image>
+          <image wx:if="{{photographerInfo.avatarUrl}}" class="photographer-avatar-small" src="{{photographerInfo.avatarUrl}}" mode="aspectFill"></image>
           <view wx:else class="photographer-avatar-small placeholder">{{photographerInfo.name.substring(0,1)}}</view>
           <view class="photographer-text">
             <text class="photographer-name-small">{{photographerInfo.name}}</text>

@@ -16,27 +16,58 @@ Page({
   },
 
   onLoad() {
-    this.loadPhotographerInfo();
+    // 不在 onLoad 中加载数据，避免 globalData 还未准备好
   },
 
   onShow() {
-    // 每次显示页面时刷新订单
-    if (this.data.photographerInfo) {
-      this.loadOrders();
-    }
+    // 每次显示页面时加载摄影师信息和订单
+    this.loadPhotographerInfo();
   },
 
   // 加载摄影师信息
   async loadPhotographerInfo() {
     try {
-      const { result } = await wx.cloud.callFunction({ name: 'unifiedLogin' });
-      const userOpenId = result.userInfo?._openid || result.userInfo?.openid || result._openid || result.openid;
+      const app = getApp();
+      let userInfo = app.globalData.userInfo;
+      let userOpenId = null;
+      
+      // 优先从 globalData 获取用户信息
+      if (userInfo && (userInfo._openid || userInfo.openid)) {
+        userOpenId = userInfo._openid || userInfo.openid;
+        console.log('✅ 从 globalData 获取用户信息:', { nickName: userInfo.nickName, avatarUrl: userInfo.avatarUrl, openid: userOpenId });
+      } else {
+        // 如果 globalData 没有，则调用云函数获取
+        console.log('⚠️ globalData 为空，调用云函数获取用户信息');
+        const { result } = await wx.cloud.callFunction({ name: 'unifiedLogin' });
+        userOpenId = result.userInfo?._openid || result.userInfo?.openid || result._openid || result.openid;
+        userInfo = result.userInfo || result.user;
+        
+        // 更新 globalData
+        if (userInfo) {
+          app.globalData.userInfo = userInfo;
+          console.log('✅ 更新 globalData 用户信息:', { nickName: userInfo.nickName, avatarUrl: userInfo.avatarUrl });
+        }
+      }
 
       if (!userOpenId) {
         throw new Error('无法获取用户信息');
       }
 
       const db = wx.cloud.database();
+      
+      // 如果 userInfo 中没有头像，从 users 集合查询
+      if (!userInfo || !userInfo.avatarUrl) {
+        console.log('⚠️ userInfo 没有头像，从 users 集合查询');
+        const { data: users } = await db.collection('users')
+          .where({ _openid: userOpenId })
+          .get();
+        
+        if (users && users.length > 0) {
+          userInfo = users[0];
+          app.globalData.userInfo = userInfo;
+          console.log('✅ 从 users 集合获取用户信息:', { nickName: userInfo.nickName, avatarUrl: userInfo.avatarUrl });
+        }
+      }
       
       // 查询摄影师账号
       const { data: accounts } = await db.collection('photographer_accounts')
@@ -57,20 +88,30 @@ Page({
 
       const account = accounts[0];
 
-      // 获取摄影师详细信息
+      // 获取摄影师详细信息（name, status 等）
       const { data: photographers } = await db.collection('photographers')
         .doc(account.photographerId)
         .get();
 
       if (photographers) {
+        // 🔥 关键修改：使用 users 集合的 avatarUrl，而不是 photographers 集合的 avatar
         this.setData({
           photographerInfo: {
             ...photographers,
-            _id: account.photographerId
+            _id: account.photographerId,
+            _openid: userOpenId,
+            avatarUrl: userInfo?.avatarUrl || photographers.avatar || '',
+            nickName: userInfo?.nickName || photographers.name || '摄影师'
           }
         }, () => {
           // 摄影师信息加载完成后，立即加载订单
           this.loadOrders();
+        });
+        
+        console.log('✅ 摄影师信息加载完成:', {
+          name: photographers.name,
+          avatarUrl: userInfo?.avatarUrl,
+          openid: userOpenId
         });
       }
     } catch (e) {
