@@ -310,7 +310,11 @@ class ImageUrlManager {
                   failReason = '云存储错误';
                 } else if (!file.tempFileURL) {
                   failReason = '临时URL为空';
-                  debugInfo.warning = 'status=0但tempFileURL为空，文件可能已被删除';
+                  if (file.status === 0) {
+                    debugInfo.warning = 'status=0但tempFileURL为空，文件可能已被删除';
+                  } else {
+                    debugInfo.warning = `status=${file.status}，错误信息: ${file.errMsg || 'none'}`;
+                  }
                 } else if (!this.isValidHttpsUrl(file.tempFileURL)) {
                   failReason = 'URL格式错误';
                   debugInfo.invalidUrl = file.tempFileURL;
