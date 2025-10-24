@@ -30,7 +30,7 @@ Page({
   _throttleDelay: 500, // 节流延迟（毫秒）
   _lastReachBottomTime: 0, // 触底加载节流
   _reachBottomThrottle: 1000, // 触底节流延迟（1秒）
-  _deletedActivityIds: new Set(), // 已知不存在的活动ID缓存
+  _deletedActivityIds: [], // 已知不存在的活动ID缓存（使用数组代替Set，避免序列化警告）
 
   // 工具：格式化为北京时间 YYYY-MM-DD HH:mm:ss
   formatBeijing(ts) {
@@ -194,7 +194,7 @@ Page({
       // 1. 收集所有唯一的活动ID（排除已知不存在的）
       const activityIds = new Set();
       res.data.forEach(order => {
-        if (order.activityId && !this._deletedActivityIds.has(order.activityId)) {
+        if (order.activityId && !this._deletedActivityIds.includes(order.activityId)) {
           activityIds.add(order.activityId);
         }
       });
@@ -225,7 +225,7 @@ Page({
         // 从映射表中获取活动信息
         if (activityMap.has(order.activityId)) {
           order.activityInfo = activityMap.get(order.activityId);
-        } else if (this._deletedActivityIds.has(order.activityId)) {
+        } else if (this._deletedActivityIds.includes(order.activityId)) {
           // 已知不存在，使用快照
           order.activityInfo = {
             name: order.activityName || '未知活动',
@@ -234,7 +234,10 @@ Page({
           };
         } else {
           // 未查询到且非已知不存在，记录并使用快照
-          this._deletedActivityIds.add(order.activityId);
+          // 使用数组方式，先检查是否存在再添加（避免重复）
+          if (!this._deletedActivityIds.includes(order.activityId)) {
+            this._deletedActivityIds.push(order.activityId);
+          }
           console.warn(`⚠️ 活动 ${order.activityId} 不存在，使用快照信息`);
           order.activityInfo = {
             name: order.activityName || '未知活动',
