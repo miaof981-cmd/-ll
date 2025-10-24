@@ -152,6 +152,29 @@ exports.main = async (event, context) => {
       }
     }
 
+    // 8. order_photo_history 集合：orderId + rejectType + createdAt 组合索引
+    console.log('📊 创建 order_photo_history 索引...');
+    try {
+      await db.collection('order_photo_history').createIndex({
+        keys: {
+          orderId: 1,        // WHERE 条件字段
+          rejectType: 1,     // WHERE 条件字段
+          createdAt: -1      // 排序字段（降序）
+        },
+        name: 'idx_order_reject_time',
+        unique: false
+      });
+      results.push({ collection: 'order_photo_history', index: 'idx_order_reject_time', status: 'success' });
+      console.log('✅ order_photo_history 索引创建成功');
+    } catch (e) {
+      if (e.message.includes('already exists')) {
+        results.push({ collection: 'order_photo_history', index: 'idx_order_reject_time', status: 'exists' });
+        console.log('ℹ️ order_photo_history 索引已存在');
+      } else {
+        console.warn('⚠️ order_photo_history 索引创建失败:', e.message);
+      }
+    }
+
     console.log('✅ 索引创建完成！');
     
     return {
