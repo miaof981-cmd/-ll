@@ -1,0 +1,10 @@
+{
+  "name": "diagnoseDuplicateNames",
+  "version": "1.0.0",
+  "description": "诊断重复姓名的摄影师数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+
